@@ -1,58 +1,413 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🧺 NYUCI.ID - Laundry Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi manajemen toko laundry **built-in Indonesia** untuk pemilik toko dan staff. Designed khusus untuk kebutuhan operasional toko laundry modern dengan fitur lengkap dari input order hingga tracking pembayaran.
 
-## About Laravel
+**Live Demo:** [nyuci.id](https://nyuci.id)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Daftar Isi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- [Fitur](#-fitur-utama)
+- [Prasyarat](#-prasyarat)
+- [Instalasi](#-instalasi)
+- [Struktur Database](#-struktur-database)
+- [API Endpoints](#-api-endpoints)
+- [Development Guide](#-development-guide)
+- [Troubleshooting](#-troubleshooting)
+- [Roadmap](#-roadmap)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## ✨ Fitur Utama
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### ✅ Versi 1.0.0 (Current)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+#### 👥 **User & Authentication**
+- Register akun pemilik toko
+- Login dengan email & password
+- Two-factor authentication (2FA)
+- Profile management (edit data, change password)
+- Session management & logout
 
-## Agentic Development
+#### 🏪 **Toko Management**
+- Register/setup toko baru per pemilik
+- Edit informasi toko (nama, alamat, nomor HP)
+- Satu pemilik bisa manage satu toko
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+#### 📦 **Order Laundry (Laundries)**
+- Input order laundry pelanggan (nama, nomor HP, berat, tanggal)
+- Pilih jenis layanan: Cuci | Setrika | Keduanya
+- Set estimasi tanggal selesai
+- Track status order (pending, diambil, belum diambil)
+- Toggle status "sudah diambil" / "belum diambil"
+- View daftar order terbaru di dashboard
+
+#### 💰 **Managemen Pembayaran**
+- Input pembayaran per order
+- Track status pembayaran: "belum bayar" | "sudah bayar"
+- Mark pembayaran sebagai paid
+- Lihat riwayat pembayaran
+
+#### 📊 **Dashboard**
+- Stats: Total order, pending pickup, pembayaran terselesaikan
+- Daftar order terbaru (5 order terakhir)
+- Quick overview omset hari ini
+
+---
+
+## 🛠️ Prasyarat
+
+- **PHP** ≥ 8.3
+- **Composer** (dependency manager PHP)
+- **Node.js** ≥ 18 (untuk frontend assets)
+- **MySQL/MariaDB** ≥ 5.7
+- **Git** (untuk version control)
+
+**Untuk Windows:**
+- XAMPP (sudah include Apache, PHP, MySQL)
+- Atau PHP & MySQL standalone
+
+---
+
+## 📥 Instalasi
+
+### 1️⃣ **Clone Repository**
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/EvanderSG29/nyuci.id.git
+cd nyuci.id
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2️⃣ **Install Dependencies**
 
-## Contributing
+```bash
+# Install PHP dependencies menggunakan Composer
+composer install
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Install JavaScript dependencies
+npm install
+```
 
-## Code of Conduct
+### 3️⃣ **Setup Environment**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+# Copy .env.example ke .env
+cp .env.example .env
 
-## Security Vulnerabilities
+# Generate application key
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4️⃣ **Konfigurasi Database**
 
-## License
+Edit file `.env`:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nyuci_id
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Buat database:
+
+```bash
+php artisan migrate
+```
+
+### 5️⃣ **Build Frontend Assets**
+
+```bash
+# Development
+npm run dev
+
+# Production
+npm run build
+```
+
+### 6️⃣ **Start Server**
+
+```bash
+# Buka terminal baru
+php artisan serve
+
+# Akses: http://localhost:8000
+```
+
+---
+
+## 🗄️ Struktur Database
+
+### Users Table
+```
+id, email, password, email_verified_at, two_factor_*, timestamps
+```
+
+### Tokos Table
+```
+id, user_id (FK), nama_toko, alamat, no_hp, timestamps
+```
+
+### Laundries Table
+```
+id, toko_id (FK), nama, no_hp, berat, tanggal, layanan, 
+estimasi_selesai, is_taken, timestamps
+```
+
+### Pembayarans Table
+```
+id, laundry_id (FK), total, status, timestamps
+```
+
+**Relasi:**
+- User 1 → 1 Toko
+- Toko 1 → Many Laundries
+- Laundry 1 → 1 Pembayaran
+
+---
+
+## 🔗 API Endpoints
+
+### Authentication
+```
+GET  /                          → Home/Dashboard redirect
+GET  /forgot-password           → Password reset page
+```
+
+### Toko Management
+```
+GET  /register/toko             → Form register toko
+POST /register/toko             → Submit register toko
+```
+
+### Laundry Management
+```
+GET    /laundry                 → List semua laundry
+GET    /laundry/create          → Form input laundry baru
+POST   /laundry                 → Submit input laundry
+GET    /laundry/{id}            → Detail laundry
+GET    /laundry/{id}/edit       → Form edit laundry
+PUT    /laundry/{id}            → Submit edit laundry
+DELETE /laundry/{id}            → Hapus laundry
+GET    /laundry/{id}/toggle     → Toggle status is_taken
+```
+
+### Pembayaran Management
+```
+GET    /pembayaran              → List semua pembayaran
+GET    /pembayaran/create       → Form input pembayaran
+POST   /pembayaran              → Submit input pembayaran
+GET    /pembayaran/{id}         → Detail pembayaran
+GET    /pembayaran/{id}/paid    → Mark as paid
+DELETE /pembayaran/{id}         → Hapus pembayaran
+```
+
+### Profile
+```
+GET   /profile                  → Edit profile page
+PATCH /profile                  → Update profile
+DELETE /profile                 → Delete account
+```
+
+---
+
+## 💻 Development Guide
+
+### Struktur Folder
+
+```
+app/
+├── Actions/              → Business logic (Fortify actions)
+├── Http/
+│   ├── Controllers/      → Request handlers
+│   ├── Requests/         → Form validation rules
+│   └── Responses/        → JSON responses
+├── Models/               → Database models
+│   ├── User.php
+│   ├── Toko.php
+│   ├── Laundry.php
+│   └── Pembayaran.php
+├── Policies/             → Authorization policies
+└── Providers/            → Service providers
+
+database/
+├── migrations/           → Database schema changes
+└── factories/            → Test data generators
+
+routes/
+├── web.php               → Web routes
+└── console.php           → Artisan commands
+
+resources/
+├── css/                  → Stylesheets
+├── js/                   → JavaScript
+└── views/                → Blade templates
+
+tests/
+├── Feature/              → Feature tests
+└── Unit/                 → Unit tests
+```
+
+### Workflow Development
+
+**Lihat:** [DEVELOPMENT.md](DEVELOPMENT.md) untuk guide lengkap
+
+### Testing
+
+```bash
+# Run semua test
+php artisan test
+
+# Run test spesifik
+php artisan test tests/Feature/LaundryTest.php
+
+# Dengan coverage
+php artisan test --coverage
+```
+
+### Database
+
+```bash
+# Run migration
+php artisan migrate
+
+# Rollback migration
+php artisan migrate:rollback
+
+# Fresh migration (reset + migrate)
+php artisan migrate:fresh
+
+# Seed data (jika ada seeder)
+php artisan db:seed
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Problem: `php artisan serve` error
+
+**Solution:**
+```bash
+# Clear cache
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+
+# Generate key
+php artisan key:generate
+```
+
+### Problem: Migration error "SQLSTATE[HY000]"
+
+**Solution:**
+```bash
+# Pastikan database sudah dibuat dan credentials di .env benar
+php artisan migrate:fresh
+```
+
+### Problem: 500 error di browser
+
+**Solution:**
+```bash
+# Check log
+tail storage/logs/laravel.log
+
+# Clear all cache
+php artisan optimize:clear
+```
+
+### Problem: npm run dev tidak jalan
+
+**Solution:**
+```bash
+# Clear cache npm
+npm cache clean --force
+
+# Reinstall
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+---
+
+## 🗺️ Roadmap
+
+### 🔄 Versi 1.1.0 (Upcoming)
+- [ ] Staff Management + Authorization
+- [ ] Pricing Management per layanan
+- [ ] Role-based access control (Pemilik, Staff, Kasir)
+
+### 🔄 Versi 1.2.0 (Planned)
+- [ ] Advanced Dashboard dengan Analytics
+- [ ] Report generation (PDF/Excel)
+- [ ] WhatsApp integration untuk notifikasi pelanggan
+
+### 🔄 Versi 2.0.0 (Future)
+- [ ] Multi-tenant support
+- [ ] Mobile app (React Native/Flutter)
+- [ ] Payment gateway integration (Midtrans, Stripe)
+- [ ] Inventory management
+
+---
+
+## 🤝 Contributing
+
+Kontribusi sangat diterima! Silakan baca [CONTRIBUTING.md](CONTRIBUTING.md) untuk guidelines.
+
+### Branch Convention
+
+```
+main             → Production (release branch)
+develop          → Development (working branch)
+feature/*        → Fitur baru (feature/staff-management)
+bugfix/*         → Bug fix (bugfix/login-issue)
+hotfix/*         → Hot fix production (hotfix/critical-bug)
+```
+
+### Commit Message Format
+
+```
+feat: deskripsi fitur baru
+fix: deskripsi perbaikan bug
+docs: perubahan dokumentasi
+refactor: perubahan struktur code
+style: formatting/linting
+test: tambah/update test
+```
+
+---
+
+## 📄 Lisensi
+
+Proyek ini menggunakan Lisensi MIT. Lihat [LICENSE](LICENSE) untuk detail.
+
+---
+
+## 📞 Support & Contact
+
+**Issues & Questions?**
+- Buka [GitHub Issues](https://github.com/EvanderSG29/nyuci.id/issues)
+- Email: support@nyuci.id
+
+---
+
+## 👨‍💻 Author
+
+**Evander SG**  
+- GitHub: [@EvanderSG29](https://github.com/EvanderSG29)
+- Email: evander@nyuci.id
+
+---
+
+<div align="center">
+
+**Made with ❤️ for Indonesian laundry business owners**
+
+[⬆ Kembali ke atas](#-nyuciid---laundry-management-system)
+
+</div>
