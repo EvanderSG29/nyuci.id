@@ -1,0 +1,55 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+:root {
+    --bg-main: #020617;
+    --bg-card: #0b1220;
+    --bg-surface: #111827;
+    --bg-elevated: #1e293b;
+
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-soft: #93c5fd;
+
+    --accent: #1e293b;
+    --accent-deep: #0f172a;
+
+    --text-main: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-strong: #f8fafc;
+
+    --border-main: #1e293b;
+    --border-soft: #334155;
+    --danger: #ef4444;
+}
+
+[data-theme='light'] {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-surface: #f1f5f9;
+    --bg-elevated: #e2e8f0;
+
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --text-strong: #020617;
+    --border-main: #dbe3ef;
+    --border-soft: #cbd5e1;
+}
+
+body {
+    background: var(--bg-main);
+    color: var(--text-main);
+}
+
+.nyuci-gradient-brand {
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+}
