@@ -2,7 +2,7 @@
 
 Aplikasi manajemen toko laundry **built-in Indonesia** untuk pemilik toko dan staff. Designed khusus untuk kebutuhan operasional toko laundry modern dengan fitur lengkap dari input order hingga tracking pembayaran.
 
-**Live Demo:** [nyuci.id](https://nyuci.id)
+<!-- **Live Demo:** [nyuci.id](https://nyuci.id) -->
 
 ---
 
@@ -26,7 +26,7 @@ Aplikasi manajemen toko laundry **built-in Indonesia** untuk pemilik toko dan st
 #### 👥 **User & Authentication**
 - Register akun pemilik toko
 - Login dengan email & password
-- Two-factor authentication (2FA)
+<!-- - Two-factor authentication (2FA) -->
 - Profile management (edit data, change password)
 - Session management & logout
 
@@ -392,7 +392,7 @@ Proyek ini menggunakan Lisensi MIT. Lihat [LICENSE](LICENSE) untuk detail.
 
 **Issues & Questions?**
 - Buka [GitHub Issues](https://github.com/EvanderSG29/nyuci.id/issues)
-- Email: support@nyuci.id
+- Email: smidgidionevander@gmail.com
 
 ---
 
@@ -400,7 +400,7 @@ Proyek ini menggunakan Lisensi MIT. Lihat [LICENSE](LICENSE) untuk detail.
 
 **Evander SG**  
 - GitHub: [@EvanderSG29](https://github.com/EvanderSG29)
-- Email: evander@nyuci.id
+- Email: smidgidionevander@gmail.com
 
 ---
 
