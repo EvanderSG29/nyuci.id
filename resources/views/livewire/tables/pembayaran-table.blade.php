@@ -104,13 +104,13 @@
                         @foreach ($rows as $pembayaran)
                             <flux:table.row :key="$pembayaran->id">
                                 <flux:table.cell class="space-y-1">
-                                    <div class="font-medium text-zinc-800 dark:text-white">{{ $pembayaran->klien?->nama_klien ?? $pembayaran->laundry?->nama }}</div>
-                                    <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $pembayaran->klien?->no_hp_klien ?? $pembayaran->laundry?->no_hp }}</div>
+                                    <div class="font-medium text-[var(--text-strong)]">{{ $pembayaran->klien?->nama_klien ?? $pembayaran->laundry?->nama }}</div>
+                                    <div class="text-xs text-[var(--text-muted)]">{{ $pembayaran->klien?->no_hp_klien ?? $pembayaran->laundry?->no_hp }}</div>
                                 </flux:table.cell>
 
                                 <flux:table.cell class="space-y-1">
                                     <div>{{ $pembayaran->laundry?->jasa?->nama_jasa ?? $pembayaran->laundry?->jenis_jasa_label ?? '-' }}</div>
-                                    <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $pembayaran->laundry?->satuan_label ?? '-' }}</div>
+                                    <div class="text-xs text-[var(--text-muted)]">{{ $pembayaran->laundry?->satuan_label ?? '-' }}</div>
                                 </flux:table.cell>
 
                                 <flux:table.cell>{{ $pembayaran->metode_pembayaran_label }}</flux:table.cell>

@@ -52,15 +52,6 @@ document.addEventListener('alpine:init', () => {
             this.themeMode = this.resolvedTheme === 'dark' ? 'light' : 'dark';
         },
     }));
-
-    Alpine.data('storeBackgroundSettings', (initialMode = 'system', initialColor = '#020617') => ({
-        mode: initialMode,
-        color: initialColor,
-
-        isCustom() {
-            return this.mode === 'custom';
-        },
-    }));
 });
 
 Alpine.start();

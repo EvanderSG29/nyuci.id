@@ -14,8 +14,6 @@ class Toko extends Model
         'nama_toko',
         'alamat',
         'no_hp',
-        'background_mode',
-        'background_color',
     ];
 
     public function user()

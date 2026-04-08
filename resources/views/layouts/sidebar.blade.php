@@ -13,8 +13,8 @@
     ];
 @endphp
 
-<flux:sidebar sticky collapsible="mobile" class="border-r border-zinc-200 bg-zinc-50/95 dark:border-zinc-700 dark:bg-zinc-900/95">
-    <flux:sidebar.header class="border-b border-zinc-200 dark:border-zinc-700">
+<flux:sidebar sticky collapsible="mobile" class="border-r !border-[var(--border-main)] !bg-[var(--bg-card)]">
+    <flux:sidebar.header class="!border-b !border-[var(--border-main)]">
         <flux:sidebar.brand
             href="{{ route('dashboard') }}"
             name="Nyuci.id"
@@ -27,10 +27,10 @@
     </flux:sidebar.header>
 
     <div class="px-2 pt-4">
-        <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-950/40">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Operasional toko</p>
-            <p class="mt-3 truncate text-sm font-semibold text-zinc-900 dark:text-white">{{ Auth::user()->name }}</p>
-            <p class="mt-1 truncate text-xs text-zinc-500 dark:text-zinc-400">{{ Auth::user()->email }}</p>
+        <div class="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Operasional toko</p>
+            <p class="mt-3 truncate text-sm font-semibold text-[var(--text-strong)]">{{ Auth::user()->name }}</p>
+            <p class="mt-1 truncate text-xs text-[var(--text-muted)]">{{ Auth::user()->email }}</p>
         </div>
     </div>
 

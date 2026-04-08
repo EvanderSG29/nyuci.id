@@ -90,8 +90,8 @@
                         @foreach ($rows as $klien)
                             <flux:table.row :key="$klien->id">
                                 <flux:table.cell class="space-y-1">
-                                    <div class="font-medium text-zinc-800 dark:text-white">{{ $klien->nama_klien }}</div>
-                                    <div class="truncate text-xs text-zinc-500 dark:text-zinc-400">{{ $klien->alamat_klien ?: 'Alamat belum diisi' }}</div>
+                                    <div class="font-medium text-[var(--text-strong)]">{{ $klien->nama_klien }}</div>
+                                    <div class="truncate text-xs text-[var(--text-muted)]">{{ $klien->alamat_klien ?: 'Alamat belum diisi' }}</div>
                                 </flux:table.cell>
 
                                 <flux:table.cell>{{ $klien->no_hp_klien }}</flux:table.cell>

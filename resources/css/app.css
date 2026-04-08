@@ -129,13 +129,13 @@ body {
     display: grid;
     width: min(100%, 28rem);
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding: 0.3rem;
+    padding: 0.25rem;
     margin: 0;
     list-style: none;
     border: 1px solid var(--border-main);
-    border-radius: 1.4rem;
-    background: color-mix(in srgb, var(--bg-card) 88%, var(--primary-soft));
-    box-shadow: 0 18px 45px rgb(15 23 42 / 0.1);
+    border-radius: 1rem;
+    background: var(--bg-surface);
+    box-shadow: none;
 }
 
 .switches li {
@@ -153,20 +153,21 @@ body {
 }
 
 .switches label {
-    display: grid;
-    grid-template-columns: auto 50px;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.75rem;
-    min-height: 4rem;
-    padding: 0.9rem 1rem;
+    min-height: 3rem;
+    padding: 0.75rem 1rem;
     cursor: pointer;
     background: transparent;
     color: var(--text-main);
-    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0.8rem;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .switches label:hover {
-    background: var(--bg-surface);
+    background: color-mix(in srgb, var(--bg-card) 70%, transparent);
     color: var(--text-strong);
 }
 
@@ -178,78 +179,36 @@ body {
     white-space: nowrap;
 }
 
-.switches span {
-    flex-shrink: 0;
-}
-
 .switches span:empty {
     position: relative;
-    width: 48px;
-    height: 26px;
+    width: 3rem;
+    height: 1.5rem;
     border-radius: 9999px;
     background: var(--bg-elevated);
-    transition: all 0.3s ease;
-}
-
-.switches span:empty::before,
-.switches span:empty::after {
-    content: '';
-    position: absolute;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
 }
 
 .switches span:empty::before {
-    top: 1px;
-    left: 1px;
-    width: 24px;
-    height: 24px;
-    background: var(--accent);
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 1rem;
+    height: 1rem;
+    background: var(--text-muted);
     border-radius: 9999px;
-    z-index: 1;
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.switches span:empty::after {
-    top: 50%;
-    left: 6px;
-    width: 14px;
-    height: 14px;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 14px 14px;
-    transform: translateY(-50%);
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .switches [type='radio']:checked + label {
-    border-radius: 1.1rem;
     background: var(--bg-card);
     color: var(--text-strong);
-    box-shadow: 0 10px 24px rgb(15 23 42 / 0.08);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
 }
 
 .switches [type='radio']:checked + label span:empty {
-    background: color-mix(in srgb, var(--primary-soft) 56%, var(--bg-card));
-}
-
-.switches [type='radio']:checked + label span:empty::before {
-    transform: translateX(24px);
-    background: var(--primary);
-}
-
-.switches [type='radio']:focus-visible + label {
-    outline: 2px solid var(--primary);
-    outline-offset: -2px;
-}
-
-.switches li:nth-child(1) [type='radio']:checked + label span:empty::after {
-    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMEYxNzJBIiBkPSJNMzYxLjUgMS4yYzUgMi4xIDguNiA2LjYgOS42IDExLjlMMzkxIDEyMWwxMDcuOSAxOS44YzUuMyAxIDkuOCA0LjYgMTEuOSA5LjZzMS41IDEwLjctMS42IDE1LjJMNDQ2LjkgMjU2bDYyLjMgOTAuM2MzLjEgNC41IDMuNyAxMC4yIDEuNiAxNS4yczYuNiA4LjYtMTEuOSA5LjZMMzkxIDM5MSAzNzEuMSA0OTguOWMtMSA1LjMtNC42IDkuOC05LjYgMTEuOXMtMTAuNyAxLjUtMTUuMi0xLjZMMjU2IDQ0Ni45bC05MC4zIDYyLjNjLTQuNSAzLjEtMTAuMiAzLjctMTUuMiAxLjZzLTguNi02LjYtOS42LTExLjlMMTIxIDM5MSAxMy4xIDM3MS4xYy01LjMtMS05LjgtNC42LTExLjktOS42cy0xLjUtMTAuNyAxLjYtMTUuMkw2NS4xIDI1NiAyLjggMTY1LjdjLTMuMS00LjUtMy43LTEwLjItMS42LTE1LjJzNi42LTguNiAxMS45LTkuNkwxMjEgMTIxIDE0MC45IDEzLjFjMS01LjMgNC42LTkuOCA5LjYtMTEuOXMxMC43LTEuNSAxNS4yIDEuNkwyNTYgNjUuMSAzNDYuMyAyLjhjNC41LTMuMSAxMC4yLTMuNyAxNS4yLTEuNnoiLz48L3N2Zz4=");
-}
-
-.switches li:nth-child(2) [type='radio']:checked + label span:empty::after {
-    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQgNTEyIj48cGF0aCBmaWxsPSIjMEYxNzJBIiBkPSJNMjIzLjUgMzJDMTAwIDMyIDAgMTMyLjMgMCAyNTZTMTAwIDQ4MCAyMjMuNSA0ODBjNjAuNiAwIDExNS41LTI0LjIgMTU1LjgtNjMuNGM1LTQuOSA2LjMtMTIuNSAzLjEtMTguN3MtMTAuMS05LjctMTctOC41Yy05LjggMS43LTE5LjggMi42LTMwLjEgMi42Yy05Ni45IDAtMTc1LjUtNzguOC0xNzUuNS0xNzZjMC02NS44IDM2LTEyMy4xIDg5LjMtMTUzLjNjNi4xLTMuNSA5LjItMTAuNSA3LjctMTcuM3MtNy4zLTExLjktMTQuMy0xMi41Yy02LjMtLjUtMTIuNi0uOC0xOS0uOHoiLz48L3N2Zz4=");
-}
-
-.switches li:nth-child(3) [type='radio']:checked + label span:empty::after {
-    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMEYxNzJBIiBkPSJNNDQ4IDI1NmMwLTEwNi04Ni0xOTItMTkyLTE5MmwwIDM4NGMxMDYgMCAxOTItODYgMTkyLTE5MnpNMCAyNTZhMjU2IDI1NiAwIDEgMSA1MTIgMEEyNTYgMjU2IDAgMSAxIDAgMjU2eiIvPjwvc3ZnPg==");
+    background: color-mix(in srgb, var(--primary-soft) 55%, var(--bg-card));
 }
 
 .nyuci-theme-option {
@@ -387,20 +346,14 @@ body {
 }
 
 .nyuci-sidebar-brand {
-    border-color: color-mix(in srgb, var(--primary) 16%, var(--border-main));
-    background:
-        linear-gradient(
-            180deg,
-            color-mix(in srgb, white 88%, var(--primary-soft)) 0%,
-            color-mix(in srgb, var(--primary-soft) 72%, white) 42%,
-            color-mix(in srgb, var(--primary) 42%, white) 100%
-        );
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
+    border-color: var(--border-main);
+    background: var(--bg-surface);
+    box-shadow: none;
 }
 
 .dark .nyuci-sidebar-brand {
     border-color: var(--border-main);
-    background: linear-gradient(180deg, var(--bg-card), var(--accent-deep));
+    background: var(--bg-surface);
     box-shadow: none;
 }
 
@@ -460,22 +413,15 @@ body {
     --hero-copy: var(--text-main);
     --hero-panel-label: var(--text-muted);
     --hero-panel-value: var(--text-strong);
-    border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--border-main));
-    background:
-        radial-gradient(circle at top right, rgb(255 255 255 / 0.82), transparent 34%),
-        linear-gradient(
-            135deg,
-            color-mix(in srgb, var(--primary-soft) 78%, white) 0%,
-            color-mix(in srgb, var(--primary) 18%, white) 55%,
-            color-mix(in srgb, var(--accent) 12%, white) 100%
-        );
+    border: 1px solid var(--border-main);
+    background: var(--bg-card);
     color: var(--text-strong);
-    box-shadow: 0 24px 56px rgb(27 48 77 / 0.1);
+    box-shadow: 0 18px 44px rgb(15 23 42 / 0.06);
 }
 
 .nyuci-dashboard-hero-panel {
-    border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border-soft));
-    background: rgb(255 255 255 / 0.58);
+    border: 1px solid var(--border-main);
+    background: var(--bg-surface);
     backdrop-filter: blur(12px);
 }
 
@@ -483,72 +429,62 @@ body {
     --metric-eyebrow: var(--primary-ink);
     --metric-number: var(--text-strong);
     --metric-copy: var(--text-main);
-    border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border-main));
-    background:
-        linear-gradient(
-            135deg,
-            color-mix(in srgb, var(--primary-soft) 70%, white) 0%,
-            color-mix(in srgb, var(--primary) 14%, white) 100%
-        );
+    border: 1px solid var(--border-main);
+    background: var(--bg-card);
 }
 
 .nyuci-dashboard-metric-navy {
-    --metric-eyebrow: var(--accent);
-    --metric-number: var(--accent-deep);
+    --metric-eyebrow: var(--text-muted);
+    --metric-number: var(--text-strong);
     --metric-copy: var(--text-main);
-    border-color: color-mix(in srgb, var(--accent) 14%, var(--border-main));
-    background:
-        linear-gradient(
-            135deg,
-            color-mix(in srgb, var(--primary-soft) 38%, white) 0%,
-            color-mix(in srgb, var(--accent) 10%, white) 100%
-        );
+    border-color: var(--border-main);
+    background: var(--bg-surface);
 }
 
 .nyuci-summary-accent {
-    --summary-label: var(--primary-ink);
+    --summary-label: var(--text-muted);
     --summary-value: var(--text-strong);
 }
 
 .nyuci-summary-navy {
-    --summary-label: var(--accent);
-    --summary-value: var(--accent-deep);
+    --summary-label: var(--text-muted);
+    --summary-value: var(--text-strong);
 }
 
 .dark .nyuci-dashboard-hero {
-    --hero-eyebrow: #bfdbfe;
-    --hero-copy: #cbd5e1;
-    --hero-panel-label: #cbd5e1;
-    --hero-panel-value: #ffffff;
-    border-color: rgb(30 58 138 / 0.45);
-    background: linear-gradient(135deg, #0f172a, #1e3a8a);
-    color: #ffffff;
-    box-shadow: 0 24px 56px rgb(2 6 23 / 0.5);
+    --hero-eyebrow: var(--text-muted);
+    --hero-copy: var(--text-main);
+    --hero-panel-label: var(--text-muted);
+    --hero-panel-value: var(--text-strong);
+    border-color: var(--border-main);
+    background: var(--bg-card);
+    color: var(--text-strong);
+    box-shadow: 0 18px 44px rgb(2 6 23 / 0.35);
 }
 
 .dark .nyuci-dashboard-hero-panel {
-    border-color: rgb(255 255 255 / 0.15);
-    background: rgb(255 255 255 / 0.1);
+    border-color: var(--border-main);
+    background: var(--bg-surface);
 }
 
 .dark .nyuci-dashboard-metric {
-    --metric-eyebrow: #bfdbfe;
-    --metric-number: #dbeafe;
-    --metric-copy: #bfdbfe;
-    border-color: rgb(59 130 246 / 0.35);
-    background: linear-gradient(135deg, #0f1a2e, #1e3a8a);
+    --metric-eyebrow: var(--text-muted);
+    --metric-number: var(--text-strong);
+    --metric-copy: var(--text-main);
+    border-color: var(--border-main);
+    background: var(--bg-card);
 }
 
 .dark .nyuci-dashboard-metric-navy {
-    --metric-eyebrow: #bfdbfe;
-    --metric-number: #eff6ff;
-    --metric-copy: #bfdbfe;
-    border-color: rgb(96 165 250 / 0.45);
-    background: #13203a;
+    --metric-eyebrow: var(--text-muted);
+    --metric-number: var(--text-strong);
+    --metric-copy: var(--text-main);
+    border-color: var(--border-main);
+    background: var(--bg-surface);
 }
 
 .dark .nyuci-summary-accent,
 .dark .nyuci-summary-navy {
-    --summary-label: #bfdbfe;
-    --summary-value: #dbeafe;
+    --summary-label: var(--text-muted);
+    --summary-value: var(--text-strong);
 }

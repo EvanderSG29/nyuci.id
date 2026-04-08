@@ -87,13 +87,13 @@
 
                             <flux:table.row :key="$laundry->id">
                                 <flux:table.cell class="space-y-1">
-                                    <div class="font-medium text-zinc-800 dark:text-white">{{ $laundry->klien?->nama_klien ?? $laundry->nama }}</div>
-                                    <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $laundry->klien?->no_hp_klien ?? $laundry->no_hp }}</div>
+                                    <div class="font-medium text-[var(--text-strong)]">{{ $laundry->klien?->nama_klien ?? $laundry->nama }}</div>
+                                    <div class="text-xs text-[var(--text-muted)]">{{ $laundry->klien?->no_hp_klien ?? $laundry->no_hp }}</div>
                                 </flux:table.cell>
 
                                 <flux:table.cell class="space-y-1">
                                     <div>{{ $laundry->jasa?->nama_jasa ?? $laundry->jenis_jasa_label }}</div>
-                                    <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $laundry->satuan_label }}</div>
+                                    <div class="text-xs text-[var(--text-muted)]">{{ $laundry->satuan_label }}</div>
                                 </flux:table.cell>
 
                                 <flux:table.cell>{{ $laundry->tanggal_dimulai?->translatedFormat('d M Y') ?? '-' }}</flux:table.cell>

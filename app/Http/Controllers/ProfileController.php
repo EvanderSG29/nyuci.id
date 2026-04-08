@@ -67,10 +67,6 @@ class ProfileController extends Controller
                 'nama_toko' => $validated['nama_toko'],
                 'alamat' => $validated['alamat'] ?: null,
                 'no_hp' => $validated['no_hp'] ?: null,
-                'background_mode' => $validated['background_mode'],
-                'background_color' => $validated['background_mode'] === 'custom'
-                    ? strtoupper($validated['background_color'])
-                    : null,
             ]
         );
 

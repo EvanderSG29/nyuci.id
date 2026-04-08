@@ -1,12 +1,16 @@
 <!DOCTYPE html>
+@php
+    $appName = $appName ?? config('app.name', 'Nyuci.id');
+    $pageTitle = trim($__env->yieldContent('title', $pageTitle ?? $title ?? $appName));
+    $pageTitle = $pageTitle !== '' ? $pageTitle : $appName;
+@endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        @php($pageTitle = trim($__env->yieldContent('title', $title ?? 'Nyuci.id')))
-        <title>{{ $pageTitle === 'Nyuci.id' ? 'Nyuci.id' : $pageTitle . ' - Nyuci.id' }}</title>
+        <title>{{ $pageTitle === $appName ? $appName : $pageTitle . ' - ' . $appName }}</title>
         <link rel="icon" type="image/x-icon" href="{{ url('/storage/icon_blue.ico') }}">
         <link rel="shortcut icon" href="{{ url('/storage/icon_blue.ico') }}">
 
