@@ -1,7 +1,7 @@
 <x-guest-layout title="Daftar">
     <div class="mb-6">
-        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Buat Akun Baru</h1>
-        <p class="mt-2 text-sm text-slate-600">
+        <h1 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Buat Akun Baru</h1>
+        <p class="mt-2 text-sm text-[var(--text-muted)]">
             Setelah akun dibuat, Anda akan lanjut ke halaman informasi toko dengan desain yang sama.
         </p>
     </div>
@@ -47,7 +47,7 @@
         </div>
 
         <div class="flex items-center justify-end mt-4">
-            <a class="rounded-md text-sm text-slate-600 underline hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2" href="{{ route('login') }}">
+            <a class="rounded-md text-sm text-[var(--text-muted)] underline hover:text-[var(--text-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2" href="{{ route('login') }}">
                 {{ __('Sudah punya akun?') }}
             </a>
 

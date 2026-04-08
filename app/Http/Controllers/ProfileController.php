@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\StoreSettingsUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,16 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         return view('profile.edit', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Display the store settings form.
+     */
+    public function editStore(Request $request): View
+    {
+        return view('settings.store', [
             'user' => $request->user(),
         ]);
     }
@@ -40,16 +51,30 @@ class ProfileController extends Controller
 
         $user->save();
 
-        $user->toko()->updateOrCreate(
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Update the authenticated user's store settings.
+     */
+    public function updateStore(StoreSettingsUpdateRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        $request->user()->toko()->updateOrCreate(
             [],
             [
                 'nama_toko' => $validated['nama_toko'],
                 'alamat' => $validated['alamat'] ?: null,
                 'no_hp' => $validated['no_hp'] ?: null,
+                'background_mode' => $validated['background_mode'],
+                'background_color' => $validated['background_mode'] === 'custom'
+                    ? strtoupper($validated['background_color'])
+                    : null,
             ]
         );
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('pengaturan-toko.edit')->with('status', 'store-settings-updated');
     }
 
     /**

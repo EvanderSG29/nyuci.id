@@ -1,8 +1,8 @@
 <x-guest-layout title="Verifikasi 2 Langkah">
     <div class="space-y-6">
         <div>
-            <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Autentikasi Dua Faktor</h2>
-            <p class="mt-2 text-sm text-slate-600">
+            <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Autentikasi Dua Faktor</h2>
+            <p class="mt-2 text-sm text-[var(--text-muted)]">
                 @if (session('auth.uses_recovery_code'))
                     Silakan masukkan salah satu kode pemulihan Anda.
                 @else
@@ -23,7 +23,7 @@
                     inputmode="numeric"
                     required
                     autofocus
-                    class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-[var(--primary)] focus:outline-none focus:ring-[var(--primary)]"
+                    class="block w-full rounded-xl border border-[var(--border-soft)] bg-[var(--bg-surface)] px-3 py-2 text-[var(--text-main)] shadow-sm placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none focus:ring-[var(--primary)]"
                     placeholder="@if (session('auth.uses_recovery_code')) Kode Pemulihan @else Kode Autentikasi @endif"
                 >
                 @error('code')

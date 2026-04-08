@@ -1,11 +1,11 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-[var(--text-strong)]">
-            {{ __('Informasi Profil') }}
+            {{ __('Informasi Akun') }}
         </h2>
 
         <p class="mt-1 text-sm text-[var(--text-muted)]">
-            {{ __("Perbarui informasi profil dan alamat email akun Anda.") }}
+            {{ __("Perbarui nama dan alamat email yang dipakai untuk masuk ke Nyuci.id.") }}
         </p>
     </header>
 
@@ -20,7 +20,7 @@
         @method('patch')
 
         <div>
-            <x-input-label for="name" :value="__('Name')" />
+            <x-input-label for="name" :value="__('Nama Lengkap')" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
@@ -35,41 +35,18 @@
                     <p class="mt-2 text-sm text-[var(--text-main)]">
                         {{ __('Alamat email Anda belum diverifikasi.') }}
 
-                        <button form="send-verification" class="rounded-md text-sm text-[var(--primary-soft)] underline hover:text-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
+                        <button form="send-verification" class="rounded-md text-sm text-[var(--primary-ink)] underline hover:text-[var(--text-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
                             {{ __('Klik di sini untuk mengirim ulang email verifikasi.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 text-sm font-medium text-[var(--primary-soft)]">
+                        <p class="mt-2 text-sm font-medium text-[var(--primary-ink)]">
                             {{ __('Tautan verifikasi baru telah dikirim ke alamat email Anda.') }}
                         </p>
                     @endif
                 </div>
             @endif
-        </div>
-
-        <div>
-            <x-input-label for="nama_toko" :value="__('Nama Toko')" />
-            <x-text-input id="nama_toko" name="nama_toko" type="text" class="mt-1 block w-full" :value="old('nama_toko', $user->toko?->nama_toko)" required autocomplete="organization" />
-            <x-input-error class="mt-2" :messages="$errors->get('nama_toko')" />
-        </div>
-
-        <div>
-            <x-input-label for="no_hp" :value="__('No. HP Toko')" />
-            <x-text-input id="no_hp" name="no_hp" type="text" class="mt-1 block w-full" :value="old('no_hp', $user->toko?->no_hp)" autocomplete="tel" />
-            <x-input-error class="mt-2" :messages="$errors->get('no_hp')" />
-        </div>
-
-        <div>
-            <x-input-label for="alamat" :value="__('Alamat Toko')" />
-            <textarea
-                id="alamat"
-                name="alamat"
-                rows="4"
-                class="mt-1 block w-full rounded-xl border border-[var(--border-soft)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)]"
-            >{{ old('alamat', $user->toko?->alamat) }}</textarea>
-            <x-input-error class="mt-2" :messages="$errors->get('alamat')" />
         </div>
 
         <div class="flex items-center gap-4">

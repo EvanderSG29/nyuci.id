@@ -34,4 +34,14 @@ class User extends Authenticatable
     {
         return $this->hasOne(Toko::class);
     }
+
+    public function kliens()
+    {
+        return $this->hasManyThrough(Klien::class, Toko::class);
+    }
+
+    public function jasas()
+    {
+        return $this->hasManyThrough(Jasa::class, Toko::class);
+    }
 }

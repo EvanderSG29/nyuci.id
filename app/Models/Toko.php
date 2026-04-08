@@ -14,6 +14,8 @@ class Toko extends Model
         'nama_toko',
         'alamat',
         'no_hp',
+        'background_mode',
+        'background_color',
     ];
 
     public function user()
@@ -24,5 +26,15 @@ class Toko extends Model
     public function laundries()
     {
         return $this->hasMany(Laundry::class);
+    }
+
+    public function jasas()
+    {
+        return $this->hasMany(Jasa::class);
+    }
+
+    public function kliens()
+    {
+        return $this->hasMany(Klien::class);
     }
 }
