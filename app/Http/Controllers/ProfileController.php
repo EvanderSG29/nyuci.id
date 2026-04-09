@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Requests\StoreSettingsUpdateRequest;
+use App\Models\Toko;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,8 @@ class ProfileController extends Controller
     {
         return view('settings.store', [
             'user' => $request->user(),
+            'dashboardCards' => $request->user()->toko?->dashboardCards() ?? Toko::dashboardCardDefaults(),
+            'dashboardCardOptions' => Toko::dashboardCardOptions(),
         ]);
     }
 
@@ -67,6 +70,7 @@ class ProfileController extends Controller
                 'nama_toko' => $validated['nama_toko'],
                 'alamat' => $validated['alamat'] ?: null,
                 'no_hp' => $validated['no_hp'] ?: null,
+                'dashboard_cards' => Toko::normalizeDashboardCards($validated['dashboard_cards'] ?? []),
             ]
         );
 

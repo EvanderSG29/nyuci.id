@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Toko;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSettingsUpdateRequest extends FormRequest
@@ -13,10 +14,17 @@ class StoreSettingsUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'nama_toko' => ['required', 'string', 'max:255'],
             'alamat' => ['nullable', 'string', 'max:1000'],
             'no_hp' => ['nullable', 'string', 'max:30'],
+            'dashboard_cards' => ['nullable', 'array'],
         ];
+
+        foreach (array_keys(Toko::dashboardCardOptions()) as $key) {
+            $rules["dashboard_cards.$key"] = ['nullable', 'boolean'];
+        }
+
+        return $rules;
     }
 }

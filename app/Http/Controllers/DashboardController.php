@@ -22,6 +22,7 @@ class DashboardController extends Controller
         if (! $toko) {
             return view('dashboard', [
                 'toko' => null,
+                'dashboardCards' => Toko::dashboardCardDefaults(),
                 'overview' => $this->emptyOverview(),
                 'highlights' => collect(),
                 'trend' => $this->emptyTrend(),
@@ -35,6 +36,7 @@ class DashboardController extends Controller
         $today = CarbonImmutable::now()->startOfDay();
         $trendStart = $today->subDays(13);
         $trendEnd = $today;
+        $dashboardCards = $toko->dashboardCards();
 
         $totalLaundry = $toko->laundries()->count();
         $pendingLaundry = $toko->laundries()->where('status', '!=', 'selesai')->count();
@@ -128,6 +130,7 @@ class DashboardController extends Controller
 
         return view('dashboard', [
             'toko' => $toko,
+            'dashboardCards' => $dashboardCards,
             'overview' => $overview,
             'highlights' => $highlights,
             'trend' => $this->buildTrend($toko->id, $trendStart, $trendEnd),
@@ -179,12 +182,6 @@ class DashboardController extends Controller
             ];
         });
 
-        $chart = $this->buildLineChart($points);
-        $axisLabels = $points
-            ->filter(fn (array $point, int $index) => in_array($index, [0, 3, 6, 9, $points->count() - 1], true))
-            ->values()
-            ->pluck('shortLabel');
-
         return [
             'heading' => 'Pergerakan order 14 hari terakhir',
             'period' => $startDate->translatedFormat('d M').' - '.$endDate->translatedFormat('d M'),
@@ -193,62 +190,14 @@ class DashboardController extends Controller
                 ['label' => 'Order selesai', 'value' => number_format($points->sum('finished'), 0, ',', '.')],
                 ['label' => 'Revenue', 'value' => $this->formatCurrency((int) $points->sum('revenue'))],
             ],
-            'points' => $chart['points'],
-            'ordersPath' => $chart['ordersPath'],
-            'ordersAreaPath' => $chart['ordersAreaPath'],
-            'finishedPath' => $chart['finishedPath'],
-            'gridLines' => $chart['gridLines'],
-            'axisLabels' => $axisLabels,
+            'chart' => [
+                'labels' => $points->pluck('shortLabel')->all(),
+                'fullLabels' => $points->pluck('label')->all(),
+                'orders' => $points->pluck('orders')->all(),
+                'finished' => $points->pluck('finished')->all(),
+                'revenue' => $points->pluck('revenue')->all(),
+            ],
             'hasData' => $points->sum('orders') > 0 || $points->sum('finished') > 0 || $points->sum('revenue') > 0,
-        ];
-    }
-
-    private function buildLineChart(Collection $points): array
-    {
-        $width = 100;
-        $chartTop = 8;
-        $chartBottom = 48;
-        $chartHeight = $chartBottom - $chartTop;
-        $divisor = max($points->count() - 1, 1);
-        $maxValue = max((int) $points->max('orders'), (int) $points->max('finished'), 1);
-
-        $mappedPoints = $points->values()->map(function (array $point, int $index) use ($width, $divisor, $chartTop, $chartBottom, $chartHeight, $maxValue): array {
-            $x = round(4 + (($width - 8) * ($index / $divisor)), 2);
-
-            return [
-                ...$point,
-                'x' => $x,
-                'ordersY' => round($chartBottom - (($point['orders'] / $maxValue) * $chartHeight), 2),
-                'finishedY' => round($chartBottom - (($point['finished'] / $maxValue) * $chartHeight), 2),
-            ];
-        });
-
-        $ordersCoordinates = $mappedPoints
-            ->map(fn (array $point) => $point['x'].' '.$point['ordersY'])
-            ->implode(' L ');
-
-        $finishedCoordinates = $mappedPoints
-            ->map(fn (array $point) => $point['x'].' '.$point['finishedY'])
-            ->implode(' L ');
-
-        $firstPoint = $mappedPoints->first() ?? ['x' => 4];
-        $lastPoint = $mappedPoints->last() ?? ['x' => 96];
-
-        $gridLines = collect(range(0, 3))->map(function (int $index) use ($chartTop, $chartHeight, $maxValue): array {
-            $fraction = $index / 3;
-
-            return [
-                'y' => round($chartTop + ($chartHeight * $fraction), 2),
-                'label' => (string) (int) round($maxValue - ($maxValue * $fraction)),
-            ];
-        });
-
-        return [
-            'points' => $mappedPoints,
-            'ordersPath' => 'M '.$ordersCoordinates,
-            'ordersAreaPath' => 'M '.$ordersCoordinates.' L '.$lastPoint['x'].' '.$chartBottom.' L '.$firstPoint['x'].' '.$chartBottom.' Z',
-            'finishedPath' => 'M '.$finishedCoordinates,
-            'gridLines' => $gridLines,
         ];
     }
 
@@ -399,12 +348,13 @@ class DashboardController extends Controller
             'heading' => 'Pergerakan order 14 hari terakhir',
             'period' => '',
             'totals' => [],
-            'points' => collect(),
-            'ordersPath' => '',
-            'ordersAreaPath' => '',
-            'finishedPath' => '',
-            'gridLines' => collect(),
-            'axisLabels' => collect(),
+            'chart' => [
+                'labels' => [],
+                'fullLabels' => [],
+                'orders' => [],
+                'finished' => [],
+                'revenue' => [],
+            ],
             'hasData' => false,
         ];
     }

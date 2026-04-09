@@ -116,7 +116,7 @@
 
             <div>
                 <label class="mb-3 block text-sm font-medium text-[var(--text-strong)]">Kode verifikasi</label>
-                <div class="grid grid-cols-6 gap-2 sm:gap-3">
+                <div class="flex items-center justify-center gap-2 sm:gap-3">
                     <template x-for="(digit, index) in digits" :key="index">
                         <input
                             data-otp-input
@@ -124,7 +124,8 @@
                             maxlength="1"
                             inputmode="numeric"
                             autocomplete="one-time-code"
-                            class="h-14 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-card)] text-center text-xl font-semibold text-[var(--text-strong)] shadow-sm transition focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                            :aria-label="`Digit ${index + 1}`"
+                            class="flex h-14 w-14 items-center justify-center rounded-3xl border border-[var(--border-main)] bg-[var(--bg-card)] text-center text-2xl font-semibold text-[var(--text-strong)] shadow-sm transition duration-150 ease-in-out hover:border-[var(--primary)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                             x-model="digits[index]"
                             @input="onInput($event, index)"
                             @keydown.backspace.prevent="onBackspace($event, index)"
