@@ -1,13 +1,14 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RegisterTokoController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JasaController;
 use App\Http\Controllers\KlienController;
 use App\Http\Controllers\LaundryController;
+use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\ProfileController;
-use App\Models\Klien;
-use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,37 +24,20 @@ Route::get('/forgot-password', function () {
     return view('auth.forgot-password');
 })->middleware('guest')->name('password.request');
 
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:3,1')->name('register.store');
+
+    Route::get('/register/otp', [OtpController::class, 'create'])->name('register.otp.notice');
+    Route::post('/register/otp', [OtpController::class, 'store'])->middleware('throttle:5,1')->name('register.otp.verify');
+    Route::post('/register/otp/resend', [OtpController::class, 'resend'])->middleware('throttle:3,1')->name('register.otp.resend');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/register/toko', [RegisterTokoController::class, 'create'])->name('register.toko.create');
     Route::post('/register/toko', [RegisterTokoController::class, 'store'])->name('register.toko.store');
 
-    Route::get('/dashboard', function (Request $request) {
-        $user = $request->user()->load('toko');
-        $toko = $user->toko;
-
-        $stats = [
-            'totalLaundry' => 0,
-            'pendingLaundry' => 0,
-            'paidCount' => 0,
-            'totalPelanggan' => 0,
-        ];
-
-        $recentLaundries = collect();
-
-        if ($toko) {
-            $stats['totalLaundry'] = $toko->laundries()->count();
-            $stats['pendingLaundry'] = $toko->laundries()->where('status', '!=', 'selesai')->count();
-            $stats['paidCount'] = Pembayaran::query()
-                ->whereHas('laundry', fn ($query) => $query->where('toko_id', $toko->id))
-                ->where('status', 'sudah_bayar')
-                ->count();
-            $stats['totalPelanggan'] = Klien::query()->where('toko_id', $toko->id)->count();
-
-            $recentLaundries = $toko->laundries()->with(['klien', 'jasa'])->latest()->take(5)->get();
-        }
-
-        return view('dashboard', compact('toko', 'stats', 'recentLaundries'));
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('biaya-jasa', JasaController::class)->parameters(['biaya-jasa' => 'jasa'])->except('show');
     Route::resource('pelanggan', KlienController::class)->parameters(['pelanggan' => 'klien'])->except('show');

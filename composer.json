@@ -14,7 +14,8 @@
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "livewire/flux": "*",
-        "livewire/livewire": "*"
+        "livewire/livewire": "*",
+        "sadiqsalau/laravel-otp": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

@@ -44,6 +44,27 @@
                     'icon' => 'cog-6-tooth',
                 ],
             ];
+
+            $statusToToast = [
+                'profile-updated' => ['text' => 'Profil akun berhasil diperbarui.', 'variant' => 'success'],
+                'password-updated' => ['text' => 'Kata sandi berhasil diperbarui.', 'variant' => 'success'],
+                'store-settings-updated' => ['text' => 'Pengaturan toko berhasil diperbarui.', 'variant' => 'success'],
+                'verification-link-sent' => ['text' => 'Tautan verifikasi baru berhasil dikirim.', 'variant' => 'success'],
+            ];
+
+            $flashToasts = [];
+
+            if (session('success')) {
+                $flashToasts[] = ['text' => session('success'), 'variant' => 'success', 'duration' => 5000];
+            }
+
+            if (session('warning')) {
+                $flashToasts[] = ['text' => session('warning'), 'variant' => 'warning', 'duration' => 5000];
+            }
+
+            if (session('status') && isset($statusToToast[session('status')])) {
+                $flashToasts[] = [...$statusToToast[session('status')], 'duration' => 5000];
+            }
         @endphp
 
         <div class="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
@@ -139,25 +160,21 @@
             </div>
         @endpersist
 
-        @if (session('success') || session('warning'))
+        @livewireScripts
+        @fluxScripts
+
+        @if ($flashToasts !== [])
             <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    window.dispatchEvent(new CustomEvent('toast-show', {
-                        detail: {
-                            duration: 4500,
-                            dataset: {
-                                variant: @js(session('warning') ? 'warning' : 'success'),
-                            },
-                            slots: {
-                                text: @js(session('warning') ?: session('success')),
-                            },
-                        },
-                    }));
+                queueMicrotask(() => {
+                    const toasts = @js($flashToasts);
+
+                    toasts.forEach((toast, index) => {
+                        window.setTimeout(() => {
+                            window.Flux?.toast(toast);
+                        }, index * 120);
+                    });
                 });
             </script>
         @endif
-
-        @livewireScripts
-        @fluxScripts
     </body>
 </html>

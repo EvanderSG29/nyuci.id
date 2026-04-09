@@ -54,16 +54,6 @@
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Simpan Pengaturan') }}</x-primary-button>
-
-            @if (session('status') === 'store-settings-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-[var(--text-muted)]"
-                >{{ __('Tersimpan.') }}</p>
-            @endif
         </div>
     </form>
 </section>

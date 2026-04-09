@@ -18,9 +18,23 @@
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" rel="stylesheet" />
 
         @include('layouts.partials.theme-init')
+        @livewireStyles
+        @fluxAppearance
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body x-data="themeManager()" :class="{ 'dark theme-dark': resolvedTheme === 'dark' }" class="font-sans antialiased">
+        @php
+            $flashToasts = [];
+
+            if (session('success')) {
+                $flashToasts[] = ['text' => session('success'), 'variant' => 'success', 'duration' => 5000];
+            }
+
+            if (session('warning')) {
+                $flashToasts[] = ['text' => session('warning'), 'variant' => 'warning', 'duration' => 5000];
+            }
+        @endphp
+
         <div class="nyuci-landing-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
             <div class="nyuci-auth-panel mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl overflow-hidden rounded-[2rem] lg:grid-cols-[0.95fr_1.05fr]">
                 <div class="nyuci-gradient-brand relative hidden overflow-hidden px-8 py-10 text-white lg:flex lg:flex-col lg:justify-between">
@@ -83,5 +97,26 @@
                 </div>
             </div>
         </div>
+
+        <div class="fixed right-4 top-4 z-[90] sm:right-6 sm:top-6">
+            <flux:toast position="top end" />
+        </div>
+
+        @livewireScripts
+        @fluxScripts
+
+        @if ($flashToasts !== [])
+            <script>
+                queueMicrotask(() => {
+                    const toasts = @js($flashToasts);
+
+                    toasts.forEach((toast, index) => {
+                        window.setTimeout(() => {
+                            window.Flux?.toast(toast);
+                        }, index * 120);
+                    });
+                });
+            </script>
+        @endif
     </body>
 </html>

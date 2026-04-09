@@ -36,6 +36,12 @@
     --success: #10b981;
     --primary-ink: #2d62c7;
     --on-primary: #ffffff;
+
+    --chart-primary: #4a7df0;
+    --chart-secondary: #06b6d4;
+    --chart-emerald: #10b981;
+    --chart-amber: #f59e0b;
+    --chart-violet: #7c3aed;
 }
 
 .dark {
@@ -61,6 +67,12 @@
     --success: #10b981;
     --primary-ink: #dbeafe;
     --on-primary: #ffffff;
+
+    --chart-primary: #60a5fa;
+    --chart-secondary: #22d3ee;
+    --chart-emerald: #34d399;
+    --chart-amber: #fbbf24;
+    --chart-violet: #a78bfa;
 }
 
 html {
@@ -487,4 +499,223 @@ body {
 .dark .nyuci-summary-navy {
     --summary-label: var(--text-muted);
     --summary-value: var(--text-strong);
+}
+
+.nyuci-analytics-hero {
+    --hero-eyebrow: var(--primary-ink);
+    --hero-copy: var(--text-main);
+    border: 1px solid var(--border-main);
+    background:
+        radial-gradient(circle at top right, rgb(74 125 240 / 0.16), transparent 32%),
+        linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 92%, var(--primary-soft)), var(--bg-card));
+    box-shadow: 0 24px 60px rgb(15 23 42 / 0.08);
+}
+
+.nyuci-mini-stat,
+.nyuci-kpi-card,
+.nyuci-kpi-chip,
+.nyuci-analytics-side,
+.nyuci-side-note,
+.nyuci-quick-action,
+.nyuci-service-row,
+.nyuci-breakdown-row,
+.nyuci-chart-shell {
+    border: 1px solid var(--border-main);
+    background: var(--bg-card);
+}
+
+.nyuci-mini-stat {
+    background: color-mix(in srgb, var(--bg-card) 84%, var(--primary-soft));
+}
+
+.nyuci-kpi-card {
+    position: relative;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--bg-card) 92%, var(--primary-soft));
+}
+
+.nyuci-kpi-card::after {
+    content: '';
+    position: absolute;
+    inset: auto -2rem -2rem auto;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.nyuci-kpi-chip {
+    min-width: 8rem;
+    background: color-mix(in srgb, var(--bg-card) 90%, var(--primary-soft));
+}
+
+.nyuci-kpi-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+    border-radius: 9999px;
+    padding: 0.45rem 0.85rem;
+    background: color-mix(in srgb, var(--primary-soft) 70%, var(--bg-card));
+    color: var(--primary-ink);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.nyuci-quick-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.nyuci-quick-action:hover {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border-soft));
+    background: color-mix(in srgb, var(--bg-card) 80%, var(--primary-soft));
+    color: var(--text-strong);
+    transform: translateY(-1px);
+}
+
+.nyuci-side-note {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 88%, var(--primary-soft)), var(--bg-card));
+}
+
+.nyuci-legend-dot,
+.nyuci-breakdown-dot {
+    display: inline-flex;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+}
+
+.nyuci-chart-shell {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 92%, var(--primary-soft)), var(--bg-card));
+}
+
+.nyuci-chart-grid {
+    stroke: color-mix(in srgb, var(--border-main) 82%, transparent);
+    stroke-dasharray: 3 4;
+}
+
+.nyuci-chart-area {
+    fill: color-mix(in srgb, var(--chart-primary) 18%, transparent);
+}
+
+.nyuci-chart-line-primary,
+.nyuci-chart-line-secondary {
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.nyuci-chart-line-primary {
+    stroke: var(--chart-primary);
+}
+
+.nyuci-chart-line-secondary {
+    stroke: var(--chart-emerald);
+}
+
+.nyuci-chart-dot-primary {
+    fill: var(--chart-primary);
+}
+
+.nyuci-chart-dot-secondary {
+    fill: var(--chart-emerald);
+}
+
+.nyuci-donut-chart {
+    position: relative;
+    flex-shrink: 0;
+    width: 8.5rem;
+    height: 8.5rem;
+    border-radius: 9999px;
+}
+
+.nyuci-donut-chart::after {
+    content: '';
+    position: absolute;
+    inset: 1.3rem;
+    border-radius: 9999px;
+    background: var(--bg-card);
+    box-shadow: inset 0 0 0 1px var(--border-main);
+}
+
+.nyuci-donut-content {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.nyuci-breakdown-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(7rem, 1.25fr) auto;
+    align-items: center;
+    gap: 0.9rem;
+    background: color-mix(in srgb, var(--bg-card) 88%, var(--bg-surface));
+}
+
+.nyuci-meter {
+    position: relative;
+    height: 0.55rem;
+    border-radius: 9999px;
+    background: var(--bg-elevated);
+    overflow: hidden;
+}
+
+.nyuci-meter > span {
+    display: block;
+    height: 100%;
+    width: var(--meter-width, 0%);
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--meter-color), color-mix(in srgb, var(--meter-color) 55%, white));
+}
+
+.nyuci-service-row {
+    background: color-mix(in srgb, var(--bg-card) 88%, var(--bg-surface));
+}
+
+.nyuci-service-bar {
+    height: 0.55rem;
+    border-radius: 9999px;
+    background: var(--bg-elevated);
+    overflow: hidden;
+}
+
+.nyuci-service-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--chart-primary), var(--chart-secondary));
+}
+
+@media (max-width: 767px) {
+    .nyuci-breakdown-row {
+        grid-template-columns: 1fr;
+    }
+
+    .nyuci-donut-chart {
+        width: 7.5rem;
+        height: 7.5rem;
+    }
+}
+
+.dark .nyuci-analytics-hero {
+    background:
+        radial-gradient(circle at top right, rgb(96 165 250 / 0.16), transparent 30%),
+        linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 88%, var(--accent-deep)), var(--bg-card));
+    box-shadow: 0 24px 60px rgb(2 6 23 / 0.35);
 }

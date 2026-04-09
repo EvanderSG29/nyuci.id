@@ -2,11 +2,11 @@
     <div class="mb-6">
         <h1 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Buat Akun Baru</h1>
         <p class="mt-2 text-sm text-[var(--text-muted)]">
-            Setelah akun dibuat, Anda akan lanjut ke halaman informasi toko dengan desain yang sama.
+            Setelah form dikirim, kami akan mengirim OTP ke email Anda sebelum lanjut ke pengaturan toko.
         </p>
     </div>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register.store') }}">
         @csrf
 
         <!-- Name -->
