@@ -1,7 +1,17 @@
 <x-guest-layout title="Verifikasi OTP">
+    @php
+        $otpLength = (int) config('otp.length', 6);
+        $otpSplitIndex = (int) ceil($otpLength / 2);
+        $prefilledOtpDigits = collect(str_split((string) old('code', '')))
+            ->pad($otpLength, '')
+            ->take($otpLength)
+            ->values()
+            ->all();
+    @endphp
+
     <div
         x-data="{
-            digits: Array.from({ length: 6 }, () => ''),
+            digits: @js($prefilledOtpDigits),
             expiresAt: @js($expiresAt->toIso8601String()),
             resendAvailableAt: @js($resendAvailableAt?->toIso8601String()),
             remainingSeconds: 0,
@@ -116,23 +126,50 @@
 
             <div>
                 <label class="mb-3 block text-sm font-medium text-[var(--text-strong)]">Kode verifikasi</label>
-                <div class="flex items-center justify-center gap-2 sm:gap-3">
-                    <template x-for="(digit, index) in digits" :key="index">
-                        <input
-                            data-otp-input
-                            type="text"
-                            maxlength="1"
-                            inputmode="numeric"
-                            autocomplete="one-time-code"
-                            :aria-label="`Digit ${index + 1}`"
-                            class="flex h-14 w-14 items-center justify-center rounded-3xl border border-[var(--border-main)] bg-[var(--bg-card)] text-center text-2xl font-semibold text-[var(--text-strong)] shadow-sm transition duration-150 ease-in-out hover:border-[var(--primary)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                            x-model="digits[index]"
-                            @input="onInput($event, index)"
-                            @keydown.backspace.prevent="onBackspace($event, index)"
-                            @keydown.left.prevent="focusInput(Math.max(0, index - 1))"
-                            @keydown.right.prevent="focusInput(Math.min(digits.length - 1, index + 1))"
-                        >
-                    </template>
+                <div class="nyuci-otp-wrap">
+                    <div class="nyuci-otp-group">
+                        @foreach (range(0, max($otpSplitIndex - 1, 0)) as $index)
+                            <input
+                                data-otp-input
+                                type="text"
+                                maxlength="1"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                autocomplete="{{ $index === 0 ? 'one-time-code' : 'off' }}"
+                                aria-label="Digit {{ $index + 1 }}"
+                                class="nyuci-otp-input"
+                                x-model="digits[{{ $index }}]"
+                                @input="onInput($event, {{ $index }})"
+                                @keydown.backspace.prevent="onBackspace($event, {{ $index }})"
+                                @keydown.left.prevent="focusInput(Math.max(0, {{ $index }} - 1))"
+                                @keydown.right.prevent="focusInput(Math.min(digits.length - 1, {{ $index }} + 1))"
+                            >
+                        @endforeach
+                    </div>
+
+                    @if ($otpSplitIndex < $otpLength)
+                        <span class="nyuci-otp-separator" aria-hidden="true">-</span>
+
+                        <div class="nyuci-otp-group">
+                            @foreach (range($otpSplitIndex, $otpLength - 1) as $index)
+                                <input
+                                    data-otp-input
+                                    type="text"
+                                    maxlength="1"
+                                    inputmode="numeric"
+                                    pattern="[0-9]*"
+                                    autocomplete="off"
+                                    aria-label="Digit {{ $index + 1 }}"
+                                    class="nyuci-otp-input"
+                                    x-model="digits[{{ $index }}]"
+                                    @input="onInput($event, {{ $index }})"
+                                    @keydown.backspace.prevent="onBackspace($event, {{ $index }})"
+                                    @keydown.left.prevent="focusInput(Math.max(0, {{ $index }} - 1))"
+                                    @keydown.right.prevent="focusInput(Math.min(digits.length - 1, {{ $index }} + 1))"
+                                >
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <x-input-error :messages="$errors->get('code')" class="mt-3" />

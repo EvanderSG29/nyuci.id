@@ -1,5 +1,14 @@
 <section class="grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
     <x-card class="rounded-[2rem] p-6">
+        @php
+            $gridLines = data_get($trend, 'gridLines', []);
+            $points = data_get($trend, 'points', []);
+            $axisLabels = data_get($trend, 'axisLabels', []);
+            $ordersAreaPath = data_get($trend, 'ordersAreaPath', '');
+            $ordersPath = data_get($trend, 'ordersPath', '');
+            $finishedPath = data_get($trend, 'finishedPath', '');
+        @endphp
+
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
                 <p class="text-sm font-semibold text-[var(--text-muted)]">Statistik operasional</p>
@@ -28,15 +37,15 @@
         @if ($trend['hasData'])
             <div class="nyuci-chart-shell mt-6 rounded-[1.75rem] p-4 sm:p-5">
                 <svg viewBox="0 0 100 60" class="h-64 w-full overflow-visible" preserveAspectRatio="none" aria-hidden="true">
-                    @foreach ($trend['gridLines'] as $line)
+                    @foreach ($gridLines as $line)
                         <line x1="0" y1="{{ $line['y'] }}" x2="100" y2="{{ $line['y'] }}" class="nyuci-chart-grid" />
                     @endforeach
 
-                    <path d="{{ $trend['ordersAreaPath'] }}" class="nyuci-chart-area" />
-                    <path d="{{ $trend['ordersPath'] }}" class="nyuci-chart-line-primary" />
-                    <path d="{{ $trend['finishedPath'] }}" class="nyuci-chart-line-secondary" />
+                    <path d="{{ $ordersAreaPath }}" class="nyuci-chart-area" />
+                    <path d="{{ $ordersPath }}" class="nyuci-chart-line-primary" />
+                    <path d="{{ $finishedPath }}" class="nyuci-chart-line-secondary" />
 
-                    @foreach ($trend['points'] as $point)
+                    @foreach ($points as $point)
                         <circle cx="{{ $point['x'] }}" cy="{{ $point['ordersY'] }}" r="1.3" class="nyuci-chart-dot-primary">
                             <title>{{ $point['label'] }}: {{ $point['orders'] }} order masuk</title>
                         </circle>
@@ -47,7 +56,7 @@
                 </svg>
 
                 <div class="mt-4 grid grid-cols-5 gap-2 text-xs font-medium text-[var(--text-muted)]">
-                    @foreach ($trend['axisLabels'] as $label)
+                    @foreach ($axisLabels as $label)
                         <span>{{ $label }}</span>
                     @endforeach
                 </div>

@@ -267,6 +267,66 @@ body {
     background: var(--preview-color, var(--bg-main));
 }
 
+.nyuci-otp-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.nyuci-otp-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+
+input.nyuci-otp-input {
+    width: 3rem !important;
+    min-width: 3rem !important;
+    max-width: 3rem !important;
+    height: 3rem !important;
+    flex: 0 0 3rem !important;
+    padding: 0 !important;
+    border: 1px solid var(--border-main);
+    border-radius: 0.95rem;
+    background: var(--bg-card);
+    color: var(--text-strong);
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+    outline: none;
+    appearance: textfield;
+    -moz-appearance: textfield;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+input.nyuci-otp-input:hover {
+    border-color: var(--primary);
+}
+
+input.nyuci-otp-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+input.nyuci-otp-input::-webkit-outer-spin-button,
+input.nyuci-otp-input::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+}
+
+.nyuci-otp-separator {
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1;
+}
+
 [x-cloak] {
     display: none !important;
 }
@@ -703,6 +763,27 @@ body {
 }
 
 @media (max-width: 767px) {
+    .nyuci-otp-wrap {
+        gap: 0.55rem;
+    }
+
+    .nyuci-otp-group {
+        gap: 0.4rem;
+    }
+
+    input.nyuci-otp-input {
+        width: 2.75rem !important;
+        min-width: 2.75rem !important;
+        max-width: 2.75rem !important;
+        height: 2.75rem !important;
+        flex-basis: 2.75rem !important;
+        font-size: 1.1rem;
+    }
+
+    .nyuci-otp-separator {
+        font-size: 1.25rem;
+    }
+
     .nyuci-breakdown-row {
         grid-template-columns: 1fr;
     }

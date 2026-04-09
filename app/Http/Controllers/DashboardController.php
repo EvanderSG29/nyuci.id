@@ -182,6 +182,8 @@ class DashboardController extends Controller
             ];
         });
 
+        $chart = $this->buildLineChart($points);
+
         return [
             'heading' => 'Pergerakan order 14 hari terakhir',
             'period' => $startDate->translatedFormat('d M').' - '.$endDate->translatedFormat('d M'),
@@ -190,6 +192,12 @@ class DashboardController extends Controller
                 ['label' => 'Order selesai', 'value' => number_format($points->sum('finished'), 0, ',', '.')],
                 ['label' => 'Revenue', 'value' => $this->formatCurrency((int) $points->sum('revenue'))],
             ],
+            'points' => $chart['points'],
+            'ordersPath' => $chart['ordersPath'],
+            'ordersAreaPath' => $chart['ordersAreaPath'],
+            'finishedPath' => $chart['finishedPath'],
+            'gridLines' => $chart['gridLines'],
+            'axisLabels' => $chart['axisLabels'],
             'chart' => [
                 'labels' => $points->pluck('shortLabel')->all(),
                 'fullLabels' => $points->pluck('label')->all(),
@@ -198,6 +206,61 @@ class DashboardController extends Controller
                 'revenue' => $points->pluck('revenue')->all(),
             ],
             'hasData' => $points->sum('orders') > 0 || $points->sum('finished') > 0 || $points->sum('revenue') > 0,
+        ];
+    }
+
+    private function buildLineChart(Collection $points): array
+    {
+        $width = 100;
+        $chartTop = 8;
+        $chartBottom = 48;
+        $chartHeight = $chartBottom - $chartTop;
+        $divisor = max($points->count() - 1, 1);
+        $maxValue = max((int) $points->max('orders'), (int) $points->max('finished'), 1);
+
+        $mappedPoints = $points->values()->map(function (array $point, int $index) use ($width, $divisor, $chartTop, $chartBottom, $chartHeight, $maxValue): array {
+            $x = round(4 + (($width - 8) * ($index / $divisor)), 2);
+
+            return [
+                ...$point,
+                'x' => $x,
+                'ordersY' => round($chartBottom - (($point['orders'] / $maxValue) * $chartHeight), 2),
+                'finishedY' => round($chartBottom - (($point['finished'] / $maxValue) * $chartHeight), 2),
+            ];
+        });
+
+        $ordersCoordinates = $mappedPoints
+            ->map(fn (array $point) => $point['x'].' '.$point['ordersY'])
+            ->implode(' L ');
+
+        $finishedCoordinates = $mappedPoints
+            ->map(fn (array $point) => $point['x'].' '.$point['finishedY'])
+            ->implode(' L ');
+
+        $firstPoint = $mappedPoints->first() ?? ['x' => 4];
+        $lastPoint = $mappedPoints->last() ?? ['x' => 96];
+
+        $gridLines = collect(range(0, 3))->map(function (int $index) use ($chartTop, $chartHeight, $maxValue): array {
+            $fraction = $index / 3;
+
+            return [
+                'y' => round($chartTop + ($chartHeight * $fraction), 2),
+                'label' => (string) (int) round($maxValue - ($maxValue * $fraction)),
+            ];
+        });
+
+        $axisLabels = $points
+            ->filter(fn (array $point, int $index) => in_array($index, [0, 3, 6, 9, $points->count() - 1], true))
+            ->values()
+            ->pluck('shortLabel');
+
+        return [
+            'points' => $mappedPoints,
+            'ordersPath' => 'M '.$ordersCoordinates,
+            'ordersAreaPath' => 'M '.$ordersCoordinates.' L '.$lastPoint['x'].' '.$chartBottom.' L '.$firstPoint['x'].' '.$chartBottom.' Z',
+            'finishedPath' => 'M '.$finishedCoordinates,
+            'gridLines' => $gridLines,
+            'axisLabels' => $axisLabels,
         ];
     }
 
@@ -348,6 +411,12 @@ class DashboardController extends Controller
             'heading' => 'Pergerakan order 14 hari terakhir',
             'period' => '',
             'totals' => [],
+            'points' => collect(),
+            'ordersPath' => '',
+            'ordersAreaPath' => '',
+            'finishedPath' => '',
+            'gridLines' => collect(),
+            'axisLabels' => collect(),
             'chart' => [
                 'labels' => [],
                 'fullLabels' => [],

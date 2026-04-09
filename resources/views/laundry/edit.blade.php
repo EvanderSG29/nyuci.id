@@ -42,6 +42,17 @@
                     ])
                 </form>
             </x-card>
+
+            <x-delete-resource-card
+                :action="route('laundry.destroy', $laundry)"
+                modal-name="confirm-laundry-deletion"
+                title="Hapus laundry ini"
+                description="Menghapus laundry akan menghilangkan data order ini dari sistem. Jika ada pembayaran yang terhubung, data pembayaran tersebut ikut terhapus."
+                trigger-label="Hapus Laundry"
+                modal-title="Hapus data laundry?"
+                modal-description="Tindakan ini bersifat permanen. Pastikan order laundry ini memang sudah tidak diperlukan sebelum Anda melanjutkan."
+                confirm-label="Ya, hapus"
+            />
         </div>
     </div>
 </x-app-layout>
