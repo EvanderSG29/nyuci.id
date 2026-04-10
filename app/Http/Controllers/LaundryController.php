@@ -311,5 +311,9 @@ class LaundryController extends Controller
             'total' => $totalBiaya,
             'total_biaya' => $totalBiaya,
         ]);
+
+        if ($laundry->pembayaran->status !== 'sudah_bayar' && $laundry->pembayaran->gatewayHasSession()) {
+            $laundry->pembayaran->clearGatewaySession();
+        }
     }
 }

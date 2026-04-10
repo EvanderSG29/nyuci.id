@@ -268,6 +268,20 @@ class PembayaranController extends Controller
 
         $pembayaran->update($this->buildPaymentPayload($laundry, $validated));
 
+        if ($validated['status'] === 'sudah_bayar') {
+            $pembayaran->forceFill([
+                'gateway_status' => 'paid',
+                'gateway_paid_at' => $pembayaran->gateway_paid_at ?? now(),
+            ])->save();
+        } elseif ($pembayaran->gatewayHasSession()) {
+            $pembayaran->clearGatewaySession();
+        } else {
+            $pembayaran->forceFill([
+                'gateway_status' => null,
+                'gateway_paid_at' => null,
+            ])->save();
+        }
+
         return redirect()->route('pembayaran.index')->with('success', 'Pembayaran berhasil diperbarui.');
     }
 
@@ -287,6 +301,11 @@ class PembayaranController extends Controller
             'status' => 'sudah_bayar',
             'tgl_pembayaran' => $pembayaran->tgl_pembayaran ?? now()->toDateString(),
         ]);
+
+        $pembayaran->forceFill([
+            'gateway_status' => 'paid',
+            'gateway_paid_at' => $pembayaran->gateway_paid_at ?? now(),
+        ])->save();
 
         return back()->with('success', 'Status pembayaran diperbarui.');
     }

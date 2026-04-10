@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### ✨ Added
+
+- Checkout QRIS publik untuk pembayaran laundry menggunakan QRIS statis lokal
+- Sinkron status pembayaran dari sesi checkout QRIS
+- Link checkout yang bisa dibagikan ke pelanggan
+
+### 🔧 Changed
+
+- Konfigurasi payment gateway dipindah ke `config/payment_gateway.php`
+- Provider QRIS diganti dari simulator eksternal ke generator statis lokal
+
 ## [1.0.0] - 2026-04-06
 
 ### 🎉 Initial Release
@@ -264,7 +277,7 @@ Temukan bug? Punya saran? Buka [GitHub Issues](https://github.com/EvanderSG29/ny
 
 <div align="center">
 
-**Last Updated:** 2026-04-06  
+**Last Updated:** 2026-04-09  
 **Current Version:** 1.0.0  
 **Status:** 🟢 Stable Release
 

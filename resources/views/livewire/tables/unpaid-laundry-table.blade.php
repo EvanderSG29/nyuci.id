@@ -110,9 +110,15 @@
 
                                 <flux:table.cell align="end">
                                     @if ($existingPayment)
-                                        <flux:button size="sm" href="{{ route('pembayaran.edit', $existingPayment) }}" wire:navigate icon="wallet">
-                                            Selesaikan Pembayaran
-                                        </flux:button>
+                                        @if ($existingPayment->gateway_token)
+                                            <flux:button size="sm" href="{{ $existingPayment->gateway_checkout_url }}" target="_blank" rel="noopener" icon="qr-code">
+                                                Buka Checkout QRIS
+                                            </flux:button>
+                                        @else
+                                            <flux:button size="sm" href="{{ route('pembayaran.edit', $existingPayment) }}" wire:navigate icon="wallet">
+                                                Selesaikan Pembayaran
+                                            </flux:button>
+                                        @endif
                                     @else
                                         <flux:button size="sm" variant="primary" href="{{ route('pembayaran.create', ['laundry_id' => $laundry->id]) }}" wire:navigate icon="banknotes">
                                             Bayar Sekarang

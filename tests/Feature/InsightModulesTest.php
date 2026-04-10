@@ -144,7 +144,7 @@ test('biaya jasa page groups services into kiloan and per unit references', func
         ->assertSee('Setrika')
         ->assertSee('pcs')
         ->assertDontSee('Cuci')
-        ->assertSee('Showing 1-1 of 1 entries');
+        ->assertSee('Showing 1 to 1 of 1 results');
 });
 
 test('pelanggan page filters follow up customers and shows overview cards', function () {
@@ -222,5 +222,5 @@ test('pelanggan page filters follow up customers and shows overview cards', func
         ->assertSee('Perlu Follow Up')
         ->assertSee('Citra')
         ->assertDontSee('Dina')
-        ->assertSee('Showing 1-1 of 1 entries');
+        ->assertSee('Showing 1 to 1 of 1 results');
 });

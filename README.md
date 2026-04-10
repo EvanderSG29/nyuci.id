@@ -48,6 +48,9 @@ Aplikasi manajemen toko laundry **built-in Indonesia** untuk pemilik toko dan st
 - Track status pembayaran: "belum bayar" | "sudah bayar"
 - Mark pembayaran sebagai paid
 - Lihat riwayat pembayaran
+- Buat checkout QRIS publik dari detail pembayaran
+- Sinkron status pembayaran dari sesi checkout QRIS statis
+- Salin link checkout untuk dibagikan ke pelanggan
 
 #### 📊 **Dashboard**
 - Stats: Total order, pending pickup, pembayaran terselesaikan
@@ -118,7 +121,22 @@ Buat database:
 php artisan migrate
 ```
 
-### 5️⃣ **Build Frontend Assets**
+### 5️⃣ **Konfigurasi QRIS Statis**
+
+Siapkan payload QRIS statis dari gambar QR merchant. Kamu bisa memakai `StaticQrisGenerator` atau QR scanner lain untuk membaca gambar QRIS, lalu tempelkan hasil string-nya ke `.env`:
+
+```env
+PAYMENT_GATEWAY_DRIVER=qris_static
+PAYMENT_GATEWAY_CHECKOUT_TTL_MINUTES=30
+PAYMENT_GATEWAY_QRIS_STATIC_PAYLOAD=...
+PAYMENT_GATEWAY_QRIS_STATIC_MERCHANT_NAME=...
+```
+
+Jika belum dikonfigurasi, halaman checkout QRIS akan menampilkan warning konfigurasi.
+
+`PAYMENT_GATEWAY_QRIS_STATIC_PAYLOAD` adalah isi string QRIS hasil scan. `PAYMENT_GATEWAY_QRIS_STATIC_MERCHANT_NAME` opsional, dipakai sebagai label merchant di halaman checkout.
+
+### 6️⃣ **Build Frontend Assets**
 
 ```bash
 # Development
@@ -128,7 +146,7 @@ npm run dev
 npm run build
 ```
 
-### 6️⃣ **Start Server**
+### 7️⃣ **Start Server**
 
 ```bash
 # Buka terminal baru
@@ -202,6 +220,9 @@ GET    /pembayaran/create       → Form input pembayaran
 POST   /pembayaran              → Submit input pembayaran
 GET    /pembayaran/{id}         → Detail pembayaran
 GET    /pembayaran/{id}/paid    → Mark as paid
+POST   /pembayaran/{id}/gateway  → Buat sesi checkout QRIS
+GET    /bayar/{id}/{token}       → Checkout publik QRIS
+POST   /bayar/{id}/{token}/sync  → Sinkron status pembayaran QRIS
 DELETE /pembayaran/{id}         → Hapus pembayaran
 ```
 
@@ -350,7 +371,6 @@ npm run dev
 ### 🔄 Versi 2.0.0 (Future)
 - [ ] Multi-tenant support
 - [ ] Mobile app (React Native/Flutter)
-- [ ] Payment gateway integration (Midtrans, Stripe)
 - [ ] Inventory management
 
 ---

@@ -109,6 +109,7 @@
                     <option value="{{ $value }}" @selected($selectedMethod === $value)>{{ $label }}</option>
                 @endforeach
             </select>
+            <p class="mt-2 text-xs text-[var(--text-muted)]">Pilih <span class="font-semibold text-[var(--text-strong)]">QRIS</span> jika transaksi ini akan dibuka lewat checkout publik.</p>
             @error('metode_pembayaran')
                 <p class="mt-1 text-sm text-[var(--danger)]">{{ $message }}</p>
             @enderror

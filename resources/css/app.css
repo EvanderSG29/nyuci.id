@@ -412,6 +412,11 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     color: var(--primary-ink);
 }
 
+.nyuci-badge-danger {
+    background: var(--danger);
+    color: #ffffff;
+}
+
 .nyuci-badge-default {
     background: var(--accent);
     color: #ffffff;

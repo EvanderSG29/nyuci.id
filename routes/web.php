@@ -8,6 +8,7 @@ use App\Http\Controllers\KlienController;
 use App\Http\Controllers\LaundryController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\PembayaranGatewayController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/register/otp/resend', [OtpController::class, 'resend'])->middleware('throttle:3,1')->name('register.otp.resend');
 });
 
+Route::get('/bayar/{pembayaran}/{token}', [PembayaranGatewayController::class, 'checkout'])->name('pembayaran.gateway.checkout');
+Route::post('/bayar/{pembayaran}/{token}/sync', [PembayaranGatewayController::class, 'sync'])->name('pembayaran.gateway.sync');
+
 Route::middleware('auth')->group(function () {
     Route::get('/register/toko', [RegisterTokoController::class, 'create'])->name('register.toko.create');
     Route::post('/register/toko', [RegisterTokoController::class, 'store'])->name('register.toko.store');
@@ -48,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembayaran/belum-bayar', [PembayaranController::class, 'unpaid'])->name('pembayaran.unpaid');
     Route::resource('pembayaran', PembayaranController::class);
     Route::get('/pembayaran/{pembayaran}/paid', [PembayaranController::class, 'markAsPaid'])->name('pembayaran.paid');
+    Route::post('/pembayaran/{pembayaran}/gateway', [PembayaranGatewayController::class, 'issue'])->name('pembayaran.gateway.issue');
 
     Route::get('/pengaturan-toko', [ProfileController::class, 'editStore'])->name('pengaturan-toko.edit');
     Route::patch('/pengaturan-toko', [ProfileController::class, 'updateStore'])->name('pengaturan-toko.update');

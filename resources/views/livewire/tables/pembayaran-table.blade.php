@@ -134,6 +134,12 @@
                                                 Detail
                                             </flux:menu.item>
 
+                                            @if ($pembayaran->gateway_token)
+                                                <flux:menu.item href="{{ $pembayaran->gateway_checkout_url }}" target="_blank" rel="noopener" icon="qr-code">
+                                                    Buka Checkout
+                                                </flux:menu.item>
+                                            @endif
+
                                             <flux:menu.item href="{{ route('pembayaran.edit', $pembayaran) }}" wire:navigate icon="pencil-square">
                                                 Edit
                                             </flux:menu.item>
