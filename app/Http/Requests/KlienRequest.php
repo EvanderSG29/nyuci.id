@@ -15,6 +15,7 @@ class KlienRequest extends FormRequest
     {
         return [
             'nama_klien' => ['required', 'string', 'max:255'],
+            'email_klien' => ['nullable', 'email:rfc', 'max:255'],
             'alamat_klien' => ['nullable', 'string', 'max:255'],
             'no_hp_klien' => ['required', 'string', 'max:30'],
         ];

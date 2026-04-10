@@ -57,27 +57,27 @@
                 icon="magnifying-glass"
             />
 
-            <flux:select wire:model.live="status">
+            <flux:select wire:model="status">
                 <option value="">Semua status</option>
                 <option value="belum_selesai">Belum Selesai</option>
                 <option value="proses">Proses</option>
                 <option value="selesai">Selesai</option>
             </flux:select>
 
-            <flux:select wire:model.live="dibayar">
+            <flux:select wire:model="dibayar">
                 <option value="">Semua pembayaran</option>
                 <option value="belum_bayar">Belum Bayar</option>
                 <option value="sudah_bayar">Sudah Bayar</option>
             </flux:select>
 
-            <flux:select wire:model.live="jasaId">
+            <flux:select wire:model="jasaId">
                 <option value="0">Semua jasa</option>
                 @foreach ($jasaOptions as $jasa)
                     <option value="{{ $jasa->id }}">{{ $jasa->nama_jasa }} / {{ $jasa->satuan }}</option>
                 @endforeach
             </flux:select>
 
-            <flux:select wire:model.live="perPage">
+            <flux:select wire:model="perPage">
                 @foreach ([10, 20, 50] as $perPageOption)
                     <option value="{{ $perPageOption }}">{{ $perPageOption }} per halaman</option>
                 @endforeach

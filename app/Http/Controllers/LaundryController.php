@@ -6,11 +6,14 @@ use App\Http\Requests\LaundryRequest;
 use App\Http\Requests\LaundryStatusUpdateRequest;
 use App\Models\Laundry;
 use App\Models\Toko;
+use App\Notifications\LaundryFinishedNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
 class LaundryController extends Controller
 {
@@ -199,6 +202,7 @@ class LaundryController extends Controller
         }
 
         $validated = $request->validated();
+        $wasFinished = $laundry->status === 'selesai';
         $isFinished = $validated['status'] === 'selesai';
         $finishedDate = $isFinished ? $validated['tgl_selesai'] : null;
 
@@ -208,13 +212,27 @@ class LaundryController extends Controller
                 ->withInput();
         }
 
-        $laundry->update([
-            'status' => $validated['status'],
-            'is_taken' => $isFinished,
-            'tgl_selesai' => $finishedDate,
-        ]);
+        DB::transaction(function () use ($laundry, $validated, $isFinished, $finishedDate): void {
+            $laundry->update([
+                'status' => $validated['status'],
+                'is_taken' => $isFinished,
+                'tgl_selesai' => $finishedDate,
+            ]);
+        });
 
-        return back()->with('success', 'Status laundry berhasil diperbarui.');
+        $warning = null;
+
+        if (! $wasFinished && $isFinished) {
+            $warning = $this->dispatchFinishedNotifications($request, $laundry->fresh());
+        }
+
+        $redirect = back()->with('success', 'Status laundry berhasil diperbarui.');
+
+        if ($warning !== null) {
+            $redirect->with('warning', $warning);
+        }
+
+        return $redirect;
     }
 
     private function validatedLaundryData(LaundryRequest $request, Toko $toko, ?Laundry $laundry = null): array
@@ -315,5 +333,32 @@ class LaundryController extends Controller
         if ($laundry->pembayaran->status !== 'sudah_bayar' && $laundry->pembayaran->gatewayHasSession()) {
             $laundry->pembayaran->clearGatewaySession();
         }
+    }
+
+    private function dispatchFinishedNotifications(Request $request, Laundry $laundry): ?string
+    {
+        $laundry->loadMissing('klien', 'jasa', 'toko');
+
+        try {
+            $request->user()?->notify(new LaundryFinishedNotification($laundry));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return 'Status laundry tersimpan, tetapi notifikasi dashboard gagal dijadwalkan.';
+        }
+
+        if (! filled($laundry->klien?->email_klien)) {
+            return 'Status laundry tersimpan. Email pelanggan belum dikirim karena alamat email pelanggan belum diisi.';
+        }
+
+        try {
+            $laundry->klien->notify(new LaundryFinishedNotification($laundry));
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return 'Status laundry tersimpan, tetapi email notifikasi pelanggan gagal dijadwalkan.';
+        }
+
+        return null;
     }
 }

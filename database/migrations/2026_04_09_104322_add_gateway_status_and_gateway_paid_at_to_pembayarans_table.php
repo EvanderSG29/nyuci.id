@@ -9,15 +9,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pembayarans', function (Blueprint $table): void {
-            $table->string('gateway_status')->nullable();
-            $table->dateTime('gateway_paid_at')->nullable();
+            if (! Schema::hasColumn('pembayarans', 'gateway_status')) {
+                $table->string('gateway_status')->nullable();
+            }
+
+            if (! Schema::hasColumn('pembayarans', 'gateway_paid_at')) {
+                $table->dateTime('gateway_paid_at')->nullable();
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('pembayarans', function (Blueprint $table): void {
-            $table->dropColumn(['gateway_paid_at', 'gateway_status']);
+            $columnsToDrop = [];
+
+            if (Schema::hasColumn('pembayarans', 'gateway_paid_at')) {
+                $columnsToDrop[] = 'gateway_paid_at';
+            }
+
+            if (Schema::hasColumn('pembayarans', 'gateway_status')) {
+                $columnsToDrop[] = 'gateway_status';
+            }
+
+            if ($columnsToDrop !== []) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 };

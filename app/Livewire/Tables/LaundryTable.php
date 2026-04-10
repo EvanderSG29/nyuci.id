@@ -127,7 +127,17 @@ class LaundryTable extends Component
                     ->where('laundries.nama', 'like', '%'.$this->search.'%')
                     ->orWhere('laundries.no_hp', 'like', '%'.$this->search.'%')
                     ->orWhere('laundries.jenis_jasa', 'like', '%'.$this->search.'%')
-                    ->orWhere('laundries.satuan', 'like', '%'.$this->search.'%');
+                    ->orWhere('laundries.satuan', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('klien', function (Builder $relation): void {
+                        $relation
+                            ->where('nama_klien', 'like', '%'.$this->search.'%')
+                            ->orWhere('no_hp_klien', 'like', '%'.$this->search.'%');
+                    })
+                    ->orWhereHas('jasa', function (Builder $relation): void {
+                        $relation
+                            ->where('nama_jasa', 'like', '%'.$this->search.'%')
+                            ->orWhere('satuan', 'like', '%'.$this->search.'%');
+                    });
             });
         }
 

@@ -6,7 +6,9 @@ use App\Models\Laundry;
 use App\Models\Pembayaran;
 use App\Models\Toko;
 use App\Models\User;
+use App\Notifications\LaundryFinishedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 
 uses(RefreshDatabase::class);
@@ -30,6 +32,7 @@ function createLaundryMasterData(Toko $toko, array $klienOverrides = [], array $
     $klien = Klien::create(array_merge([
         'toko_id' => $toko->id,
         'nama_klien' => 'Klien Test',
+        'email_klien' => null,
         'alamat_klien' => 'Jl. Klien Test',
         'no_hp_klien' => '081111111111',
     ], $klienOverrides));
@@ -192,4 +195,114 @@ test('laundry status update route stores the finished date', function () {
     expect($laundry->is_taken)->toBeTrue();
     expect($laundry->status)->toBe('selesai');
     expect($laundry->tgl_selesai?->format('Y-m-d'))->toBe('2026-04-08');
+});
+
+test('laundry status update queues dashboard and customer notifications', function () {
+    Notification::fake();
+
+    $user = createLaundryOwner();
+    $toko = $user->toko;
+    [$klien, $jasa] = createLaundryMasterData($toko, [
+        'nama_klien' => 'Bima',
+        'email_klien' => 'bima@example.test',
+        'no_hp_klien' => '081912345678',
+    ], [
+        'nama_jasa' => 'cuci express',
+        'satuan' => 'kg',
+        'harga' => 12000,
+    ]);
+
+    $laundry = createLaundryRecord($toko, $klien, $jasa, [
+        'status' => 'proses',
+        'tanggal_dimulai' => '2026-04-07',
+        'ets_selesai' => '2026-04-09',
+    ]);
+
+    $this
+        ->actingAs($user)
+        ->from(route('laundry.index'))
+        ->patch(route('laundry.status.update', $laundry), [
+            'status_laundry_id' => $laundry->id,
+            'status' => 'selesai',
+            'tgl_selesai' => '2026-04-09',
+        ])
+        ->assertRedirect(route('laundry.index'))
+        ->assertSessionHas('success', 'Status laundry berhasil diperbarui.');
+
+    Notification::assertSentTo(
+        $user,
+        LaundryFinishedNotification::class,
+        fn (LaundryFinishedNotification $notification, array $channels) => $channels === ['database']
+    );
+
+    Notification::assertSentTo(
+        $klien,
+        LaundryFinishedNotification::class,
+        fn (LaundryFinishedNotification $notification, array $channels) => $channels === ['mail']
+    );
+});
+
+test('laundry status update does not resend notification when order was already finished', function () {
+    Notification::fake();
+
+    $user = createLaundryOwner();
+    $toko = $user->toko;
+    [$klien, $jasa] = createLaundryMasterData($toko, [
+        'nama_klien' => 'Nadia',
+        'email_klien' => 'nadia@example.test',
+        'no_hp_klien' => '081923456789',
+    ]);
+
+    $laundry = createLaundryRecord($toko, $klien, $jasa, [
+        'status' => 'selesai',
+        'tgl_selesai' => '2026-04-08',
+    ]);
+
+    $this
+        ->actingAs($user)
+        ->from(route('laundry.index'))
+        ->patch(route('laundry.status.update', $laundry), [
+            'status_laundry_id' => $laundry->id,
+            'status' => 'selesai',
+            'tgl_selesai' => '2026-04-08',
+        ])
+        ->assertRedirect(route('laundry.index'));
+
+    Notification::assertNothingSent();
+});
+
+test('dashboard dropdown can mark notification as read', function () {
+    $user = createLaundryOwner();
+    $toko = $user->toko;
+    [$klien, $jasa] = createLaundryMasterData($toko, [
+        'nama_klien' => 'Salsa',
+        'email_klien' => 'salsa@example.test',
+        'no_hp_klien' => '081934567890',
+    ]);
+
+    $laundry = createLaundryRecord($toko, $klien, $jasa, [
+        'status' => 'selesai',
+        'tgl_selesai' => '2026-04-08',
+    ]);
+
+    $user->notifyNow(new LaundryFinishedNotification($laundry));
+
+    $notification = $user->unreadNotifications()->firstOrFail();
+
+    $this
+        ->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('Laundry selesai diproses')
+        ->assertSee('Tandai dibaca');
+
+    $this
+        ->actingAs($user)
+        ->from(route('dashboard'))
+        ->patch(route('notifications.read', $notification))
+        ->assertRedirect(route('dashboard'))
+        ->assertSessionHas('success', 'Notifikasi ditandai sudah dibaca.');
+
+    expect($notification->fresh()->read_at)->not()->toBeNull();
+    expect($user->fresh()->unreadNotifications()->count())->toBe(0);
 });

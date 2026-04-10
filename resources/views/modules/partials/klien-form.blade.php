@@ -16,6 +16,22 @@
     </div>
 
     <div class="sm:col-span-2">
+        <label for="email_klien" class="mb-2 block text-sm font-semibold text-[var(--text-main)]">Email</label>
+        <input
+            type="email"
+            id="email_klien"
+            name="email_klien"
+            value="{{ old('email_klien', $klien?->email_klien) }}"
+            placeholder="pelanggan@email.com"
+            class="w-full rounded-xl border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] @error('email_klien') border-[var(--danger)] @enderror"
+        >
+        <p class="mt-2 text-xs text-[var(--text-muted)]">Opsional, tetapi dibutuhkan jika ingin mengirim notifikasi email otomatis.</p>
+        @error('email_klien')
+            <p class="mt-2 text-sm text-[var(--danger)]">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div class="sm:col-span-2">
         <label for="alamat_klien" class="mb-2 block text-sm font-semibold text-[var(--text-main)]">Alamat</label>
         <textarea
             id="alamat_klien"

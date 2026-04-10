@@ -38,13 +38,13 @@
                 icon="magnifying-glass"
             />
 
-            <flux:select wire:model.live="status">
+            <flux:select wire:model="status">
                 <option value="">Semua status</option>
                 <option value="belum_selesai">Belum Selesai</option>
                 <option value="selesai">Selesai</option>
             </flux:select>
 
-            <flux:select wire:model.live="perPage">
+            <flux:select wire:model="perPage">
                 @foreach ([10, 20, 50] as $perPageOption)
                     <option value="{{ $perPageOption }}">{{ $perPageOption }} per halaman</option>
                 @endforeach

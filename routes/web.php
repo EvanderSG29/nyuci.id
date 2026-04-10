@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JasaController;
 use App\Http\Controllers\KlienController;
 use App\Http\Controllers\LaundryController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PembayaranGatewayController;
@@ -42,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/register/toko', [RegisterTokoController::class, 'store'])->name('register.toko.store');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::patch('/notifikasi/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     Route::resource('biaya-jasa', JasaController::class)->parameters(['biaya-jasa' => 'jasa'])->except('show');
     Route::resource('pelanggan', KlienController::class)->parameters(['pelanggan' => 'klien'])->except('show');

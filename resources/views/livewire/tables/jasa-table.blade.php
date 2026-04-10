@@ -44,13 +44,13 @@
                 icon="magnifying-glass"
             />
 
-            <flux:select wire:model.live="kategori">
+            <flux:select wire:model="kategori">
                 <option value="">Semua kategori</option>
                 <option value="kiloan">Kiloan</option>
                 <option value="per_unit">Per Unit</option>
             </flux:select>
 
-            <flux:select wire:model.live="perPage">
+            <flux:select wire:model="perPage">
                 @foreach ([10, 20, 50] as $perPageOption)
                     <option value="{{ $perPageOption }}">{{ $perPageOption }} per halaman</option>
                 @endforeach
