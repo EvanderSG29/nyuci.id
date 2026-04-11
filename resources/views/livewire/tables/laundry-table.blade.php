@@ -51,37 +51,58 @@
 
     <section class="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-card)] p-4 shadow-sm sm:p-6">
         <div class="grid gap-3 xl:grid-cols-[minmax(0,1.4fr)_180px_180px_220px_180px_auto]">
-            <flux:input
-                wire:model.live.debounce.300ms="search"
-                placeholder="Cari pelanggan, nomor, atau jasa"
-                icon="magnifying-glass"
-            />
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[var(--text-muted)]">
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.473 9.766l3.63 3.63a.75.75 0 1 0 1.06-1.06l-3.629-3.63A5.5 5.5 0 0 0 9 3.5Zm-4 5.5a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd" />
+                    </svg>
+                </span>
 
-            <flux:select wire:model="status">
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari pelanggan, nomor, atau jasa"
+                    class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] py-3 pl-11 pr-4 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                >
+            </div>
+
+            <select
+                wire:model.live="status"
+                class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            >
                 <option value="">Semua status</option>
                 <option value="belum_selesai">Belum Selesai</option>
                 <option value="proses">Proses</option>
                 <option value="selesai">Selesai</option>
-            </flux:select>
+            </select>
 
-            <flux:select wire:model="dibayar">
+            <select
+                wire:model.live="dibayar"
+                class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            >
                 <option value="">Semua pembayaran</option>
                 <option value="belum_bayar">Belum Bayar</option>
                 <option value="sudah_bayar">Sudah Bayar</option>
-            </flux:select>
+            </select>
 
-            <flux:select wire:model="jasaId">
+            <select
+                wire:model.live.number="jasaId"
+                class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            >
                 <option value="0">Semua jasa</option>
                 @foreach ($jasaOptions as $jasa)
                     <option value="{{ $jasa->id }}">{{ $jasa->nama_jasa }} / {{ $jasa->satuan }}</option>
                 @endforeach
-            </flux:select>
+            </select>
 
-            <flux:select wire:model="perPage">
+            <select
+                wire:model.live.number="perPage"
+                class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            >
                 @foreach ([10, 20, 50] as $perPageOption)
                     <option value="{{ $perPageOption }}">{{ $perPageOption }} per halaman</option>
                 @endforeach
-            </flux:select>
+            </select>
 
             <div class="flex items-center justify-end">
                 <flux:button variant="ghost" wire:click="clearFilters" icon="arrow-path">

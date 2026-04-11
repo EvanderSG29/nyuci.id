@@ -37,9 +37,15 @@
     <flux:sidebar.nav class="gap-1 pt-4">
         <flux:sidebar.group heading="Menu">
             @foreach ($primaryItems as $item)
-                <flux:sidebar.item href="{{ route($item['route']) }}" wire:navigate icon="{{ $item['icon'] }}">
-                    {{ $item['label'] }}
-                </flux:sidebar.item>
+                @if ($item['route'] === 'laundry.index')
+                    <flux:sidebar.item href="{{ route($item['route']) }}" icon="{{ $item['icon'] }}">
+                        {{ $item['label'] }}
+                    </flux:sidebar.item>
+                @else
+                    <flux:sidebar.item href="{{ route($item['route']) }}" wire:navigate icon="{{ $item['icon'] }}">
+                        {{ $item['label'] }}
+                    </flux:sidebar.item>
+                @endif
             @endforeach
         </flux:sidebar.group>
 
