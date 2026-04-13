@@ -49,6 +49,36 @@ test('registration sends otp and does not create the user before verification', 
     expect(Cache::get(registerOtpCacheKey('alya@example.com')))->toBeArray();
 });
 
+test('registration accepts passwords with letters, numbers, and symbols', function () {
+    Notification::fake();
+
+    $password = 'Nyuci!2026#Aman';
+
+    $response = $this->post(route('register.store'), [
+        'name' => 'Alya Laundry',
+        'email' => 'alya-symbol@example.com',
+        'password' => $password,
+        'password_confirmation' => $password,
+    ]);
+
+    $response
+        ->assertRedirect(route('register.otp.notice'))
+        ->assertSessionHas('success');
+
+    expect(Cache::get(registerOtpCacheKey('alya-symbol@example.com')))->toBeArray();
+});
+
+test('registration form uses text input mode for password fields', function () {
+    $response = $this->get(route('register'));
+
+    $response->assertOk();
+
+    $content = $response->getContent();
+
+    expect($content)->toMatch('/<input\b(?=[^>]*name="password")(?=[^>]*inputmode="text")[^>]*>/');
+    expect($content)->toMatch('/<input\b(?=[^>]*name="password_confirmation")(?=[^>]*inputmode="text")[^>]*>/');
+});
+
 test('verified otp creates the user, logs them in, and redirects to setup toko', function () {
     Notification::fake();
     app('otp')->useGenerator(fn ($format = null, $length = null) => '123456');
