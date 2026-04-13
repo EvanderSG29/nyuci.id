@@ -75,6 +75,50 @@
                                 </h1>
                             </div>
                         @endisset
+
+                        @hasSection('breadcrumbs')
+                            <nav class="nyuci-breadcrumbs mt-3">
+                                @yield('breadcrumbs')
+                            </nav>
+                        @else
+                            @php
+                                $breadcrumbs = collect();
+                                $routeName = request()->route()?->getName();
+
+                                if ($routeName) {
+                                    $segments = explode('.', $routeName);
+
+                                    if (count($segments) > 1) {
+                                        $parentRoute = $segments[0] . '.index';
+
+                                        if (Route::has($parentRoute) && $parentRoute !== 'dashboard.index') {
+                                            $breadcrumbs->push([
+                                                'label' => \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $segments[0])),
+                                                'url' => route($parentRoute),
+                                            ]);
+                                        }
+                                    }
+                                }
+                            @endphp
+
+                            <nav class="nyuci-breadcrumbs mt-3">
+                                <a href="{{ route('dashboard') }}" class="nyuci-breadcrumb-item text-[var(--text-muted)] hover:text-[var(--text-strong)]">
+                                    Beranda
+                                </a>
+
+                                @foreach ($breadcrumbs as $item)
+                                    <span class="nyuci-breadcrumb-separator">/</span>
+                                    <a href="{{ $item['url'] }}" class="nyuci-breadcrumb-item text-[var(--text-muted)] hover:text-[var(--text-strong)]">
+                                        {{ $item['label'] }}
+                                    </a>
+                                @endforeach
+
+                                <span class="nyuci-breadcrumb-separator">/</span>
+                                <span class="nyuci-breadcrumb-item truncate text-[var(--text-strong)]">
+                                    {{ $pageTitle }}
+                                </span>
+                            </nav>
+                        @endif
                     </div>
 
                     <div class="ml-auto flex items-center gap-2">

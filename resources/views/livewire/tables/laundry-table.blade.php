@@ -1,6 +1,30 @@
 @php($rows = $this->laundries)
 @php($summary = $this->summary)
 @php($jasaOptions = $this->jasaOptions)
+@php($loadingTargets = 'search,status,dibayar,jasaId,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
+@php($statusOptions = [
+    ['value' => '', 'label' => 'Semua status'],
+    ['value' => 'belum_selesai', 'label' => 'Belum Selesai'],
+    ['value' => 'proses', 'label' => 'Proses'],
+    ['value' => 'selesai', 'label' => 'Selesai'],
+])
+@php($paymentOptions = [
+    ['value' => '', 'label' => 'Semua pembayaran'],
+    ['value' => 'belum_bayar', 'label' => 'Belum Bayar'],
+    ['value' => 'sudah_bayar', 'label' => 'Sudah Bayar'],
+])
+@php($serviceOptions = $jasaOptions->map(fn ($jasa) => [
+    'value' => $jasa->id,
+    'label' => $jasa->nama_jasa,
+    'meta' => $jasa->satuan,
+])->prepend([
+    'value' => 0,
+    'label' => 'Semua jasa',
+])->values()->all())
+@php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
+    'value' => $value,
+    'label' => $value.' per halaman',
+])->all())
 
 <div class="space-y-6" id="laundry-table">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -66,43 +90,32 @@
                 >
             </div>
 
-            <select
+            <x-filter-select
                 wire:model.live="status"
-                class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-            >
-                <option value="">Semua status</option>
-                <option value="belum_selesai">Belum Selesai</option>
-                <option value="proses">Proses</option>
-                <option value="selesai">Selesai</option>
-            </select>
+                :options="$statusOptions"
+                placeholder="Semua status"
+            />
 
-            <select
+            <x-filter-select
                 wire:model.live="dibayar"
-                class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-            >
-                <option value="">Semua pembayaran</option>
-                <option value="belum_bayar">Belum Bayar</option>
-                <option value="sudah_bayar">Sudah Bayar</option>
-            </select>
+                :options="$paymentOptions"
+                placeholder="Semua pembayaran"
+            />
 
-            <select
+            <x-filter-select
                 wire:model.live.number="jasaId"
-                class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-            >
-                <option value="0">Semua jasa</option>
-                @foreach ($jasaOptions as $jasa)
-                    <option value="{{ $jasa->id }}">{{ $jasa->nama_jasa }} / {{ $jasa->satuan }}</option>
-                @endforeach
-            </select>
+                :options="$serviceOptions"
+                placeholder="Semua jasa"
+                searchable
+                search-placeholder="Cari jasa..."
+            />
 
-            <select
+            <x-filter-select
                 wire:model.live.number="perPage"
-                class="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-3 text-sm text-[var(--text-main)] focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
-            >
-                @foreach ([10, 20, 50] as $perPageOption)
-                    <option value="{{ $perPageOption }}">{{ $perPageOption }} per halaman</option>
-                @endforeach
-            </select>
+                :options="$perPageOptions"
+                :searchable="false"
+                placeholder="Baris per halaman"
+            />
 
             <div class="flex items-center justify-end">
                 <flux:button variant="ghost" wire:click="clearFilters" icon="arrow-path">
@@ -111,19 +124,30 @@
             </div>
         </div>
 
-        @if ($summary['total'] === 0)
-            <div class="py-14 text-center">
-                <p class="text-base font-semibold text-[var(--text-strong)]">Belum ada order laundry.</p>
-                <p class="mt-2 text-sm text-[var(--text-muted)]">Tambahkan order pertama untuk mulai mencatat proses operasional.</p>
+        <div class="mt-6">
+            <div wire:loading.delay wire:target="{{ $loadingTargets }}">
+                <x-table-skeleton
+                    :columns="['Pelanggan', 'Layanan', 'Qty', 'Tanggal Masuk', 'ETS', 'Status', 'Pembayaran', 'Aksi']"
+                    :detail-columns="[0, 1]"
+                    :avatar-columns="[0]"
+                    :badge-columns="[5, 6]"
+                    :action-column="7"
+                />
             </div>
-        @elseif ($rows->isEmpty())
-            <div class="py-14 text-center">
-                <p class="text-base font-semibold text-[var(--text-strong)]">Tidak ada order yang cocok.</p>
-                <p class="mt-2 text-sm text-[var(--text-muted)]">Sesuaikan filter untuk menampilkan order lain.</p>
-            </div>
-        @else
-            <div class="mt-6">
-                <flux:table :paginate="$rows" pagination:scroll-to="#laundry-table">
+
+            <div wire:loading.remove wire:target="{{ $loadingTargets }}">
+                @if ($summary['total'] === 0)
+                    <div class="py-14 text-center">
+                        <p class="text-base font-semibold text-[var(--text-strong)]">Belum ada order laundry.</p>
+                        <p class="mt-2 text-sm text-[var(--text-muted)]">Tambahkan order pertama untuk mulai mencatat proses operasional.</p>
+                    </div>
+                @elseif ($rows->isEmpty())
+                    <div class="py-14 text-center">
+                        <p class="text-base font-semibold text-[var(--text-strong)]">Tidak ada order yang cocok.</p>
+                        <p class="mt-2 text-sm text-[var(--text-muted)]">Sesuaikan filter untuk menampilkan order lain.</p>
+                    </div>
+                @else
+                    <flux:table :paginate="$rows" pagination:scroll-to="#laundry-table">
                     <flux:table.columns>
                         <flux:table.column sortable :sorted="$sortBy === 'nama_klien'" :direction="$sortDirection" wire:click="sort('nama_klien')">Pelanggan</flux:table.column>
                         <flux:table.column sortable :sorted="$sortBy === 'jasa'" :direction="$sortDirection" wire:click="sort('jasa')">Layanan</flux:table.column>
@@ -190,12 +214,13 @@
                             </flux:table.row>
                         @endforeach
                     </flux:table.rows>
-                </flux:table>
-            </div>
+                    </flux:table>
 
-            <p class="mt-4 text-sm text-[var(--text-muted)]">
-                Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
-            </p>
-        @endif
+                    <p class="mt-4 text-sm text-[var(--text-muted)]">
+                        Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
+                    </p>
+                @endif
+            </div>
+        </div>
     </section>
 </div>

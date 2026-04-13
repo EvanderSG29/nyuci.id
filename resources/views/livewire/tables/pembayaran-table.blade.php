@@ -1,6 +1,23 @@
 @php($rows = $this->pembayarans)
 @php($summary = $this->summary)
 @php($paymentMethods = $this->paymentMethods)
+@php($loadingTargets = 'search,status,metodePembayaran,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
+@php($statusOptions = [
+    ['value' => '', 'label' => 'Semua status'],
+    ['value' => 'belum_bayar', 'label' => 'Belum Bayar'],
+    ['value' => 'sudah_bayar', 'label' => 'Sudah Bayar'],
+])
+@php($paymentMethodOptions = collect($paymentMethods)->map(fn ($label, $value) => [
+    'value' => $value,
+    'label' => $label,
+])->prepend([
+    'value' => '',
+    'label' => 'Semua metode',
+])->values()->all())
+@php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
+    'value' => $value,
+    'label' => $value.' per halaman',
+])->all())
 
 <div class="space-y-6" id="pembayaran-table">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -51,24 +68,24 @@
                 icon="magnifying-glass"
             />
 
-            <flux:select wire:model="status">
-                <option value="">Semua status</option>
-                <option value="belum_bayar">Belum Bayar</option>
-                <option value="sudah_bayar">Sudah Bayar</option>
-            </flux:select>
+            <x-filter-select
+                wire:model.live="status"
+                :options="$statusOptions"
+                placeholder="Semua status"
+            />
 
-            <flux:select wire:model="metodePembayaran">
-                <option value="">Semua metode</option>
-                @foreach ($paymentMethods as $value => $label)
-                    <option value="{{ $value }}">{{ $label }}</option>
-                @endforeach
-            </flux:select>
+            <x-filter-select
+                wire:model.live="metodePembayaran"
+                :options="$paymentMethodOptions"
+                placeholder="Semua metode"
+            />
 
-            <flux:select wire:model="perPage">
-                @foreach ([10, 20, 50] as $perPageOption)
-                    <option value="{{ $perPageOption }}">{{ $perPageOption }} per halaman</option>
-                @endforeach
-            </flux:select>
+            <x-filter-select
+                wire:model.live.number="perPage"
+                :options="$perPageOptions"
+                :searchable="false"
+                placeholder="Baris per halaman"
+            />
 
             <div class="flex items-center justify-end">
                 <flux:button variant="ghost" wire:click="clearFilters" icon="arrow-path">
@@ -77,19 +94,30 @@
             </div>
         </div>
 
-        @if ($summary['total'] === 0)
-            <div class="py-14 text-center">
-                <p class="text-base font-semibold text-[var(--text-strong)]">Belum ada pembayaran.</p>
-                <p class="mt-2 text-sm text-[var(--text-muted)]">Buat transaksi pembayaran pertama dari daftar order laundry.</p>
+        <div class="mt-6">
+            <div wire:loading.delay wire:target="{{ $loadingTargets }}">
+                <x-table-skeleton
+                    :columns="['Pelanggan', 'Layanan', 'Metode', 'Tanggal', 'Status', 'Total', 'Aksi']"
+                    :detail-columns="[0, 1]"
+                    :avatar-columns="[0]"
+                    :badge-columns="[4]"
+                    :action-column="6"
+                />
             </div>
-        @elseif ($rows->isEmpty())
-            <div class="py-14 text-center">
-                <p class="text-base font-semibold text-[var(--text-strong)]">Tidak ada pembayaran yang cocok.</p>
-                <p class="mt-2 text-sm text-[var(--text-muted)]">Sesuaikan pencarian atau filter yang sedang aktif.</p>
-            </div>
-        @else
-            <div class="mt-6">
-                <flux:table :paginate="$rows" pagination:scroll-to="#pembayaran-table">
+
+            <div wire:loading.remove wire:target="{{ $loadingTargets }}">
+                @if ($summary['total'] === 0)
+                    <div class="py-14 text-center">
+                        <p class="text-base font-semibold text-[var(--text-strong)]">Belum ada pembayaran.</p>
+                        <p class="mt-2 text-sm text-[var(--text-muted)]">Buat transaksi pembayaran pertama dari daftar order laundry.</p>
+                    </div>
+                @elseif ($rows->isEmpty())
+                    <div class="py-14 text-center">
+                        <p class="text-base font-semibold text-[var(--text-strong)]">Tidak ada pembayaran yang cocok.</p>
+                        <p class="mt-2 text-sm text-[var(--text-muted)]">Sesuaikan pencarian atau filter yang sedang aktif.</p>
+                    </div>
+                @else
+                    <flux:table :paginate="$rows" pagination:scroll-to="#pembayaran-table">
                     <flux:table.columns>
                         <flux:table.column sortable :sorted="$sortBy === 'nama_klien'" :direction="$sortDirection" wire:click="sort('nama_klien')">Pelanggan</flux:table.column>
                         <flux:table.column>Layanan</flux:table.column>
@@ -155,12 +183,13 @@
                             </flux:table.row>
                         @endforeach
                     </flux:table.rows>
-                </flux:table>
-            </div>
+                    </flux:table>
 
-            <p class="mt-4 text-sm text-[var(--text-muted)]">
-                Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
-            </p>
-        @endif
+                    <p class="mt-4 text-sm text-[var(--text-muted)]">
+                        Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
+                    </p>
+                @endif
+            </div>
+        </div>
     </section>
 </div>

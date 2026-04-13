@@ -1,5 +1,16 @@
 @php($rows = $this->kliens)
 @php($summary = $this->summary)
+@php($loadingTargets = 'search,status,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
+@php($statusOptions = [
+    ['value' => '', 'label' => 'Semua status'],
+    ['value' => 'aktif', 'label' => 'Aktif'],
+    ['value' => 'perlu_follow_up', 'label' => 'Perlu Follow Up'],
+    ['value' => 'arsip', 'label' => 'Arsip'],
+])
+@php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
+    'value' => $value,
+    'label' => $value.' per halaman',
+])->all())
 
 <div class="space-y-6" id="klien-table">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -44,18 +55,18 @@
                 icon="magnifying-glass"
             />
 
-            <flux:select wire:model="status">
-                <option value="">Semua status</option>
-                <option value="aktif">Aktif</option>
-                <option value="perlu_follow_up">Perlu Follow Up</option>
-                <option value="arsip">Arsip</option>
-            </flux:select>
+            <x-filter-select
+                wire:model.live="status"
+                :options="$statusOptions"
+                placeholder="Semua status"
+            />
 
-            <flux:select wire:model="perPage">
-                @foreach ([10, 20, 50] as $perPageOption)
-                    <option value="{{ $perPageOption }}">{{ $perPageOption }} per halaman</option>
-                @endforeach
-            </flux:select>
+            <x-filter-select
+                wire:model.live.number="perPage"
+                :options="$perPageOptions"
+                :searchable="false"
+                placeholder="Baris per halaman"
+            />
 
             <div class="flex items-center justify-end">
                 <flux:button variant="ghost" wire:click="clearFilters" icon="arrow-path">
@@ -64,19 +75,30 @@
             </div>
         </div>
 
-        @if ($summary['total'] === 0)
-            <div class="py-14 text-center">
-                <p class="text-base font-semibold text-[var(--text-strong)]">Belum ada pelanggan.</p>
-                <p class="mt-2 text-sm text-[var(--text-muted)]">Tambahkan data pelanggan pertama untuk mulai mencatat order.</p>
+        <div class="mt-6">
+            <div wire:loading.delay wire:target="{{ $loadingTargets }}">
+                <x-table-skeleton
+                    :columns="['Pelanggan', 'Kontak', 'Order', 'Belum Bayar', 'Terakhir Order', 'Aksi']"
+                    :detail-columns="[0]"
+                    :avatar-columns="[0]"
+                    :badge-columns="[3]"
+                    :action-column="5"
+                />
             </div>
-        @elseif ($rows->isEmpty())
-            <div class="py-14 text-center">
-                <p class="text-base font-semibold text-[var(--text-strong)]">Tidak ada pelanggan yang cocok.</p>
-                <p class="mt-2 text-sm text-[var(--text-muted)]">Ubah kata kunci atau status filter.</p>
-            </div>
-        @else
-            <div class="mt-6">
-                <flux:table :paginate="$rows" pagination:scroll-to="#klien-table">
+
+            <div wire:loading.remove wire:target="{{ $loadingTargets }}">
+                @if ($summary['total'] === 0)
+                    <div class="py-14 text-center">
+                        <p class="text-base font-semibold text-[var(--text-strong)]">Belum ada pelanggan.</p>
+                        <p class="mt-2 text-sm text-[var(--text-muted)]">Tambahkan data pelanggan pertama untuk mulai mencatat order.</p>
+                    </div>
+                @elseif ($rows->isEmpty())
+                    <div class="py-14 text-center">
+                        <p class="text-base font-semibold text-[var(--text-strong)]">Tidak ada pelanggan yang cocok.</p>
+                        <p class="mt-2 text-sm text-[var(--text-muted)]">Ubah kata kunci atau status filter.</p>
+                    </div>
+                @else
+                    <flux:table :paginate="$rows" pagination:scroll-to="#klien-table">
                     <flux:table.columns>
                         <flux:table.column sortable :sorted="$sortBy === 'nama_klien'" :direction="$sortDirection" wire:click="sort('nama_klien')">Pelanggan</flux:table.column>
                         <flux:table.column sortable :sorted="$sortBy === 'no_hp_klien'" :direction="$sortDirection" wire:click="sort('no_hp_klien')">Kontak</flux:table.column>
@@ -122,12 +144,13 @@
                             </flux:table.row>
                         @endforeach
                     </flux:table.rows>
-                </flux:table>
-            </div>
+                    </flux:table>
 
-            <p class="mt-4 text-sm text-[var(--text-muted)]">
-                Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
-            </p>
-        @endif
+                    <p class="mt-4 text-sm text-[var(--text-muted)]">
+                        Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
+                    </p>
+                @endif
+            </div>
+        </div>
     </section>
 </div>

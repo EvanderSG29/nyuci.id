@@ -52,6 +52,81 @@ document.addEventListener('alpine:init', () => {
             this.themeMode = this.resolvedTheme === 'dark' ? 'light' : 'dark';
         },
     }));
+
+    Alpine.data('nyuciFilterSelect', (config = {}) => ({
+        open: false,
+        query: '',
+        options: Array.isArray(config.options) ? config.options : [],
+        searchable: Boolean(config.searchable),
+        searchPlaceholder: config.searchPlaceholder ?? 'Cari pilihan...',
+        emptyMessage: config.emptyMessage ?? 'Tidak ada pilihan yang cocok.',
+        selected: config.selected ?? '',
+
+        init() {
+            if (this.selected === undefined || this.selected === null) {
+                this.selected = this.options[0]?.value ?? '';
+            }
+
+            this.$watch('open', (value) => {
+                if (value && this.searchable) {
+                    this.$nextTick(() => this.$refs.search?.focus());
+                }
+
+                if (! value) {
+                    this.query = '';
+                }
+            });
+        },
+
+        toggle() {
+            this.open = ! this.open;
+        },
+
+        close() {
+            this.open = false;
+        },
+
+        normalize(value) {
+            return value === undefined || value === null ? '' : String(value);
+        },
+
+        isSelected(option) {
+            return this.normalize(this.selected) === this.normalize(option.value);
+        },
+
+        select(option) {
+            this.selected = option.value;
+            this.close();
+        },
+
+        selectedOption() {
+            return this.options.find((option) => this.isSelected(option)) ?? this.options[0] ?? null;
+        },
+
+        selectedLabel() {
+            const option = this.selectedOption();
+
+            if (! option) {
+                return '';
+            }
+
+            return option.meta ? `${option.label} / ${option.meta}` : option.label;
+        },
+
+        filteredOptions() {
+            const term = this.query.trim().toLowerCase();
+
+            if (! this.searchable || term === '') {
+                return this.options;
+            }
+
+            return this.options.filter((option) => {
+                const haystack = `${option.label ?? ''} ${option.meta ?? ''}`.toLowerCase();
+
+                return haystack.includes(term);
+            });
+        },
+    }));
 });
 
 Alpine.start();

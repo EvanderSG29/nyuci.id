@@ -1,5 +1,15 @@
 @php($rows = $this->jasas)
 @php($summary = $this->summary)
+@php($loadingTargets = 'search,kategori,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
+@php($categoryOptions = [
+    ['value' => '', 'label' => 'Semua kategori'],
+    ['value' => 'kiloan', 'label' => 'Kiloan'],
+    ['value' => 'per_unit', 'label' => 'Per Unit'],
+])
+@php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
+    'value' => $value,
+    'label' => $value.' per halaman',
+])->all())
 
 <div class="space-y-6" id="jasa-table">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -44,17 +54,18 @@
                 icon="magnifying-glass"
             />
 
-            <flux:select wire:model="kategori">
-                <option value="">Semua kategori</option>
-                <option value="kiloan">Kiloan</option>
-                <option value="per_unit">Per Unit</option>
-            </flux:select>
+            <x-filter-select
+                wire:model.live="kategori"
+                :options="$categoryOptions"
+                placeholder="Semua kategori"
+            />
 
-            <flux:select wire:model="perPage">
-                @foreach ([10, 20, 50] as $perPageOption)
-                    <option value="{{ $perPageOption }}">{{ $perPageOption }} per halaman</option>
-                @endforeach
-            </flux:select>
+            <x-filter-select
+                wire:model.live.number="perPage"
+                :options="$perPageOptions"
+                :searchable="false"
+                placeholder="Baris per halaman"
+            />
 
             <div class="flex items-center justify-end">
                 <flux:button variant="ghost" wire:click="clearFilters" icon="arrow-path">
@@ -63,19 +74,28 @@
             </div>
         </div>
 
-        @if ($summary['total'] === 0)
-            <div class="py-14 text-center">
-                <p class="text-base font-semibold text-[var(--text-strong)]">Belum ada biaya jasa.</p>
-                <p class="mt-2 text-sm text-[var(--text-muted)]">Tambahkan jasa pertama agar order laundry bisa langsung dipetakan.</p>
+        <div class="mt-6">
+            <div wire:loading.delay wire:target="{{ $loadingTargets }}">
+                <x-table-skeleton
+                    :columns="['No', 'Nama Jasa', 'Satuan', 'Harga', 'Dipakai', 'Aksi']"
+                    :badge-columns="[2]"
+                    :action-column="5"
+                />
             </div>
-        @elseif ($rows->isEmpty())
-            <div class="py-14 text-center">
-                <p class="text-base font-semibold text-[var(--text-strong)]">Tidak ada jasa yang cocok.</p>
-                <p class="mt-2 text-sm text-[var(--text-muted)]">Ubah pencarian atau reset filter untuk melihat semua jasa.</p>
-            </div>
-        @else
-            <div class="mt-6">
-                <flux:table :paginate="$rows" pagination:scroll-to="#jasa-table">
+
+            <div wire:loading.remove wire:target="{{ $loadingTargets }}">
+                @if ($summary['total'] === 0)
+                    <div class="py-14 text-center">
+                        <p class="text-base font-semibold text-[var(--text-strong)]">Belum ada biaya jasa.</p>
+                        <p class="mt-2 text-sm text-[var(--text-muted)]">Tambahkan jasa pertama agar order laundry bisa langsung dipetakan.</p>
+                    </div>
+                @elseif ($rows->isEmpty())
+                    <div class="py-14 text-center">
+                        <p class="text-base font-semibold text-[var(--text-strong)]">Tidak ada jasa yang cocok.</p>
+                        <p class="mt-2 text-sm text-[var(--text-muted)]">Ubah pencarian atau reset filter untuk melihat semua jasa.</p>
+                    </div>
+                @else
+                    <flux:table :paginate="$rows" pagination:scroll-to="#jasa-table">
                     <flux:table.columns>
                         <flux:table.column>No</flux:table.column>
                         <flux:table.column sortable :sorted="$sortBy === 'nama_jasa'" :direction="$sortDirection" wire:click="sort('nama_jasa')">Nama Jasa</flux:table.column>
@@ -126,8 +146,9 @@
                             </flux:table.row>
                         @endforeach
                     </flux:table.rows>
-                </flux:table>
+                    </flux:table>
+                @endif
             </div>
-        @endif
+        </div>
     </section>
 </div>
