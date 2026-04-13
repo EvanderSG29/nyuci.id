@@ -75,11 +75,47 @@ function createLaundryRecord(Toko $toko, Klien $klien, Jasa $jasa, array $overri
     ], $overrides));
 }
 
+function laundryDataTableColumn(string $data, string $name, bool $orderable = true, bool $searchable = true): array
+{
+    return [
+        'data' => $data,
+        'name' => $name,
+        'orderable' => $orderable,
+        'searchable' => $searchable,
+        'search' => [
+            'value' => '',
+            'regex' => 'false',
+        ],
+    ];
+}
+
+function laundryDataTablePayload(array $columns, array $overrides = []): array
+{
+    return array_replace_recursive([
+        'draw' => 1,
+        'start' => 0,
+        'length' => 10,
+        'search' => [
+            'value' => '',
+            'regex' => 'false',
+        ],
+        'order' => [
+            ['column' => 0, 'dir' => 'asc'],
+        ],
+        'columns' => $columns,
+    ], $overrides);
+}
+
+function laundryTableText(?string $value): string
+{
+    return trim(preg_replace('/\s+/', ' ', strip_tags($value ?? '')) ?? '');
+}
+
 test('laundry schema includes phase two columns', function () {
     expect(Schema::hasColumns('laundries', ['jenis_jasa', 'satuan', 'tgl_selesai']))->toBeTrue();
 });
 
-test('laundry index supports search, filters, and pagination', function () {
+test('laundry index renders datatable shell and endpoint supports filters', function () {
     $user = createLaundryOwner();
     $toko = $user->toko;
 
@@ -140,25 +176,72 @@ test('laundry index supports search, filters, and pagination', function () {
         ]);
     }
 
+    $foreignUser = User::factory()->create();
+    $foreignToko = Toko::create([
+        'user_id' => $foreignUser->id,
+        'nama_toko' => 'Foreign Laundry',
+        'alamat' => 'Jl. Luar',
+        'no_hp' => '081255500000',
+    ]);
+
+    [$foreignKlien, $foreignJasa] = createLaundryMasterData($foreignToko, [
+        'nama_klien' => 'Budi Luar',
+        'no_hp_klien' => '086666666666',
+    ], [
+        'nama_jasa' => 'cuci luar',
+        'satuan' => 'kg',
+        'harga' => 9000,
+    ]);
+
+    createLaundryRecord($foreignToko, $foreignKlien, $foreignJasa, [
+        'qty' => 2,
+        'tanggal_dimulai' => '2026-04-07',
+        'ets_selesai' => '2026-04-08',
+    ]);
+
+    $page = $this
+        ->actingAs($user)
+        ->get(route('laundry.index'));
+
+    $page
+        ->assertOk()
+        ->assertSee('Manage Laundry')
+        ->assertSee('New')
+        ->assertSee('Kelola Belum Bayar')
+        ->assertSee('data-dt-action="pdf"', false)
+        ->assertSee('data-dt-action="reload"', false)
+        ->assertSee('laundry-table');
+
     $response = $this
         ->actingAs($user)
-        ->get(route('laundry.index', [
-            'search' => 'Budi',
+        ->getJson(route('laundry.data', laundryDataTablePayload([
+            laundryDataTableColumn('customer', 'nama_klien'),
+            laundryDataTableColumn('service', 'jasa'),
+            laundryDataTableColumn('qty_display', 'qty'),
+            laundryDataTableColumn('received_at', 'tanggal_dimulai'),
+            laundryDataTableColumn('due_at', 'ets_selesai'),
+            laundryDataTableColumn('status_badge', 'status'),
+            laundryDataTableColumn('payment_badge', 'dibayar'),
+            laundryDataTableColumn('actions', 'actions', false, false),
+        ], [
+            'search' => ['value' => 'Budi'],
             'status' => 'belum_selesai',
             'dibayar' => 'belum_bayar',
             'jasa_id' => $cuciJasa->id,
-            'sort' => 'nama_klien',
-            'direction' => 'asc',
-            'per_page' => 10,
-        ]));
+            'order' => [['column' => 0, 'dir' => 'asc']],
+        ])));
 
     $response
         ->assertOk()
-        ->assertSee('Budi Santoso')
-        ->assertDontSee('Siti Aminah')
-        ->assertSee('Showing 1 to 1 of 1 results')
-        ->assertDontSee('Showing 1-1 of 1 entries')
-        ->assertDontSee('cuci-1');
+        ->assertJsonPath('recordsTotal', 12)
+        ->assertJsonPath('recordsFiltered', 1);
+
+    $row = $response->json('data.0');
+
+    expect(laundryTableText($row['customer']))->toContain('Budi Santoso');
+    expect(laundryTableText($row['customer']))->not->toContain('Budi Luar');
+    expect(laundryTableText($row['payment_badge']))->toContain('Belum Bayar');
+    expect(laundryTableText($row['actions']))->toContain('Selesaikan Pembayaran');
 });
 
 test('laundry status update route stores the finished date', function () {

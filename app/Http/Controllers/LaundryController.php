@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\LaundryTable as LaundryDataTable;
 use App\Http\Requests\LaundryRequest;
 use App\Http\Requests\LaundryStatusUpdateRequest;
 use App\Models\Laundry;
 use App\Models\Toko;
 use App\Notifications\LaundryFinishedNotification;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +18,7 @@ use Throwable;
 
 class LaundryController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request, LaundryDataTable $table): View|RedirectResponse
     {
         $toko = $request->user()?->toko;
 
@@ -24,7 +26,19 @@ class LaundryController extends Controller
             return redirect()->route('register.toko.create')->with('warning', 'Lengkapi data toko terlebih dahulu sebelum mengelola laundry.');
         }
 
-        return view('laundry.index');
+        return view('laundry.index', [
+            'summary' => $table->summary($toko->id),
+            'statusOptions' => $table->statusOptions($toko->id),
+            'paymentOptions' => $table->paymentOptions($toko->id),
+            'serviceOptions' => $table->serviceOptions($toko->id),
+        ]);
+    }
+
+    public function data(Request $request, LaundryDataTable $table): JsonResponse
+    {
+        abort_unless($request->user()?->toko, 403);
+
+        return $table->data($request);
     }
 
     public function create(Request $request): View|RedirectResponse

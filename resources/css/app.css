@@ -869,3 +869,435 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
         linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 88%, var(--accent-deep)), var(--bg-card));
     box-shadow: 0 24px 60px rgb(2 6 23 / 0.35);
 }
+
+.nyuci-toolbar-group {
+    display: inline-flex;
+    align-items: stretch;
+    overflow: hidden;
+    border: 1px solid var(--border-main);
+    border-radius: 0.8rem;
+    background: color-mix(in srgb, var(--accent) 58%, var(--bg-elevated));
+}
+
+.nyuci-toolbar-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.35rem;
+    padding: 0.65rem 0.95rem;
+    border: 0;
+    background: transparent;
+    color: #f8fafc;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.nyuci-toolbar-button svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.nyuci-toolbar-button + .nyuci-toolbar-button {
+    border-left: 1px solid rgb(255 255 255 / 0.12);
+}
+
+.nyuci-toolbar-button:hover {
+    background: rgb(255 255 255 / 0.08);
+}
+
+.nyuci-toolbar-button-primary {
+    border-radius: 0.8rem;
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+.nyuci-toolbar-button-primary:hover {
+    background: var(--primary-hover);
+}
+
+.nyuci-toolbar-button-muted {
+    min-width: 2.5rem;
+}
+
+.nyuci-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 1rem;
+}
+
+.nyuci-filter-input {
+    width: 100%;
+    min-height: 2.8rem;
+    border: 1px solid var(--border-main);
+    border-radius: 0.9rem;
+    background: var(--bg-card);
+    padding: 0.7rem 0.95rem;
+    color: var(--text-strong);
+    font-size: 0.92rem;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nyuci-filter-input:focus {
+    border-color: color-mix(in srgb, var(--primary) 70%, var(--border-main));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.nyuci-datatable-host {
+    overflow: hidden;
+    border: 1px solid var(--border-main);
+    border-radius: 1rem;
+    background: var(--bg-card);
+}
+
+.nyuci-table-actions {
+    display: flex;
+    justify-content: flex-end;
+    min-width: 4rem;
+    position: relative;
+}
+
+.nyuci-action-menu {
+    position: relative;
+}
+
+.nyuci-action-menu[open] {
+    z-index: 20;
+}
+
+.nyuci-action-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border: 1px solid var(--border-main);
+    border-radius: 0.8rem;
+    background: color-mix(in srgb, var(--bg-card) 88%, var(--bg-surface));
+    color: var(--text-muted);
+    cursor: pointer;
+    list-style: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.nyuci-action-menu-trigger:hover {
+    border-color: color-mix(in srgb, var(--primary) 48%, var(--border-main));
+    background: color-mix(in srgb, var(--primary-soft) 32%, var(--bg-card));
+    color: var(--text-strong);
+}
+
+.nyuci-action-menu-trigger::-webkit-details-marker {
+    display: none;
+}
+
+.nyuci-action-menu-trigger svg {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.nyuci-action-menu-panel {
+    position: absolute;
+    top: calc(100% + 0.45rem);
+    right: 0;
+    display: grid;
+    min-width: 12.5rem;
+    padding: 0.45rem;
+    border: 1px solid var(--border-main);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--bg-card) 94%, var(--bg-surface));
+    box-shadow: 0 18px 40px rgb(15 23 42 / 0.18);
+}
+
+.nyuci-action-form {
+    display: block;
+    width: 100%;
+}
+
+.nyuci-action-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    min-height: 2.35rem;
+    border: 0;
+    border-radius: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    background: transparent;
+    color: var(--text-strong);
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nyuci-action-item-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+.nyuci-action-item:hover {
+    background: color-mix(in srgb, var(--primary-soft) 44%, var(--bg-card));
+    color: var(--text-strong);
+}
+
+.nyuci-action-item-label {
+    display: inline-flex;
+    align-items: center;
+}
+
+.nyuci-table-link-primary {
+    color: var(--primary);
+}
+
+.nyuci-table-link-secondary {
+    color: var(--text-strong);
+}
+
+.nyuci-table-link-danger {
+    color: var(--danger);
+}
+
+.dt-container {
+    padding: 0;
+    color: var(--text-main);
+}
+
+.dt-container .dt-layout-row:first-child .dt-layout-cell {
+    flex: 1 1 0;
+}
+
+.dt-container .dt-layout-row:first-child .dt-layout-cell:last-child {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dt-container .dt-layout-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.95rem 0;
+}
+
+.dt-container .dt-layout-row:first-child {
+    margin-top: 0;
+}
+
+.dt-container .dt-layout-row:last-child {
+    margin-bottom: 0;
+}
+
+.dt-container .dt-layout-cell {
+    min-width: 0;
+}
+
+.dt-container .dt-length,
+.dt-container .dt-search {
+    color: var(--text-main);
+    font-size: 0.92rem;
+}
+
+.dt-container .dt-length select,
+.dt-container .dt-search input {
+    min-height: 2.5rem;
+    border: 1px solid var(--border-main);
+    border-radius: 0.75rem;
+    background: var(--bg-card);
+    color: var(--text-strong);
+    padding: 0.55rem 0.8rem;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dt-container .dt-length select:focus,
+.dt-container .dt-search input:focus {
+    border-color: color-mix(in srgb, var(--primary) 70%, var(--border-main));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.dt-container .dt-search input {
+    min-width: min(100%, 15rem);
+}
+
+.dt-container .dt-length select {
+    margin-inline: 0.35rem;
+}
+
+.dt-container .dt-info {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.dt-container .dt-paging {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.dt-container .dt-paging .dt-paging-button {
+    min-width: 2.3rem;
+    border: 1px solid var(--border-main) !important;
+    border-radius: 0.7rem;
+    background: var(--bg-card) !important;
+    padding: 0.45rem 0.75rem !important;
+    color: var(--text-main) !important;
+    font-size: 0.9rem;
+    box-shadow: none !important;
+}
+
+.dt-container .dt-paging .dt-paging-button:hover:not(.disabled) {
+    border-color: color-mix(in srgb, var(--primary) 48%, var(--border-main)) !important;
+    background: color-mix(in srgb, var(--primary-soft) 46%, var(--bg-card)) !important;
+    color: var(--text-strong) !important;
+}
+
+.dt-container .dt-paging .dt-paging-button.current {
+    border-color: var(--primary) !important;
+    background: var(--primary) !important;
+    color: var(--on-primary) !important;
+}
+
+.dt-container .dt-paging .dt-paging-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dt-container .dt-processing {
+    border: 1px solid var(--border-main) !important;
+    border-radius: 0.9rem !important;
+    background: var(--bg-card) !important;
+    color: var(--text-strong) !important;
+    box-shadow: 0 18px 45px rgb(15 23 42 / 0.14);
+}
+
+.dt-container .dt-scroll-head {
+    border-bottom: 1px solid var(--border-main);
+}
+
+.dt-container .dt-scroll-body {
+    background: var(--bg-card);
+}
+
+table.dataTable {
+    width: 100% !important;
+    margin: 0 !important;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+table.dataTable thead > tr > th,
+table.dataTable thead > tr > td {
+    border-bottom: 1px solid var(--border-main) !important;
+    background: color-mix(in srgb, var(--bg-card) 86%, var(--bg-surface));
+    padding: 0.95rem 1rem !important;
+    color: var(--text-strong);
+    font-size: 0.86rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+table.dataTable tbody > tr > th,
+table.dataTable tbody > tr > td {
+    border-bottom: 1px solid var(--border-main) !important;
+    padding: 0.95rem 1rem !important;
+    vertical-align: top;
+}
+
+table.dataTable.display > tbody > tr:nth-child(odd) > *,
+table.dataTable.stripe > tbody > tr:nth-child(odd) > * {
+    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--bg-card) 88%, var(--bg-surface));
+}
+
+table.dataTable.display > tbody > tr:hover > *,
+table.dataTable.hover > tbody > tr:hover > * {
+    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--primary-soft) 38%, var(--bg-card));
+}
+
+table.dataTable.no-footer {
+    border-bottom: 0;
+}
+
+.dark .nyuci-toolbar-group {
+    background: color-mix(in srgb, var(--accent-deep) 76%, var(--bg-elevated));
+}
+
+.dark .nyuci-toolbar-button:hover {
+    background: rgb(255 255 255 / 0.06);
+}
+
+.dark .nyuci-toolbar-button-primary {
+    box-shadow: 0 12px 28px rgb(37 99 235 / 0.3);
+}
+
+.dark .dt-container .dt-length select,
+.dark .dt-container .dt-search input,
+.dark .nyuci-filter-input,
+.dark .nyuci-datatable-host {
+    background: color-mix(in srgb, var(--bg-card) 92%, var(--bg-surface));
+}
+
+.dark .nyuci-action-menu-trigger {
+    background: color-mix(in srgb, var(--bg-card) 88%, var(--bg-surface));
+    color: var(--text-muted);
+}
+
+.dark .nyuci-action-menu-panel {
+    background: color-mix(in srgb, var(--bg-card) 92%, var(--bg-surface));
+    box-shadow: 0 24px 54px rgb(2 6 23 / 0.46);
+}
+
+.dark .nyuci-action-item:hover {
+    background: color-mix(in srgb, var(--primary-soft) 32%, var(--bg-card));
+}
+
+.dark table.dataTable thead > tr > th,
+.dark table.dataTable thead > tr > td {
+    background: color-mix(in srgb, var(--bg-card) 76%, var(--bg-surface));
+}
+
+.dark table.dataTable.display > tbody > tr:nth-child(odd) > *,
+.dark table.dataTable.stripe > tbody > tr:nth-child(odd) > * {
+    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--bg-card) 76%, var(--bg-surface));
+}
+
+.dark table.dataTable.display > tbody > tr:hover > *,
+.dark table.dataTable.hover > tbody > tr:hover > * {
+    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--primary-soft) 28%, var(--bg-card));
+}
+
+.dark .dt-container .dt-processing {
+    box-shadow: 0 24px 60px rgb(2 6 23 / 0.45);
+}
+
+@media (max-width: 767px) {
+    .nyuci-toolbar-group {
+        flex-wrap: wrap;
+    }
+
+    .nyuci-toolbar-button {
+        flex: 1 1 auto;
+    }
+
+    .dt-container .dt-layout-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dt-container .dt-search input {
+        width: 100%;
+        min-width: 0;
+    }
+}

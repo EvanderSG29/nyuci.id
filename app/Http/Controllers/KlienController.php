@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\KlienTable;
 use App\Http\Requests\KlienRequest;
 use App\Models\Klien;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -11,7 +13,7 @@ use Illuminate\View\View;
 
 class KlienController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request, KlienTable $table): View|RedirectResponse
     {
         $toko = $request->user()?->toko;
 
@@ -19,7 +21,18 @@ class KlienController extends Controller
             return redirect()->route('register.toko.create')->with('warning', 'Lengkapi data toko terlebih dahulu sebelum mengelola pelanggan.');
         }
 
-        return view('modules.pelanggan');
+        return view('modules.pelanggan', [
+            'summary' => $table->summary($toko->id),
+            'statusOptions' => $table->statusOptions($toko->id),
+            'activeSinceLabel' => $table->activeSinceLabel(),
+        ]);
+    }
+
+    public function data(Request $request, KlienTable $table): JsonResponse
+    {
+        abort_unless($request->user()?->toko, 403);
+
+        return $table->data($request);
     }
 
     public function create(Request $request): View|RedirectResponse

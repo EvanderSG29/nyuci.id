@@ -71,7 +71,67 @@ function createInsightLaundry(Toko $toko, Klien $klien, Jasa $jasa, array $overr
     ], $overrides));
 }
 
-test('biaya jasa page groups services into kiloan and per unit references', function () {
+function insightDataTableColumn(string $data, string $name, bool $orderable = true, bool $searchable = true): array
+{
+    return [
+        'data' => $data,
+        'name' => $name,
+        'orderable' => $orderable,
+        'searchable' => $searchable,
+        'search' => [
+            'value' => '',
+            'regex' => 'false',
+        ],
+    ];
+}
+
+function insightDataTablePayload(array $columns, array $overrides = []): array
+{
+    return array_replace_recursive([
+        'draw' => 1,
+        'start' => 0,
+        'length' => 10,
+        'search' => [
+            'value' => '',
+            'regex' => 'false',
+        ],
+        'order' => [
+            ['column' => 0, 'dir' => 'asc'],
+        ],
+        'columns' => $columns,
+    ], $overrides);
+}
+
+function insightTableText(?string $value): string
+{
+    return trim(preg_replace('/\s+/', ' ', strip_tags($value ?? '')) ?? '');
+}
+
+test('biaya jasa page renders datatable shell and toolbar buttons', function () {
+    $user = createInsightOwner();
+    $toko = $user->toko;
+
+    createInsightMasterData($toko, [], [
+        'nama_jasa' => 'Cuci',
+        'satuan' => 'kg',
+        'harga' => 8000,
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('biaya-jasa.index'));
+
+    $response
+        ->assertOk()
+        ->assertSee('Biaya Jasa')
+        ->assertSee('Manage Jasa')
+        ->assertSee('New')
+        ->assertSee('data-dt-action="copy"', false)
+        ->assertSee('data-dt-action="reload"', false)
+        ->assertSee('jasa-table');
+});
+
+test('biaya jasa datatable filters services by unit and scopes toko', function () {
     $user = createInsightOwner();
     $toko = $user->toko;
 
@@ -84,21 +144,10 @@ test('biaya jasa page groups services into kiloan and per unit references', func
         'harga' => 8000,
     ]);
 
-    $kiloLaundry = createInsightLaundry($toko, $kiloKlien, $kiloJasa, [
+    createInsightLaundry($toko, $kiloKlien, $kiloJasa, [
         'qty' => 3,
         'tanggal_dimulai' => '2026-04-07',
         'ets_selesai' => '2026-04-08',
-    ]);
-
-    Pembayaran::create([
-        'klien_id' => $kiloKlien->id,
-        'laundry_id' => $kiloLaundry->id,
-        'total' => 24000,
-        'total_biaya' => 24000,
-        'metode_pembayaran' => 'cash',
-        'tgl_pembayaran' => '2026-04-07',
-        'catatan' => null,
-        'status' => 'sudah_bayar',
     ]);
 
     [$unitKlien, $unitJasa] = createInsightMasterData($toko, [
@@ -110,45 +159,77 @@ test('biaya jasa page groups services into kiloan and per unit references', func
         'harga' => 9000,
     ]);
 
-    $unitLaundry = createInsightLaundry($toko, $unitKlien, $unitJasa, [
+    createInsightLaundry($toko, $unitKlien, $unitJasa, [
         'qty' => 2,
         'tanggal_dimulai' => '2026-04-06',
         'ets_selesai' => '2026-04-09',
     ]);
 
-    Pembayaran::create([
-        'klien_id' => $unitKlien->id,
-        'laundry_id' => $unitLaundry->id,
-        'total' => 18000,
-        'total_biaya' => 18000,
-        'metode_pembayaran' => 'transfer',
-        'tgl_pembayaran' => '2026-04-07',
-        'catatan' => null,
-        'status' => 'sudah_bayar',
+    $foreignUser = User::factory()->create();
+    $foreignToko = Toko::create([
+        'user_id' => $foreignUser->id,
+        'nama_toko' => 'Foreign Insight',
+        'alamat' => 'Jl. Luar',
+        'no_hp' => '081255566677',
+    ]);
+
+    createInsightMasterData($foreignToko, [], [
+        'nama_jasa' => 'Setrika Luar',
+        'satuan' => 'pcs',
+        'harga' => 9500,
     ]);
 
     $response = $this
         ->actingAs($user)
-        ->get(route('biaya-jasa.index', [
-            'search' => 'pcs',
+        ->getJson(route('biaya-jasa.data', insightDataTablePayload([
+            insightDataTableColumn('DT_RowIndex', 'DT_RowIndex', false, false),
+            insightDataTableColumn('service_name', 'nama_jasa'),
+            insightDataTableColumn('unit_badge', 'satuan'),
+            insightDataTableColumn('price_display', 'harga'),
+            insightDataTableColumn('total_order_display', 'total_order'),
+            insightDataTableColumn('actions', 'actions', false, false),
+        ], [
+            'search' => ['value' => 'pcs'],
+            'order' => [['column' => 2, 'dir' => 'asc']],
             'satuan' => 'pcs',
-            'sort' => 'satuan',
-            'direction' => 'asc',
-            'per_page' => 10,
-        ]));
+        ])));
 
     $response
         ->assertOk()
-        ->assertSee('Biaya Jasa')
-        ->assertSee('Per Unit')
-        ->assertSee('Setrika')
-        ->assertSee('pcs')
-        ->assertDontSee('Cuci')
-        ->assertSee('Showing 1 to 1 of 1 results')
-        ->assertDontSee('Showing 1-1 of 1 entries');
+        ->assertJsonPath('recordsTotal', 2)
+        ->assertJsonPath('recordsFiltered', 1);
+
+    $row = $response->json('data.0');
+
+    expect(insightTableText($row['service_name']))->toContain('Setrika');
+    expect(insightTableText($row['service_name']))->not->toContain('Luar');
+    expect(insightTableText($row['unit_badge']))->toContain('pcs');
 });
 
-test('pelanggan page filters follow up customers and shows overview cards', function () {
+test('pelanggan page renders datatable shell and toolbar buttons', function () {
+    $user = createInsightOwner();
+    $toko = $user->toko;
+
+    createInsightMasterData($toko, [
+        'nama_klien' => 'Citra',
+        'no_hp_klien' => '083333333333',
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('pelanggan.index'));
+
+    $response
+        ->assertOk()
+        ->assertSee('Pelanggan')
+        ->assertSee('Manage Pelanggan')
+        ->assertSee('New')
+        ->assertSee('data-dt-action="csv"', false)
+        ->assertSee('data-dt-action="print"', false)
+        ->assertSee('klien-table');
+});
+
+test('pelanggan datatable filters follow up customers and scopes toko', function () {
     $user = createInsightOwner();
     $toko = $user->toko;
 
@@ -156,7 +237,7 @@ test('pelanggan page filters follow up customers and shows overview cards', func
         'nama_klien' => 'Citra',
         'no_hp_klien' => '083333333333',
     ], [
-        'nama_jasa' => 'cuci',
+        'nama_jasa' => 'Cuci',
         'satuan' => 'kg',
         'harga' => 10000,
     ]);
@@ -182,7 +263,7 @@ test('pelanggan page filters follow up customers and shows overview cards', func
         'nama_klien' => 'Dina',
         'no_hp_klien' => '084444444444',
     ], [
-        'nama_jasa' => 'keduanya',
+        'nama_jasa' => 'Setrika',
         'satuan' => 'kg',
         'harga' => 12500,
     ]);
@@ -206,23 +287,64 @@ test('pelanggan page filters follow up customers and shows overview cards', func
         'status' => 'sudah_bayar',
     ]);
 
+    $foreignUser = User::factory()->create();
+    $foreignToko = Toko::create([
+        'user_id' => $foreignUser->id,
+        'nama_toko' => 'Outside Toko',
+        'alamat' => 'Jl. Lain',
+        'no_hp' => '081200000000',
+    ]);
+
+    [$foreignKlien, $foreignJasa] = createInsightMasterData($foreignToko, [
+        'nama_klien' => 'Citra Luar',
+        'no_hp_klien' => '085555555555',
+    ], [
+        'nama_jasa' => 'Dry Clean',
+        'satuan' => 'pcs',
+        'harga' => 30000,
+    ]);
+
+    $foreignLaundry = createInsightLaundry($foreignToko, $foreignKlien, $foreignJasa, [
+        'qty' => 1,
+        'tanggal_dimulai' => now()->toDateString(),
+        'ets_selesai' => now()->addDay()->toDateString(),
+    ]);
+
+    Pembayaran::create([
+        'klien_id' => $foreignKlien->id,
+        'laundry_id' => $foreignLaundry->id,
+        'total' => 30000,
+        'total_biaya' => 30000,
+        'metode_pembayaran' => 'qris',
+        'tgl_pembayaran' => now()->toDateString(),
+        'catatan' => null,
+        'status' => 'belum_bayar',
+    ]);
+
     $response = $this
         ->actingAs($user)
-        ->get(route('pelanggan.index', [
+        ->getJson(route('pelanggan.data', insightDataTablePayload([
+            insightDataTableColumn('customer', 'nama_klien'),
+            insightDataTableColumn('contact', 'no_hp_klien'),
+            insightDataTableColumn('total_order_display', 'total_order'),
+            insightDataTableColumn('unpaid_display', 'belum_bayar'),
+            insightDataTableColumn('last_order_display', 'terakhir_order'),
+            insightDataTableColumn('actions', 'actions', false, false),
+        ], [
+            'search' => ['value' => 'Citra'],
+            'order' => [['column' => 0, 'dir' => 'asc']],
             'status' => 'perlu_follow_up',
-            'search' => 'Citra',
-            'sort' => 'nama_klien',
-            'direction' => 'asc',
-            'per_page' => 10,
-        ]));
+        ])));
 
     $response
         ->assertOk()
-        ->assertSee('Pelanggan')
-        ->assertSee('Total Pelanggan')
-        ->assertSee('Perlu Follow Up')
-        ->assertSee('Citra')
-        ->assertDontSee('Dina')
-        ->assertSee('Showing 1 to 1 of 1 results')
-        ->assertDontSee('Showing 1-1 of 1 entries');
+        ->assertJsonPath('recordsTotal', 2)
+        ->assertJsonPath('recordsFiltered', 1);
+
+    $row = $response->json('data.0');
+
+    expect(insightTableText($row['customer']))->toContain('Citra');
+    expect(insightTableText($row['customer']))->not->toContain('Luar');
+    expect(insightTableText($row['unpaid_display']))->toContain('1 tagihan');
+    expect(insightTableText($row['actions']))->toContain('Edit');
 });

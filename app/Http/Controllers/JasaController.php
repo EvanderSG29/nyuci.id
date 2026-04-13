@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\JasaTable;
 use App\Http\Requests\JasaRequest;
 use App\Models\Jasa;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -11,7 +13,7 @@ use Illuminate\View\View;
 
 class JasaController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request, JasaTable $table): View|RedirectResponse
     {
         $toko = $request->user()?->toko;
 
@@ -19,7 +21,17 @@ class JasaController extends Controller
             return redirect()->route('register.toko.create')->with('warning', 'Lengkapi data toko terlebih dahulu sebelum mengelola biaya jasa.');
         }
 
-        return view('modules.biaya-jasa');
+        return view('modules.biaya-jasa', [
+            'summary' => $table->summary($toko->id),
+            'satuanOptions' => $table->satuanOptions($toko->id),
+        ]);
+    }
+
+    public function data(Request $request, JasaTable $table): JsonResponse
+    {
+        abort_unless($request->user()?->toko, 403);
+
+        return $table->data($request);
     }
 
     public function create(Request $request): View|RedirectResponse

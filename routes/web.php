@@ -46,13 +46,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/notifikasi/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
+    Route::get('/biaya-jasa/data', [JasaController::class, 'data'])->name('biaya-jasa.data');
     Route::resource('biaya-jasa', JasaController::class)->parameters(['biaya-jasa' => 'jasa'])->except('show');
+    Route::get('/pelanggan/data', [KlienController::class, 'data'])->name('pelanggan.data');
     Route::resource('pelanggan', KlienController::class)->parameters(['pelanggan' => 'klien'])->except('show');
 
+    Route::get('/laundry/data', [LaundryController::class, 'data'])->name('laundry.data');
     Route::resource('laundry', LaundryController::class)->except('show');
     Route::patch('/laundry/{laundry}/status', [LaundryController::class, 'updateStatus'])->name('laundry.status.update');
 
     Route::get('/pembayaran/belum-bayar', [PembayaranController::class, 'unpaid'])->name('pembayaran.unpaid');
+    Route::get('/pembayaran/belum-bayar/data', [PembayaranController::class, 'unpaidData'])->name('pembayaran.unpaid.data');
+    Route::get('/pembayaran/data', [PembayaranController::class, 'data'])->name('pembayaran.data');
     Route::resource('pembayaran', PembayaranController::class);
     Route::get('/pembayaran/{pembayaran}/paid', [PembayaranController::class, 'markAsPaid'])->name('pembayaran.paid');
     Route::post('/pembayaran/{pembayaran}/gateway', [PembayaranGatewayController::class, 'issue'])->name('pembayaran.gateway.issue');

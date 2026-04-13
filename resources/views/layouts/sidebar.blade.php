@@ -8,11 +8,17 @@
         ->map(fn ($segment) => str($segment)->substr(0, 1)->upper()->toString())
         ->implode('');
 
+    $laundryIcon = new \Illuminate\Support\HtmlString(<<<'HTML'
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0" aria-hidden="true">
+            <path d="M5.757 1.071a.5.5 0 0 1 .172.686L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1v4.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 13.5V9a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h1.217L5.07 1.243a.5.5 0 0 1 .686-.172zM2 9v4.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V9zM1 7v1h14V7zm3 3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 4 10m2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 6 10m2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 8 10m2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5m2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5"/>
+        </svg>
+    HTML);
+
     $primaryItems = [
         ['label' => 'Beranda', 'route' => 'dashboard', 'icon' => 'home', 'active' => 'dashboard'],
         ['label' => 'Biaya Jasa', 'route' => 'biaya-jasa.index', 'icon' => 'banknotes', 'active' => 'biaya-jasa.*'],
         ['label' => 'Pelanggan', 'route' => 'pelanggan.index', 'icon' => 'users', 'active' => 'pelanggan.*'],
-        ['label' => 'Laundry', 'route' => 'laundry.index', 'icon' => 'truck', 'active' => 'laundry.*'],
+        ['label' => 'Laundry', 'route' => 'laundry.index', 'icon' => $laundryIcon, 'active' => 'laundry.*'],
         ['label' => 'Pembayaran', 'route' => 'pembayaran.index', 'icon' => 'credit-card', 'active' => 'pembayaran.*'],
     ];
 
@@ -56,11 +62,11 @@
             @foreach ($primaryItems as $item)
                 @php($itemClasses = 'nyuci-sidebar-link'.(request()->routeIs($item['active']) ? ' is-active' : ''))
                 @if ($item['route'] === 'laundry.index')
-                    <flux:sidebar.item href="{{ route($item['route']) }}" icon="{{ $item['icon'] }}" class="{{ $itemClasses }}">
+                    <flux:sidebar.item href="{{ route($item['route']) }}" :icon="$item['icon']" class="{{ $itemClasses }}">
                         {{ $item['label'] }}
                     </flux:sidebar.item>
                 @else
-                    <flux:sidebar.item href="{{ route($item['route']) }}" wire:navigate icon="{{ $item['icon'] }}" class="{{ $itemClasses }}">
+                    <flux:sidebar.item href="{{ route($item['route']) }}" wire:navigate :icon="$item['icon']" class="{{ $itemClasses }}">
                         {{ $item['label'] }}
                     </flux:sidebar.item>
                 @endif
@@ -74,7 +80,7 @@
                 <flux:sidebar.item
                     href="{{ route($item['route']) }}"
                     wire:navigate
-                    icon="{{ $item['icon'] }}"
+                    :icon="$item['icon']"
                     class="{{ 'nyuci-sidebar-link'.(request()->routeIs($item['active']) ? ' is-active' : '') }}"
                 >
                     {{ $item['label'] }}

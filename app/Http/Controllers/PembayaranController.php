@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\PembayaranTable as PembayaranDataTable;
+use App\DataTables\UnpaidLaundryTable;
 use App\Http\Requests\PembayaranRequest;
 use App\Models\Laundry;
 use App\Models\Pembayaran;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +22,7 @@ class PembayaranController extends Controller
         'ewallet' => 'E-Wallet',
     ];
 
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request, PembayaranDataTable $table): View|RedirectResponse
     {
         $toko = $request->user()?->toko;
 
@@ -27,10 +30,21 @@ class PembayaranController extends Controller
             return redirect()->route('register.toko.create')->with('warning', 'Lengkapi data toko terlebih dahulu sebelum mengelola pembayaran.');
         }
 
-        return view('pembayaran.index');
+        return view('pembayaran.index', [
+            'summary' => $table->summary($toko->id),
+            'statusOptions' => $table->statusOptions($toko->id),
+            'paymentMethodOptions' => $table->paymentMethodOptions($toko->id),
+        ]);
     }
 
-    public function unpaid(Request $request): View|RedirectResponse
+    public function data(Request $request, PembayaranDataTable $table): JsonResponse
+    {
+        abort_unless($request->user()?->toko, 403);
+
+        return $table->data($request);
+    }
+
+    public function unpaid(Request $request, UnpaidLaundryTable $table): View|RedirectResponse
     {
         $toko = $request->user()?->toko;
 
@@ -38,7 +52,17 @@ class PembayaranController extends Controller
             return redirect()->route('register.toko.create')->with('warning', 'Lengkapi data toko terlebih dahulu sebelum mengelola pembayaran.');
         }
 
-        return view('pembayaran.unpaid');
+        return view('pembayaran.unpaid', [
+            'summary' => $table->summary($toko->id),
+            'statusOptions' => $table->statusOptions($toko->id),
+        ]);
+    }
+
+    public function unpaidData(Request $request, UnpaidLaundryTable $table): JsonResponse
+    {
+        abort_unless($request->user()?->toko, 403);
+
+        return $table->data($request);
     }
 
     public function create(Request $request): View|RedirectResponse
