@@ -126,6 +126,14 @@ abstract class BaseTable
             .'</a>';
     }
 
+    protected function actionPreview(string $url, string $label = 'Detail'): string
+    {
+        return '<button type="button" class="nyuci-action-item nyuci-table-link-secondary" data-detail-url="'.e($url).'">'
+            .$this->actionIcon($label)
+            .'<span class="nyuci-action-item-label">'.e($label).'</span>'
+            .'</button>';
+    }
+
     protected function actionForm(
         string $url,
         string $label,

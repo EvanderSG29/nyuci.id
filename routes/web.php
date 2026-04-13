@@ -47,17 +47,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     Route::get('/biaya-jasa/data', [JasaController::class, 'data'])->name('biaya-jasa.data');
+    Route::get('/biaya-jasa/{jasa}/preview', [JasaController::class, 'preview'])->name('biaya-jasa.preview');
     Route::resource('biaya-jasa', JasaController::class)->parameters(['biaya-jasa' => 'jasa'])->except('show');
     Route::get('/pelanggan/data', [KlienController::class, 'data'])->name('pelanggan.data');
+    Route::get('/pelanggan/{klien}/preview', [KlienController::class, 'preview'])->name('pelanggan.preview');
     Route::resource('pelanggan', KlienController::class)->parameters(['pelanggan' => 'klien'])->except('show');
 
     Route::get('/laundry/data', [LaundryController::class, 'data'])->name('laundry.data');
+    Route::get('/laundry/{laundry}/preview', [LaundryController::class, 'preview'])->name('laundry.preview');
     Route::resource('laundry', LaundryController::class)->except('show');
     Route::patch('/laundry/{laundry}/status', [LaundryController::class, 'updateStatus'])->name('laundry.status.update');
 
     Route::get('/pembayaran/belum-bayar', [PembayaranController::class, 'unpaid'])->name('pembayaran.unpaid');
     Route::get('/pembayaran/belum-bayar/data', [PembayaranController::class, 'unpaidData'])->name('pembayaran.unpaid.data');
     Route::get('/pembayaran/data', [PembayaranController::class, 'data'])->name('pembayaran.data');
+    Route::get('/pembayaran/{pembayaran}/preview', [PembayaranController::class, 'preview'])->name('pembayaran.preview');
     Route::resource('pembayaran', PembayaranController::class);
     Route::get('/pembayaran/{pembayaran}/paid', [PembayaranController::class, 'markAsPaid'])->name('pembayaran.paid');
     Route::post('/pembayaran/{pembayaran}/gateway', [PembayaranGatewayController::class, 'issue'])->name('pembayaran.gateway.issue');

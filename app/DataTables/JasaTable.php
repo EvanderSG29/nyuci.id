@@ -59,6 +59,7 @@ class JasaTable extends BaseTable
             ->addColumn('price_display', fn (Jasa $jasa): string => $this->strongText($this->formatCurrency($jasa->harga)))
             ->addColumn('total_order_display', fn (Jasa $jasa): string => $this->strongText((string) $jasa->total_order))
             ->addColumn('actions', fn (Jasa $jasa): string => $this->actionGroup([
+                $this->actionPreview(route('biaya-jasa.preview', $jasa)),
                 $this->actionLink(route('biaya-jasa.edit', $jasa), 'Edit'),
                 $this->actionForm(
                     route('biaya-jasa.destroy', $jasa),

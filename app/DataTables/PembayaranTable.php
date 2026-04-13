@@ -100,7 +100,7 @@ class PembayaranTable extends BaseTable
             ->addColumn('total_display', fn (Pembayaran $pembayaran): string => $this->strongText($this->formatCurrency($pembayaran->resolved_total)))
             ->addColumn('actions', function (Pembayaran $pembayaran): string {
                 $actions = [
-                    $this->actionLink(route('pembayaran.show', $pembayaran), 'Detail'),
+                    $this->actionPreview(route('pembayaran.preview', $pembayaran)),
                 ];
 
                 if ($pembayaran->gateway_token) {

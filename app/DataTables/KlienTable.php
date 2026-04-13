@@ -89,6 +89,7 @@ class KlienTable extends BaseTable
             })
             ->addColumn('last_order_display', fn (Klien $klien): string => e($this->formatDate($klien->terakhir_order)))
             ->addColumn('actions', fn (Klien $klien): string => $this->actionGroup([
+                $this->actionPreview(route('pelanggan.preview', $klien)),
                 $this->actionLink(route('pelanggan.edit', $klien), 'Edit'),
             ]))
             ->rawColumns(['customer', 'total_order_display', 'unpaid_display', 'actions'])

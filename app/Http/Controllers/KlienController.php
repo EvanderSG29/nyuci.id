@@ -35,6 +35,25 @@ class KlienController extends Controller
         return $table->data($request);
     }
 
+    public function preview(Request $request, Klien $klien): View
+    {
+        $tokoId = $request->user()?->toko?->id;
+
+        abort_unless($tokoId, 403);
+
+        $klien = Klien::query()
+            ->where('toko_id', $tokoId)
+            ->whereKey($klien->id)
+            ->withCount([
+                'laundries as total_order',
+                'pembayarans as belum_bayar' => fn ($builder) => $builder->where('status', 'belum_bayar'),
+            ])
+            ->withMax('laundries as terakhir_order', 'tanggal_dimulai')
+            ->firstOrFail();
+
+        return view('previews.klien', compact('klien'));
+    }
+
     public function create(Request $request): View|RedirectResponse
     {
         if (! $request->user()?->toko) {
@@ -121,5 +140,4 @@ class KlienController extends Controller
 
         return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil dihapus.');
     }
-
 }

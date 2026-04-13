@@ -11,10 +11,12 @@
 ])
 
 @php
+    $detailFlyoutName = "{$tableId}-detail";
     $config = [
         'tableId' => $tableId,
         'ajaxUrl' => $ajaxUrl,
         'columns' => array_values($datatableColumns),
+        'detailFlyoutName' => $detailFlyoutName,
         'order' => array_values($order),
         'searchPlaceholder' => $searchPlaceholder,
     ];
@@ -23,6 +25,7 @@
 <section
     class="overflow-hidden rounded-[1.75rem] border border-[var(--border-main)] bg-[var(--bg-card)] shadow-sm"
     data-nyuci-datatable='@json($config)'
+    data-dt-flyout-name="{{ $detailFlyoutName }}"
 >
     <div class="border-b border-[var(--border-main)] px-5 py-4">
         <h2 class="text-base font-semibold text-[var(--text-strong)]">{{ $heading }}</h2>
@@ -105,4 +108,6 @@
             </table>
         </div>
     </div>
+
+    <x-datatable-detail-flyout :name="$detailFlyoutName" />
 </section>

@@ -126,6 +126,7 @@ test('biaya jasa page renders datatable shell and toolbar buttons', function () 
         ->assertSee('Biaya Jasa')
         ->assertSee('Manage Jasa')
         ->assertSee('New')
+        ->assertSee('data-dt-flyout-body', false)
         ->assertSee('data-dt-action="copy"', false)
         ->assertSee('data-dt-action="reload"', false)
         ->assertSee('jasa-table');
@@ -204,6 +205,52 @@ test('biaya jasa datatable filters services by unit and scopes toko', function (
     expect(insightTableText($row['service_name']))->toContain('Setrika');
     expect(insightTableText($row['service_name']))->not->toContain('Luar');
     expect(insightTableText($row['unit_badge']))->toContain('pcs');
+    expect(insightTableText($row['actions']))->toContain('Detail');
+    expect($row['actions'])->toContain('data-detail-url');
+});
+
+test('biaya jasa preview is scoped to toko and renders summary details', function () {
+    $user = createInsightOwner();
+    $toko = $user->toko;
+
+    [$klien, $jasa] = createInsightMasterData($toko, [], [
+        'nama_jasa' => 'Cuci Premium',
+        'satuan' => 'kg',
+        'harga' => 12000,
+    ]);
+
+    createInsightLaundry($toko, $klien, $jasa, [
+        'qty' => 4,
+        'tanggal_dimulai' => '2026-04-07',
+        'ets_selesai' => '2026-04-08',
+    ]);
+
+    $foreignUser = User::factory()->create();
+    $foreignToko = Toko::create([
+        'user_id' => $foreignUser->id,
+        'nama_toko' => 'Preview Luar',
+        'alamat' => 'Jl. Luar',
+        'no_hp' => '081299900000',
+    ]);
+
+    [, $foreignJasa] = createInsightMasterData($foreignToko, [], [
+        'nama_jasa' => 'Cuci Luar',
+        'satuan' => 'pcs',
+        'harga' => 7000,
+    ]);
+
+    $this
+        ->actingAs($user)
+        ->get(route('biaya-jasa.preview', $jasa))
+        ->assertOk()
+        ->assertSee('Cuci Premium')
+        ->assertSee('Harga')
+        ->assertSee('1 order');
+
+    $this
+        ->actingAs($user)
+        ->get(route('biaya-jasa.preview', $foreignJasa))
+        ->assertNotFound();
 });
 
 test('pelanggan page renders datatable shell and toolbar buttons', function () {
@@ -224,6 +271,7 @@ test('pelanggan page renders datatable shell and toolbar buttons', function () {
         ->assertSee('Pelanggan')
         ->assertSee('Manage Pelanggan')
         ->assertSee('New')
+        ->assertSee('data-dt-flyout-body', false)
         ->assertSee('data-dt-action="csv"', false)
         ->assertSee('data-dt-action="print"', false)
         ->assertSee('klien-table');
@@ -346,5 +394,66 @@ test('pelanggan datatable filters follow up customers and scopes toko', function
     expect(insightTableText($row['customer']))->toContain('Citra');
     expect(insightTableText($row['customer']))->not->toContain('Luar');
     expect(insightTableText($row['unpaid_display']))->toContain('1 tagihan');
+    expect(insightTableText($row['actions']))->toContain('Detail');
     expect(insightTableText($row['actions']))->toContain('Edit');
+    expect($row['actions'])->toContain('data-detail-url');
+});
+
+test('pelanggan preview is scoped to toko and shows follow up details', function () {
+    $user = createInsightOwner();
+    $toko = $user->toko;
+
+    [$klien, $jasa] = createInsightMasterData($toko, [
+        'nama_klien' => 'Rara',
+        'email_klien' => 'rara@example.test',
+        'alamat_klien' => 'Jl. Melati 12',
+        'no_hp_klien' => '081234001122',
+    ], [
+        'nama_jasa' => 'Setrika',
+        'satuan' => 'pcs',
+        'harga' => 9000,
+    ]);
+
+    $laundry = createInsightLaundry($toko, $klien, $jasa, [
+        'qty' => 2,
+        'tanggal_dimulai' => '2026-04-09',
+        'ets_selesai' => '2026-04-10',
+    ]);
+
+    Pembayaran::create([
+        'klien_id' => $klien->id,
+        'laundry_id' => $laundry->id,
+        'total' => 18000,
+        'total_biaya' => 18000,
+        'metode_pembayaran' => 'cash',
+        'tgl_pembayaran' => '2026-04-09',
+        'catatan' => null,
+        'status' => 'belum_bayar',
+    ]);
+
+    $foreignUser = User::factory()->create();
+    $foreignToko = Toko::create([
+        'user_id' => $foreignUser->id,
+        'nama_toko' => 'Outside Preview',
+        'alamat' => 'Jl. Batas',
+        'no_hp' => '081266677788',
+    ]);
+
+    [$foreignKlien] = createInsightMasterData($foreignToko, [
+        'nama_klien' => 'Rara Luar',
+        'no_hp_klien' => '086666000111',
+    ]);
+
+    $this
+        ->actingAs($user)
+        ->get(route('pelanggan.preview', $klien))
+        ->assertOk()
+        ->assertSee('Rara')
+        ->assertSee('Belum bayar')
+        ->assertSee('1 tagihan');
+
+    $this
+        ->actingAs($user)
+        ->get(route('pelanggan.preview', $foreignKlien))
+        ->assertNotFound();
 });

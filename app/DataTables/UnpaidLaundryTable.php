@@ -75,22 +75,25 @@ class UnpaidLaundryTable extends BaseTable
             })
             ->addColumn('actions', function (Laundry $laundry): string {
                 $existingPayment = $laundry->pembayaran;
+                $actions = [
+                    $this->actionPreview(route('laundry.preview', $laundry)),
+                ];
 
                 if ($existingPayment?->gateway_token) {
-                    return $this->actionGroup([
-                        $this->actionLink($existingPayment->gateway_checkout_url, 'Buka Checkout QRIS', 'secondary', true),
-                    ]);
+                    $actions[] = $this->actionLink($existingPayment->gateway_checkout_url, 'Buka Checkout QRIS', 'secondary', true);
+
+                    return $this->actionGroup($actions);
                 }
 
                 if ($existingPayment) {
-                    return $this->actionGroup([
-                        $this->actionLink(route('pembayaran.edit', $existingPayment), 'Selesaikan Pembayaran', 'primary'),
-                    ]);
+                    $actions[] = $this->actionLink(route('pembayaran.edit', $existingPayment), 'Selesaikan Pembayaran', 'primary');
+
+                    return $this->actionGroup($actions);
                 }
 
-                return $this->actionGroup([
-                    $this->actionLink(route('pembayaran.create', ['laundry_id' => $laundry->id]), 'Bayar Sekarang', 'primary'),
-                ]);
+                $actions[] = $this->actionLink(route('pembayaran.create', ['laundry_id' => $laundry->id]), 'Bayar Sekarang', 'primary');
+
+                return $this->actionGroup($actions);
             })
             ->rawColumns(['customer', 'service', 'status_badge', 'total_display', 'actions'])
             ->filter(function (Builder $query) use ($request, $search): void {

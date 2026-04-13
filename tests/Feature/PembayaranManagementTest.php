@@ -230,6 +230,7 @@ test('pembayaran index renders datatable shell and endpoint supports filters', f
         ->assertSee('Manage Pembayaran')
         ->assertSee('New')
         ->assertSee('Kelola Belum Bayar')
+        ->assertSee('data-dt-flyout-body', false)
         ->assertSee('data-dt-action="copy"', false)
         ->assertSee('data-dt-action="print"', false)
         ->assertSee('pembayaran-table');
@@ -261,7 +262,76 @@ test('pembayaran index renders datatable shell and endpoint supports filters', f
     expect(pembayaranTableText($row['customer']))->toContain('Budi Santoso');
     expect(pembayaranTableText($row['customer']))->not->toContain('Luar');
     expect(pembayaranTableText($row['method_display']))->toContain('QRIS');
+    expect(pembayaranTableText($row['actions']))->toContain('Detail');
     expect(pembayaranTableText($row['actions']))->toContain('Tandai Lunas');
+    expect($row['actions'])->toContain('data-detail-url');
+});
+
+test('pembayaran preview is scoped to toko and renders summary details', function () {
+    $user = createPembayaranOwner();
+    $toko = $user->toko;
+
+    [$klien, $jasa] = createPaymentMasterData($toko, [
+        'nama_klien' => 'Raka',
+        'no_hp_klien' => '081822233344',
+    ], [
+        'nama_jasa' => 'Dry Clean',
+        'satuan' => 'pcs',
+        'harga' => 20000,
+    ]);
+
+    $laundry = createPaymentLaundry($toko, $klien, $jasa, [
+        'qty' => 2,
+        'tanggal_dimulai' => '2026-04-07',
+        'ets_selesai' => '2026-04-09',
+    ]);
+
+    $payment = Pembayaran::create([
+        'klien_id' => $klien->id,
+        'laundry_id' => $laundry->id,
+        'total' => 40000,
+        'total_biaya' => 40000,
+        'metode_pembayaran' => 'transfer',
+        'tgl_pembayaran' => '2026-04-08',
+        'catatan' => 'Transfer bank',
+        'status' => 'belum_bayar',
+        'gateway_token' => 'preview-token',
+        'gateway_status' => 'pending',
+    ]);
+
+    $foreignUser = User::factory()->create();
+    $foreignToko = Toko::create([
+        'user_id' => $foreignUser->id,
+        'nama_toko' => 'Foreign Preview Payment',
+        'alamat' => 'Jl. Sebelah',
+        'no_hp' => '081211122233',
+    ]);
+
+    [$foreignKlien, $foreignJasa] = createPaymentMasterData($foreignToko);
+    $foreignLaundry = createPaymentLaundry($foreignToko, $foreignKlien, $foreignJasa);
+    $foreignPayment = Pembayaran::create([
+        'klien_id' => $foreignKlien->id,
+        'laundry_id' => $foreignLaundry->id,
+        'total' => 27000,
+        'total_biaya' => 27000,
+        'metode_pembayaran' => 'cash',
+        'tgl_pembayaran' => '2026-04-07',
+        'catatan' => null,
+        'status' => 'sudah_bayar',
+    ]);
+
+    $this
+        ->actingAs($user)
+        ->get(route('pembayaran.preview', $payment))
+        ->assertOk()
+        ->assertSee('Pembayaran #'.$payment->id)
+        ->assertSee('Status pembayaran')
+        ->assertSee('Transfer');
+
+    $this
+        ->actingAs($user)
+        ->get(route('pembayaran.preview', $foreignPayment))
+        ->assertForbidden();
 });
 
 test('kelola belum bayar page renders datatable shell and endpoint returns action buttons', function () {
@@ -342,6 +412,7 @@ test('kelola belum bayar page renders datatable shell and endpoint returns actio
         ->assertSee('Kelola Belum Bayar')
         ->assertSee('Manage Belum Bayar')
         ->assertSee('New')
+        ->assertSee('data-dt-flyout-body', false)
         ->assertSee('data-dt-action="csv"', false)
         ->assertSee('data-dt-action="reload"', false)
         ->assertSee('unpaid-laundry-table');
@@ -366,14 +437,18 @@ test('kelola belum bayar page renders datatable shell and endpoint returns actio
         ->assertJsonPath('recordsFiltered', 2);
 
     $rows = $response->json('data');
+    $rawActions = collect($rows)->pluck('actions')->implode(' | ');
     $actions = collect($rows)->pluck('actions')->map(fn (?string $value) => pembayaranTableText($value))->implode(' | ');
     $customers = collect($rows)->pluck('customer')->map(fn (?string $value) => pembayaranTableText($value))->implode(' | ');
 
     expect($customers)->toContain($needsPayment->nama);
     expect($customers)->toContain($withUnpaidPayment->nama);
     expect($customers)->not->toContain('Rina Luar');
+    expect($actions)->toContain('Detail');
     expect($actions)->toContain('Bayar Sekarang');
     expect($actions)->toContain('Selesaikan Pembayaran');
+    expect($rawActions)->toContain('data-detail-url');
+    expect($rawActions)->toContain(route('laundry.preview', $needsPayment));
 });
 
 test('pembayaran store saves phase three fields and rejects foreign laundries', function () {

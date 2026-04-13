@@ -358,6 +358,81 @@ const openExportWindow = (title, headers, rows, subtitle = '', autoPrint = false
     return exportWindow;
 };
 
+const showNyuciModal = (name) => {
+    if (! name) {
+        return;
+    }
+
+    if (window.Flux?.modal) {
+        window.Flux.modal(name).show();
+
+        return;
+    }
+
+    document.dispatchEvent(new CustomEvent('modal-show', {
+        detail: { name },
+    }));
+};
+
+const buildDetailStateHtml = (title, text, modifier = '') => `
+    <div class="nyuci-detail-state ${modifier}">
+        <p class="nyuci-detail-state-label">Detail informasi</p>
+        <h3 class="nyuci-detail-state-title">${escapeHtml(title)}</h3>
+        <p class="nyuci-detail-state-text">${escapeHtml(text)}</p>
+    </div>
+`;
+
+const updateDetailFlyout = (root, markup) => {
+    const body = root?.querySelector('[data-dt-flyout-body]');
+
+    if (! body) {
+        return false;
+    }
+
+    body.innerHTML = markup;
+
+    return true;
+};
+
+const openDetailFlyout = async (trigger) => {
+    const root = trigger.closest('[data-nyuci-datatable]');
+    const detailUrl = trigger.dataset.detailUrl;
+    const flyoutName = root?.dataset.dtFlyoutName;
+
+    if (! root || ! detailUrl || ! flyoutName) {
+        return;
+    }
+
+    closeNyuciActionMenus();
+    updateDetailFlyout(root, buildDetailStateHtml('Memuat detail...', 'Mohon tunggu, informasi sedang disiapkan.', 'is-loading'));
+    showNyuciModal(flyoutName);
+
+    try {
+        const response = await fetch(detailUrl, {
+            headers: {
+                Accept: 'text/html',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        if (! response.ok) {
+            throw new Error(`Failed to fetch detail preview: ${response.status}`);
+        }
+
+        const html = (await response.text()).trim();
+
+        if (html === '') {
+            updateDetailFlyout(root, buildDetailStateHtml('Detail belum tersedia', 'Data tidak memiliki ringkasan tambahan saat ini.', 'is-empty'));
+
+            return;
+        }
+
+        updateDetailFlyout(root, html);
+    } catch {
+        updateDetailFlyout(root, buildDetailStateHtml('Gagal memuat detail', 'Coba lagi beberapa saat atau muat ulang halaman.', 'is-error'));
+    }
+};
+
 const syncSearchInput = (root, config) => {
     const searchInput = root.querySelector('.dt-search input');
 
@@ -498,6 +573,15 @@ if (document.readyState === 'loading') {
 
 document.addEventListener('livewire:navigated', initializeNyuciDataTables);
 document.addEventListener('click', (event) => {
+    const previewTrigger = event.target.closest('[data-detail-url]');
+
+    if (previewTrigger instanceof HTMLElement) {
+        event.preventDefault();
+        openDetailFlyout(previewTrigger);
+
+        return;
+    }
+
     if (! event.target.closest('.nyuci-action-menu')) {
         closeNyuciActionMenus();
     }

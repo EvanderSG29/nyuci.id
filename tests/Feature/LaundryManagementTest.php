@@ -208,6 +208,7 @@ test('laundry index renders datatable shell and endpoint supports filters', func
         ->assertSee('Manage Laundry')
         ->assertSee('New')
         ->assertSee('Kelola Belum Bayar')
+        ->assertSee('data-dt-flyout-body', false)
         ->assertSee('data-dt-action="pdf"', false)
         ->assertSee('data-dt-action="reload"', false)
         ->assertSee('laundry-table');
@@ -241,7 +242,65 @@ test('laundry index renders datatable shell and endpoint supports filters', func
     expect(laundryTableText($row['customer']))->toContain('Budi Santoso');
     expect(laundryTableText($row['customer']))->not->toContain('Budi Luar');
     expect(laundryTableText($row['payment_badge']))->toContain('Belum Bayar');
+    expect(laundryTableText($row['actions']))->toContain('Detail');
     expect(laundryTableText($row['actions']))->toContain('Selesaikan Pembayaran');
+    expect($row['actions'])->toContain('data-detail-url');
+});
+
+test('laundry preview endpoint is scoped and renders summary flyout content', function () {
+    $user = createLaundryOwner();
+    $toko = $user->toko;
+
+    [$klien, $jasa] = createLaundryMasterData($toko, [
+        'nama_klien' => 'Preview Laundry',
+        'no_hp_klien' => '081456789000',
+    ], [
+        'nama_jasa' => 'Cuci Cepat',
+        'satuan' => 'kg',
+        'harga' => 15000,
+    ]);
+
+    $laundry = createLaundryRecord($toko, $klien, $jasa, [
+        'qty' => 5,
+        'status' => 'proses',
+        'tanggal_dimulai' => '2026-04-07',
+        'ets_selesai' => '2026-04-08',
+    ]);
+
+    Pembayaran::create([
+        'klien_id' => $klien->id,
+        'laundry_id' => $laundry->id,
+        'total' => 75000,
+        'total_biaya' => 75000,
+        'metode_pembayaran' => 'qris',
+        'tgl_pembayaran' => null,
+        'catatan' => 'Menunggu checkout',
+        'status' => 'belum_bayar',
+    ]);
+
+    $foreignUser = User::factory()->create();
+    $foreignToko = Toko::create([
+        'user_id' => $foreignUser->id,
+        'nama_toko' => 'Foreign Preview Laundry',
+        'alamat' => 'Jl. Seberang',
+        'no_hp' => '081200123123',
+    ]);
+
+    [$foreignKlien, $foreignJasa] = createLaundryMasterData($foreignToko);
+    $foreignLaundry = createLaundryRecord($foreignToko, $foreignKlien, $foreignJasa);
+
+    $this
+        ->actingAs($user)
+        ->get(route('laundry.preview', $laundry))
+        ->assertOk()
+        ->assertSee('Preview Laundry')
+        ->assertSee('Status laundry')
+        ->assertSee('Estimasi total');
+
+    $this
+        ->actingAs($user)
+        ->get(route('laundry.preview', $foreignLaundry))
+        ->assertForbidden();
 });
 
 test('laundry status update route stores the finished date', function () {

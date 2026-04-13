@@ -41,6 +41,15 @@ class LaundryController extends Controller
         return $table->data($request);
     }
 
+    public function preview(Laundry $laundry): View
+    {
+        $this->authorize('view', $laundry);
+
+        return view('previews.laundry', [
+            'laundry' => $laundry->load('klien', 'jasa', 'pembayaran'),
+        ]);
+    }
+
     public function create(Request $request): View|RedirectResponse
     {
         $toko = $request->user()?->toko;

@@ -34,6 +34,21 @@ class JasaController extends Controller
         return $table->data($request);
     }
 
+    public function preview(Request $request, Jasa $jasa): View
+    {
+        $tokoId = $request->user()?->toko?->id;
+
+        abort_unless($tokoId, 403);
+
+        $jasa = Jasa::query()
+            ->where('toko_id', $tokoId)
+            ->whereKey($jasa->id)
+            ->withCount(['laundries as total_order'])
+            ->firstOrFail();
+
+        return view('previews.jasa', compact('jasa'));
+    }
+
     public function create(Request $request): View|RedirectResponse
     {
         if (! $request->user()?->toko) {
@@ -131,5 +146,4 @@ class JasaController extends Controller
 
         return redirect()->route('biaya-jasa.index')->with('success', 'Biaya jasa berhasil dihapus.');
     }
-
 }

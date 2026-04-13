@@ -65,6 +65,15 @@ class PembayaranController extends Controller
         return $table->data($request);
     }
 
+    public function preview(Pembayaran $pembayaran): View
+    {
+        $this->authorize('view', $pembayaran);
+
+        return view('previews.pembayaran', [
+            'pembayaran' => $pembayaran->load('laundry.toko', 'laundry.klien', 'laundry.jasa', 'klien'),
+        ]);
+    }
+
     public function create(Request $request): View|RedirectResponse
     {
         $toko = $request->user()?->toko;

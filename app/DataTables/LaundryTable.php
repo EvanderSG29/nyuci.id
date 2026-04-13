@@ -149,6 +149,7 @@ class LaundryTable extends BaseTable
             })
             ->addColumn('actions', function (Laundry $laundry): string {
                 $actions = [
+                    $this->actionPreview(route('laundry.preview', $laundry)),
                     $this->actionLink(route('laundry.edit', $laundry), 'Edit'),
                 ];
 
