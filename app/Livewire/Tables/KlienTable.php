@@ -82,6 +82,51 @@ class KlienTable extends Component
     }
 
     #[Computed]
+    public function statusOptions(): array
+    {
+        $activeSince = now()->subDays(30)->toDateString();
+        $query = $this->baseQuery($this->tokoId());
+
+        $options = collect([
+            [
+                'value' => 'aktif',
+                'label' => 'Aktif',
+                'count' => (clone $query)->where('terakhir_order', '>=', $activeSince)->count(),
+            ],
+            [
+                'value' => 'perlu_follow_up',
+                'label' => 'Perlu Follow Up',
+                'count' => (clone $query)->where('belum_bayar', '>', 0)->count(),
+            ],
+            [
+                'value' => 'arsip',
+                'label' => 'Arsip',
+                'count' => (clone $query)
+                    ->where(function (Builder $builder) use ($activeSince): void {
+                        $builder
+                            ->whereNull('terakhir_order')
+                            ->orWhere('terakhir_order', '<', $activeSince);
+                    })
+                    ->where('belum_bayar', 0)
+                    ->count(),
+            ],
+        ])
+            ->filter(fn (array $option): bool => $option['count'] > 0)
+            ->map(fn (array $option): array => [
+                'value' => $option['value'],
+                'label' => $option['label'],
+            ]);
+
+        return $options
+            ->prepend([
+                'value' => '',
+                'label' => 'Semua status',
+            ])
+            ->values()
+            ->all();
+    }
+
+    #[Computed]
     public function summary(): array
     {
         $activeSince = now()->subDays(30)->toDateString();

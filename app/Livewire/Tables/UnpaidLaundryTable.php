@@ -82,6 +82,36 @@ class UnpaidLaundryTable extends Component
     }
 
     #[Computed]
+    public function statusOptions(): array
+    {
+        $statuses = $this->unpaidLaundryQuery($this->tokoId())
+            ->select('laundries.status')
+            ->selectRaw('count(*) as aggregate')
+            ->groupBy('laundries.status')
+            ->pluck('aggregate', 'laundries.status');
+
+        $labels = [
+            'belum_selesai' => 'Belum Selesai',
+            'selesai' => 'Selesai',
+        ];
+
+        $options = collect($labels)
+            ->filter(fn (string $label, string $value): bool => (int) ($statuses[$value] ?? 0) > 0)
+            ->map(fn (string $label, string $value): array => [
+                'value' => $value,
+                'label' => $label,
+            ])
+            ->values();
+
+        return $options
+            ->prepend([
+                'value' => '',
+                'label' => 'Semua status',
+            ])
+            ->all();
+    }
+
+    #[Computed]
     public function summary(): array
     {
         $query = $this->unpaidLaundryQuery($this->tokoId());
@@ -105,7 +135,17 @@ class UnpaidLaundryTable extends Component
                     ->where('laundries.nama', 'like', '%'.$this->search.'%')
                     ->orWhere('laundries.no_hp', 'like', '%'.$this->search.'%')
                     ->orWhere('laundries.jenis_jasa', 'like', '%'.$this->search.'%')
-                    ->orWhere('laundries.satuan', 'like', '%'.$this->search.'%');
+                    ->orWhere('laundries.satuan', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('klien', function (Builder $relation): void {
+                        $relation
+                            ->where('nama_klien', 'like', '%'.$this->search.'%')
+                            ->orWhere('no_hp_klien', 'like', '%'.$this->search.'%');
+                    })
+                    ->orWhereHas('jasa', function (Builder $relation): void {
+                        $relation
+                            ->where('nama_jasa', 'like', '%'.$this->search.'%')
+                            ->orWhere('satuan', 'like', '%'.$this->search.'%');
+                    });
             });
         }
 

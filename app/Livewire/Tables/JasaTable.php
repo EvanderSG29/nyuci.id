@@ -27,8 +27,8 @@ class JasaTable extends Component
     #[Url(as: 'search', except: '')]
     public string $search = '';
 
-    #[Url(as: 'kategori', except: '')]
-    public string $kategori = '';
+    #[Url(as: 'satuan', except: '')]
+    public string $satuan = '';
 
     #[Url(as: 'sort', except: 'created_at')]
     public string $sortBy = 'created_at';
@@ -50,7 +50,7 @@ class JasaTable extends Component
             $this->perPage = $this->resolvePerPage($this->perPage);
         }
 
-        if (in_array($property, ['search', 'kategori', 'perPage'], true)) {
+        if (in_array($property, ['search', 'satuan', 'perPage'], true)) {
             $this->resetPage();
         }
     }
@@ -73,11 +73,36 @@ class JasaTable extends Component
 
     public function clearFilters(): void
     {
-        $this->reset('search', 'kategori');
+        $this->reset('search', 'satuan');
         $this->sortBy = 'created_at';
         $this->sortDirection = 'desc';
         $this->perPage = 10;
         $this->resetPage();
+    }
+
+    #[Computed]
+    public function satuanOptions(): array
+    {
+        $options = Jasa::query()
+            ->where('toko_id', $this->tokoId())
+            ->whereNotNull('satuan')
+            ->where('satuan', '!=', '')
+            ->select('satuan')
+            ->distinct()
+            ->orderBy('satuan')
+            ->pluck('satuan')
+            ->map(fn (string $satuan): array => [
+                'value' => $satuan,
+                'label' => $satuan,
+            ]);
+
+        return $options
+            ->prepend([
+                'value' => '',
+                'label' => 'Semua satuan',
+            ])
+            ->values()
+            ->all();
     }
 
     #[Computed]
@@ -107,10 +132,8 @@ class JasaTable extends Component
             });
         }
 
-        if ($this->kategori === 'kiloan') {
-            $query->where('satuan', 'like', '%kg%');
-        } elseif ($this->kategori === 'per_unit') {
-            $query->where('satuan', 'not like', '%kg%');
+        if ($this->satuan !== '') {
+            $query->where('satuan', $this->satuan);
         }
 
         $column = match ($this->sortBy) {
@@ -137,7 +160,14 @@ class JasaTable extends Component
         $this->perPage = $this->resolvePerPage($this->perPage);
         $this->sortBy = in_array($this->sortBy, self::SORT_OPTIONS, true) ? $this->sortBy : 'created_at';
         $this->sortDirection = $this->sortDirection === 'asc' ? 'asc' : 'desc';
-        $this->kategori = in_array($this->kategori, ['kiloan', 'per_unit'], true) ? $this->kategori : '';
+        $availableSatuan = Jasa::query()
+            ->where('toko_id', $this->tokoId())
+            ->whereNotNull('satuan')
+            ->where('satuan', '!=', '')
+            ->pluck('satuan')
+            ->all();
+
+        $this->satuan = in_array($this->satuan, $availableSatuan, true) ? $this->satuan : '';
     }
 
     private function resolvePerPage(int $value): int

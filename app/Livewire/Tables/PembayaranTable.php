@@ -27,13 +27,6 @@ class PembayaranTable extends Component
         'created_at',
     ];
 
-    private const PAYMENT_METHODS = [
-        'cash' => 'Cash',
-        'qris' => 'QRIS',
-        'transfer' => 'Transfer',
-        'ewallet' => 'E-Wallet',
-    ];
-
     #[Url(as: 'search', except: '')]
     public string $search = '';
 
@@ -96,7 +89,67 @@ class PembayaranTable extends Component
     #[Computed]
     public function paymentMethods(): array
     {
-        return self::PAYMENT_METHODS;
+        return Pembayaran::query()
+            ->join('laundries', 'laundries.id', '=', 'pembayarans.laundry_id')
+            ->where('laundries.toko_id', $this->tokoId())
+            ->whereNotNull('pembayarans.metode_pembayaran')
+            ->where('pembayarans.metode_pembayaran', '!=', '')
+            ->select('pembayarans.metode_pembayaran')
+            ->distinct()
+            ->orderBy('pembayarans.metode_pembayaran')
+            ->pluck('pembayarans.metode_pembayaran')
+            ->mapWithKeys(fn (string $method): array => [
+                $method => (new Pembayaran(['metode_pembayaran' => $method]))->metode_pembayaran_label,
+            ])
+            ->all();
+    }
+
+    #[Computed]
+    public function statusOptions(): array
+    {
+        $statuses = Pembayaran::query()
+            ->join('laundries', 'laundries.id', '=', 'pembayarans.laundry_id')
+            ->where('laundries.toko_id', $this->tokoId())
+            ->select('pembayarans.status')
+            ->selectRaw('count(*) as aggregate')
+            ->groupBy('pembayarans.status')
+            ->pluck('aggregate', 'pembayarans.status');
+
+        $labels = [
+            'belum_bayar' => 'Belum Bayar',
+            'sudah_bayar' => 'Sudah Bayar',
+        ];
+
+        $options = collect($labels)
+            ->filter(fn (string $label, string $value): bool => (int) ($statuses[$value] ?? 0) > 0)
+            ->map(fn (string $label, string $value): array => [
+                'value' => $value,
+                'label' => $label,
+            ])
+            ->values();
+
+        return $options
+            ->prepend([
+                'value' => '',
+                'label' => 'Semua status',
+            ])
+            ->all();
+    }
+
+    #[Computed]
+    public function paymentMethodOptions(): array
+    {
+        return collect($this->paymentMethods())
+            ->map(fn (string $label, string $value): array => [
+                'value' => $value,
+                'label' => $label,
+            ])
+            ->prepend([
+                'value' => '',
+                'label' => 'Semua metode',
+            ])
+            ->values()
+            ->all();
     }
 
     #[Computed]
@@ -122,6 +175,8 @@ class PembayaranTable extends Component
         $query = Pembayaran::query()
             ->select('pembayarans.*')
             ->join('laundries', 'laundries.id', '=', 'pembayarans.laundry_id')
+            ->leftJoin('kliens', 'kliens.id', '=', 'pembayarans.klien_id')
+            ->leftJoin('jasas', 'jasas.id', '=', 'laundries.jasa_id')
             ->where('laundries.toko_id', $this->tokoId())
             ->with(['laundry.klien', 'laundry.jasa', 'klien']);
 
@@ -130,6 +185,10 @@ class PembayaranTable extends Component
                 $builder
                     ->where('laundries.nama', 'like', '%'.$this->search.'%')
                     ->orWhere('laundries.no_hp', 'like', '%'.$this->search.'%')
+                    ->orWhere('kliens.nama_klien', 'like', '%'.$this->search.'%')
+                    ->orWhere('kliens.no_hp_klien', 'like', '%'.$this->search.'%')
+                    ->orWhere('jasas.nama_jasa', 'like', '%'.$this->search.'%')
+                    ->orWhere('jasas.satuan', 'like', '%'.$this->search.'%')
                     ->orWhere('pembayarans.metode_pembayaran', 'like', '%'.$this->search.'%')
                     ->orWhere('pembayarans.catatan', 'like', '%'.$this->search.'%')
                     ->orWhere('pembayarans.total_biaya', 'like', '%'.$this->search.'%')
@@ -183,7 +242,7 @@ class PembayaranTable extends Component
         $this->sortBy = in_array($this->sortBy, self::SORT_OPTIONS, true) ? $this->sortBy : 'tgl_pembayaran';
         $this->sortDirection = $this->sortDirection === 'asc' ? 'asc' : 'desc';
         $this->status = in_array($this->status, ['belum_bayar', 'sudah_bayar'], true) ? $this->status : '';
-        $this->metodePembayaran = array_key_exists($this->metodePembayaran, self::PAYMENT_METHODS) ? $this->metodePembayaran : '';
+        $this->metodePembayaran = array_key_exists($this->metodePembayaran, $this->paymentMethods()) ? $this->metodePembayaran : '';
     }
 
     private function resolvePerPage(int $value): int

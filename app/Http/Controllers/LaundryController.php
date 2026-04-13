@@ -7,7 +7,6 @@ use App\Http\Requests\LaundryStatusUpdateRequest;
 use App\Models\Laundry;
 use App\Models\Toko;
 use App\Notifications\LaundryFinishedNotification;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,20 +16,6 @@ use Throwable;
 
 class LaundryController extends Controller
 {
-    private const PER_PAGE_OPTIONS = [10, 20, 50];
-
-    private const SORT_OPTIONS = [
-        'nama_klien',
-        'no_hp_klien',
-        'jasa',
-        'qty',
-        'tanggal_dimulai',
-        'ets_selesai',
-        'tgl_selesai',
-        'status',
-        'dibayar',
-    ];
-
     public function index(Request $request): View|RedirectResponse
     {
         $toko = $request->user()?->toko;
@@ -39,86 +24,7 @@ class LaundryController extends Controller
             return redirect()->route('register.toko.create')->with('warning', 'Lengkapi data toko terlebih dahulu sebelum mengelola laundry.');
         }
 
-        $perPage = in_array($request->integer('per_page', 10), self::PER_PAGE_OPTIONS, true)
-            ? $request->integer('per_page', 10)
-            : 10;
-
-        $sort = in_array($request->string('sort')->toString(), self::SORT_OPTIONS, true)
-            ? $request->string('sort')->toString()
-            : 'tanggal_dimulai';
-
-        $direction = $request->string('direction')->toString() === 'asc' ? 'asc' : 'desc';
-        $search = trim($request->string('search')->toString());
-        $statusFilter = $request->string('status')->toString();
-        $paymentFilter = $request->string('dibayar')->toString();
-        $jasaFilter = $request->integer('jasa_id');
-
-        $summaryQuery = Laundry::query()->where('toko_id', $toko->id);
-
-        $summary = [
-            'total' => (clone $summaryQuery)->count(),
-            'belum_selesai' => (clone $summaryQuery)->where('status', 'belum_selesai')->count(),
-            'proses' => (clone $summaryQuery)->where('status', 'proses')->count(),
-            'selesai' => (clone $summaryQuery)->where('status', 'selesai')->count(),
-        ];
-
-        $query = Laundry::query()
-            ->where('laundries.toko_id', $toko->id)
-            ->with(['klien', 'jasa', 'pembayaran']);
-
-        if ($search !== '') {
-            $query->where(function (Builder $builder) use ($search): void {
-                $builder
-                    ->where('laundries.nama', 'like', "%{$search}%")
-                    ->orWhere('laundries.no_hp', 'like', "%{$search}%")
-                    ->orWhere('laundries.jenis_jasa', 'like', "%{$search}%")
-                    ->orWhere('laundries.satuan', 'like', "%{$search}%");
-            });
-        }
-
-        if (in_array($statusFilter, ['belum_selesai', 'proses', 'selesai'], true)) {
-            $query->where('laundries.status', $statusFilter);
-        }
-
-        if ($paymentFilter === 'sudah_bayar') {
-            $query->whereHas('pembayaran', fn (Builder $builder) => $builder->where('status', 'sudah_bayar'));
-        } elseif ($paymentFilter === 'belum_bayar') {
-            $query->where(function (Builder $builder): void {
-                $builder
-                    ->whereDoesntHave('pembayaran')
-                    ->orWhereHas('pembayaran', fn (Builder $relation) => $relation->where('status', 'belum_bayar'));
-            });
-        }
-
-        if ($jasaFilter > 0) {
-            $query->where('laundries.jasa_id', $jasaFilter);
-        }
-
-        $this->applySorting($query, $sort, $direction);
-
-        $laundries = $query->paginate($perPage)->withQueryString();
-
-        $statusModalLaundry = null;
-
-        if (old('status_laundry_id')) {
-            $statusModalLaundry = $laundries->getCollection()->firstWhere('id', (int) old('status_laundry_id'));
-        }
-
-        return view('laundry.index', [
-            'data' => $laundries,
-            'summary' => $summary,
-            'jasaOptions' => $toko->jasas()->orderBy('nama_jasa')->get(),
-            'filters' => [
-                'search' => $search,
-                'status' => $statusFilter,
-                'dibayar' => $paymentFilter,
-                'jasa_id' => $jasaFilter,
-                'per_page' => $perPage,
-                'sort' => $sort,
-                'direction' => $direction,
-            ],
-            'statusModalLaundry' => $statusModalLaundry,
-        ]);
+        return view('laundry.index');
     }
 
     public function create(Request $request): View|RedirectResponse
@@ -274,36 +180,6 @@ class LaundryController extends Controller
             'is_taken' => $isFinished,
             'tgl_selesai' => $isFinished ? ($laundry?->tgl_selesai?->format('Y-m-d') ?? now()->toDateString()) : null,
         ];
-    }
-
-    private function applySorting(Builder $query, string $sort, string $direction): void
-    {
-        if ($sort === 'dibayar') {
-            $query
-                ->leftJoin('pembayarans as pembayaran_sort', 'pembayaran_sort.laundry_id', '=', 'laundries.id')
-                ->select('laundries.*')
-                ->orderByRaw(
-                    "case when pembayaran_sort.status = 'sudah_bayar' then 1 when pembayaran_sort.status = 'belum_bayar' then 0 else 0 end {$direction}"
-                )
-                ->orderBy('laundries.tanggal_dimulai', 'desc');
-
-            return;
-        }
-
-        $column = match ($sort) {
-            'nama_klien' => 'laundries.nama',
-            'no_hp_klien' => 'laundries.no_hp',
-            'jasa' => 'laundries.jenis_jasa',
-            'qty' => 'laundries.qty',
-            'ets_selesai' => 'laundries.ets_selesai',
-            'tgl_selesai' => 'laundries.tgl_selesai',
-            'status' => 'laundries.status',
-            default => 'laundries.tanggal_dimulai',
-        };
-
-        $query
-            ->orderBy($column, $direction)
-            ->orderBy('laundries.id', 'desc');
     }
 
     private function formatQty(float $qty): string

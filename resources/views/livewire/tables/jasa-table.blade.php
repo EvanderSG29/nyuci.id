@@ -1,26 +1,14 @@
 @php($rows = $this->jasas)
 @php($summary = $this->summary)
-@php($loadingTargets = 'search,kategori,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
-@php($categoryOptions = [
-    ['value' => '', 'label' => 'Semua kategori'],
-    ['value' => 'kiloan', 'label' => 'Kiloan'],
-    ['value' => 'per_unit', 'label' => 'Per Unit'],
-])
+@php($satuanOptions = $this->satuanOptions)
+@php($loadingTargets = 'search,satuan,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
 @php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
     'value' => $value,
     'label' => $value.' per halaman',
 ])->all())
 
 <div class="space-y-6" id="jasa-table">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-            <p class="text-sm font-medium text-[var(--text-muted)]">Master jasa</p>
-            <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Biaya Jasa</h2>
-            <p class="mt-2 max-w-2xl text-sm text-[var(--text-muted)]">
-                Kelola daftar layanan laundry, satuan, dan harga dasar dengan format tabel Livewire yang lebih ringkas.
-            </p>
-        </div>
-
+    <div class="flex justify-end">
         <flux:button variant="primary" href="{{ route('biaya-jasa.create') }}" wire:navigate icon="plus">
             Tambah Jasa
         </flux:button>
@@ -55,9 +43,9 @@
             />
 
             <x-filter-select
-                wire:model.live="kategori"
-                :options="$categoryOptions"
-                placeholder="Semua kategori"
+                wire:model.live="satuan"
+                :options="$satuanOptions"
+                placeholder="Semua satuan"
             />
 
             <x-filter-select

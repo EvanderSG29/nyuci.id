@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PembayaranRequest;
 use App\Models\Laundry;
 use App\Models\Pembayaran;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -13,18 +12,6 @@ use Illuminate\View\View;
 
 class PembayaranController extends Controller
 {
-    private const PER_PAGE_OPTIONS = [10, 20, 50];
-
-    private const SORT_OPTIONS = [
-        'nama_klien',
-        'no_hp_klien',
-        'total',
-        'metode_pembayaran',
-        'tgl_pembayaran',
-        'status',
-        'created_at',
-    ];
-
     private const PAYMENT_METHODS = [
         'cash' => 'Cash',
         'qris' => 'QRIS',
@@ -40,71 +27,7 @@ class PembayaranController extends Controller
             return redirect()->route('register.toko.create')->with('warning', 'Lengkapi data toko terlebih dahulu sebelum mengelola pembayaran.');
         }
 
-        $perPage = in_array($request->integer('per_page', 10), self::PER_PAGE_OPTIONS, true)
-            ? $request->integer('per_page', 10)
-            : 10;
-
-        $sort = in_array($request->string('sort')->toString(), self::SORT_OPTIONS, true)
-            ? $request->string('sort')->toString()
-            : 'tgl_pembayaran';
-
-        $direction = $request->string('direction')->toString() === 'asc' ? 'asc' : 'desc';
-        $search = trim($request->string('search')->toString());
-        $statusFilter = $request->string('status')->toString();
-        $methodFilter = $request->string('metode_pembayaran')->toString();
-
-        $summary = [
-            'total' => Pembayaran::query()
-                ->whereHas('laundry', fn (Builder $builder) => $builder->where('toko_id', $toko->id))
-                ->count(),
-            'sudah_bayar' => Pembayaran::query()
-                ->whereHas('laundry', fn (Builder $builder) => $builder->where('toko_id', $toko->id))
-                ->where('status', 'sudah_bayar')
-                ->count(),
-            'belum_bayar' => $this->unpaidLaundryQuery($toko->id)->count(),
-        ];
-
-        $query = Pembayaran::query()
-            ->select('pembayarans.*')
-            ->join('laundries', 'laundries.id', '=', 'pembayarans.laundry_id')
-            ->where('laundries.toko_id', $toko->id)
-            ->with(['laundry.klien', 'laundry.jasa', 'klien']);
-
-        if ($search !== '') {
-            $query->where(function (Builder $builder) use ($search): void {
-                $builder
-                    ->where('laundries.nama', 'like', "%{$search}%")
-                    ->orWhere('laundries.no_hp', 'like', "%{$search}%")
-                    ->orWhere('pembayarans.metode_pembayaran', 'like', "%{$search}%")
-                    ->orWhere('pembayarans.catatan', 'like', "%{$search}%")
-                    ->orWhere('pembayarans.total_biaya', 'like', "%{$search}%")
-                    ->orWhere('pembayarans.total', 'like', "%{$search}%");
-            });
-        }
-
-        if ($statusFilter === 'belum_bayar' || $statusFilter === 'sudah_bayar') {
-            $query->where('pembayarans.status', $statusFilter);
-        }
-
-        if ($methodFilter !== '') {
-            $query->where('pembayarans.metode_pembayaran', $methodFilter);
-        }
-
-        $this->applyPaymentSorting($query, $sort, $direction);
-
-        return view('pembayaran.index', [
-            'data' => $query->paginate($perPage)->withQueryString(),
-            'summary' => $summary,
-            'filters' => [
-                'search' => $search,
-                'status' => $statusFilter,
-                'metode_pembayaran' => $methodFilter,
-                'per_page' => $perPage,
-                'sort' => $sort,
-                'direction' => $direction,
-            ],
-            'paymentMethods' => self::PAYMENT_METHODS,
-        ]);
+        return view('pembayaran.index');
     }
 
     public function unpaid(Request $request): View|RedirectResponse
@@ -115,56 +38,7 @@ class PembayaranController extends Controller
             return redirect()->route('register.toko.create')->with('warning', 'Lengkapi data toko terlebih dahulu sebelum mengelola pembayaran.');
         }
 
-        $perPage = in_array($request->integer('per_page', 10), self::PER_PAGE_OPTIONS, true)
-            ? $request->integer('per_page', 10)
-            : 10;
-
-        $sort = in_array($request->string('sort')->toString(), ['nama', 'no_hp', 'jenis_jasa', 'satuan', 'tanggal', 'estimasi_selesai'], true)
-            ? $request->string('sort')->toString()
-            : 'tanggal';
-
-        $direction = $request->string('direction')->toString() === 'asc' ? 'asc' : 'desc';
-        $search = trim($request->string('search')->toString());
-        $statusFilter = $request->string('status')->toString();
-
-        $query = $this->unpaidLaundryQuery($toko->id)
-            ->with(['pembayaran', 'klien', 'jasa']);
-
-        $summary = [
-            'total' => (clone $query)->count(),
-            'belum_selesai' => (clone $query)->where('laundries.status', 'belum_selesai')->count(),
-            'selesai' => (clone $query)->where('laundries.status', 'selesai')->count(),
-        ];
-
-        if ($search !== '') {
-            $query->where(function (Builder $builder) use ($search): void {
-                $builder
-                    ->where('laundries.nama', 'like', "%{$search}%")
-                    ->orWhere('laundries.no_hp', 'like', "%{$search}%")
-                    ->orWhere('laundries.jenis_jasa', 'like', "%{$search}%")
-                    ->orWhere('laundries.satuan', 'like', "%{$search}%");
-            });
-        }
-
-        if ($statusFilter === 'belum_selesai') {
-            $query->where('laundries.status', 'belum_selesai');
-        } elseif ($statusFilter === 'selesai') {
-            $query->where('laundries.status', 'selesai');
-        }
-
-        $this->applyUnpaidSorting($query, $sort, $direction);
-
-        return view('pembayaran.unpaid', [
-            'data' => $query->paginate($perPage)->withQueryString(),
-            'summary' => $summary,
-            'filters' => [
-                'search' => $search,
-                'status' => $statusFilter,
-                'per_page' => $perPage,
-                'sort' => $sort,
-                'direction' => $direction,
-            ],
-        ]);
+        return view('pembayaran.unpaid');
     }
 
     public function create(Request $request): View|RedirectResponse
@@ -308,50 +182,6 @@ class PembayaranController extends Controller
         ])->save();
 
         return back()->with('success', 'Status pembayaran diperbarui.');
-    }
-
-    private function unpaidLaundryQuery(int $tokoId): Builder
-    {
-        return Laundry::query()
-            ->where('toko_id', $tokoId)
-            ->where(function (Builder $builder): void {
-                $builder
-                    ->whereDoesntHave('pembayaran')
-                    ->orWhereHas('pembayaran', fn (Builder $relation) => $relation->where('status', 'belum_bayar'));
-            });
-    }
-
-    private function applyPaymentSorting(Builder $query, string $sort, string $direction): void
-    {
-        $column = match ($sort) {
-            'nama_klien' => 'laundries.nama',
-            'no_hp_klien' => 'laundries.no_hp',
-            'total' => 'pembayarans.total_biaya',
-            'metode_pembayaran' => 'pembayarans.metode_pembayaran',
-            'status' => 'pembayarans.status',
-            'created_at' => 'pembayarans.created_at',
-            default => 'pembayarans.tgl_pembayaran',
-        };
-
-        $query
-            ->orderBy($column, $direction)
-            ->orderBy('pembayarans.id', 'desc');
-    }
-
-    private function applyUnpaidSorting(Builder $query, string $sort, string $direction): void
-    {
-        $column = match ($sort) {
-            'nama' => 'laundries.nama',
-            'no_hp' => 'laundries.no_hp',
-            'jenis_jasa' => 'laundries.jenis_jasa',
-            'satuan' => 'laundries.satuan',
-            'estimasi_selesai' => 'laundries.ets_selesai',
-            default => 'laundries.tanggal_dimulai',
-        };
-
-        $query
-            ->orderBy($column, $direction)
-            ->orderBy('laundries.id', 'desc');
     }
 
     private function buildPaymentPayload(Laundry $laundry, array $validated): array

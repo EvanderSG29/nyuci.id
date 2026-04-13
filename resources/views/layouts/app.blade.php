@@ -3,6 +3,7 @@
     $appName = $appName ?? config('app.name', 'Nyuci.id');
     $pageTitle = trim($__env->yieldContent('title', $pageTitle ?? $title ?? $appName));
     $pageTitle = $pageTitle !== '' ? $pageTitle : $appName;
+    $storeName = Auth::user()->toko?->nama_toko ?? 'Laundry digital';
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -49,28 +50,45 @@
         <div class="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
             @include('layouts.sidebar')
 
-            <flux:header container class="!border-b !border-[var(--border-main)] !bg-[var(--bg-card)] backdrop-blur">
-                <div class="flex w-full items-center gap-3">
+            <flux:header container class="nyuci-app-header !border-b !border-[var(--border-main)] !bg-[var(--bg-card)]">
+                <div class="flex w-full items-center gap-3 sm:gap-4">
                     <flux:sidebar.toggle class="lg:hidden" />
 
-                    <div class="min-w-0 lg:hidden">
-                        <p class="truncate text-xs font-medium text-[var(--text-muted)]">
-                            {{ Auth::user()->toko?->nama_toko ?? 'Laundry digital' }}
-                        </p>
+                    <div class="min-w-0 flex-1 lg:hidden">
                         <p class="truncate text-sm font-semibold text-[var(--text-strong)]">
                             {{ $pageTitle }}
                         </p>
                     </div>
 
-                    <div class="hidden min-w-0 flex-1 lg:flex lg:flex-col">
+                    <div class="hidden min-w-0 flex-1 lg:block">
+                        @php
+                            $breadcrumbs = collect();
+                            $routeName = request()->route()?->getName();
+
+                            if ($routeName) {
+                                $segments = explode('.', $routeName);
+
+                                if (count($segments) > 1) {
+                                    $parentRoute = $segments[0] . '.index';
+
+                                    if (Route::has($parentRoute) && $parentRoute !== 'dashboard.index') {
+                                        $breadcrumbs->push([
+                                            'label' => \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $segments[0])),
+                                            'url' => route($parentRoute),
+                                        ]);
+                                    }
+                                }
+                            }
+                        @endphp
+
                         @isset($header)
                             {{ $header }}
                         @else
-                            <div class="flex flex-col gap-1">
-                                <p class="text-sm font-medium text-[var(--text-muted)]">
-                                    {{ Auth::user()->toko?->nama_toko ?? 'Laundry digital' }}
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                                    {{ $storeName }}
                                 </p>
-                                <h1 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">
+                                <h1 class="mt-2 truncate text-2xl font-semibold tracking-tight text-[var(--text-strong)]">
                                     {{ $pageTitle }}
                                 </h1>
                             </div>
@@ -81,26 +99,6 @@
                                 @yield('breadcrumbs')
                             </nav>
                         @else
-                            @php
-                                $breadcrumbs = collect();
-                                $routeName = request()->route()?->getName();
-
-                                if ($routeName) {
-                                    $segments = explode('.', $routeName);
-
-                                    if (count($segments) > 1) {
-                                        $parentRoute = $segments[0] . '.index';
-
-                                        if (Route::has($parentRoute) && $parentRoute !== 'dashboard.index') {
-                                            $breadcrumbs->push([
-                                                'label' => \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $segments[0])),
-                                                'url' => route($parentRoute),
-                                            ]);
-                                        }
-                                    }
-                                }
-                            @endphp
-
                             <nav class="nyuci-breadcrumbs mt-3">
                                 <a href="{{ route('dashboard') }}" class="nyuci-breadcrumb-item text-[var(--text-muted)] hover:text-[var(--text-strong)]">
                                     Beranda

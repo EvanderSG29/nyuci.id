@@ -166,7 +166,10 @@ test('pembayaran index supports search, filters, and pagination', function () {
         ->assertOk()
         ->assertSee('Budi Santoso')
         ->assertDontSee('Siti Aminah')
-        ->assertSee('Showing 1-1 of 1 entries');
+        ->assertSee('Showing 1 to 1 of 1 results')
+        ->assertDontSee('Showing 1-1 of 1 entries')
+        ->assertDontSee('Transfer')
+        ->assertDontSee('E-Wallet');
 });
 
 test('kelola belum bayar lists unpaid laundries and action buttons', function () {
@@ -226,7 +229,8 @@ test('kelola belum bayar lists unpaid laundries and action buttons', function ()
         ->assertSee('Selesaikan Pembayaran')
         ->assertSee($needsPayment->nama)
         ->assertSee($withUnpaidPayment->nama)
-        ->assertSee('Showing 1-2 of 2 entries');
+        ->assertSee('Showing 1 to 2 of 2 results')
+        ->assertDontSee('Showing 1-2 of 2 entries');
 });
 
 test('pembayaran store saves phase three fields and rejects foreign laundries', function () {

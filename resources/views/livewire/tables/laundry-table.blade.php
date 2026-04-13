@@ -1,42 +1,16 @@
 @php($rows = $this->laundries)
 @php($summary = $this->summary)
-@php($jasaOptions = $this->jasaOptions)
+@php($statusOptions = $this->statusOptions)
+@php($paymentOptions = $this->paymentOptions)
+@php($serviceOptions = $this->serviceOptions)
 @php($loadingTargets = 'search,status,dibayar,jasaId,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
-@php($statusOptions = [
-    ['value' => '', 'label' => 'Semua status'],
-    ['value' => 'belum_selesai', 'label' => 'Belum Selesai'],
-    ['value' => 'proses', 'label' => 'Proses'],
-    ['value' => 'selesai', 'label' => 'Selesai'],
-])
-@php($paymentOptions = [
-    ['value' => '', 'label' => 'Semua pembayaran'],
-    ['value' => 'belum_bayar', 'label' => 'Belum Bayar'],
-    ['value' => 'sudah_bayar', 'label' => 'Sudah Bayar'],
-])
-@php($serviceOptions = $jasaOptions->map(fn ($jasa) => [
-    'value' => $jasa->id,
-    'label' => $jasa->nama_jasa,
-    'meta' => $jasa->satuan,
-])->prepend([
-    'value' => 0,
-    'label' => 'Semua jasa',
-])->values()->all())
 @php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
     'value' => $value,
     'label' => $value.' per halaman',
 ])->all())
 
 <div class="space-y-6" id="laundry-table">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-            <p class="text-sm font-medium text-[var(--text-muted)]">Operasional laundry</p>
-            <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Laundry</h2>
-            <p class="mt-2 max-w-2xl text-sm text-[var(--text-muted)]">
-                Pantau semua order, progres pengerjaan, dan status pembayaran dari satu tabel Livewire.
-            </p>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap justify-end gap-2">
             <flux:button variant="outline" href="{{ route('pembayaran.unpaid') }}" wire:navigate icon="wallet">
                 Kelola Belum Bayar
             </flux:button>
@@ -44,7 +18,6 @@
             <flux:button variant="primary" href="{{ route('laundry.create') }}" wire:navigate icon="plus">
                 Tambah Laundry
             </flux:button>
-        </div>
     </div>
 
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -215,10 +188,6 @@
                         @endforeach
                     </flux:table.rows>
                     </flux:table>
-
-                    <p class="mt-4 text-sm text-[var(--text-muted)]">
-                        Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
-                    </p>
                 @endif
             </div>
         </div>

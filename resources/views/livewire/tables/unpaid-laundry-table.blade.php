@@ -1,25 +1,13 @@
 @php($rows = $this->laundries)
 @php($summary = $this->summary)
+@php($statusOptions = $this->statusOptions)
 @php($loadingTargets = 'search,status,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
-@php($statusOptions = [
-    ['value' => '', 'label' => 'Semua status'],
-    ['value' => 'belum_selesai', 'label' => 'Belum Selesai'],
-    ['value' => 'selesai', 'label' => 'Selesai'],
-])
 @php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
     'value' => $value,
     'label' => $value.' per halaman',
 ])->all())
 
 <div class="space-y-6" id="unpaid-laundry-table">
-    <div class="flex flex-col gap-3">
-        <p class="text-sm font-medium text-[var(--text-muted)]">Daftar tindak lanjut</p>
-        <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Kelola Belum Bayar</h2>
-        <p class="max-w-2xl text-sm text-[var(--text-muted)]">
-            Selesaikan Pembayaran untuk order yang belum memiliki transaksi atau masih berstatus belum lunas.
-        </p>
-    </div>
-
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <x-card>
             <p class="text-sm font-semibold text-[var(--text-muted)]">Total Belum Bayar</p>
@@ -151,10 +139,6 @@
                         @endforeach
                     </flux:table.rows>
                     </flux:table>
-
-                    <p class="mt-4 text-sm text-[var(--text-muted)]">
-                        Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
-                    </p>
                 @endif
             </div>
         </div>

@@ -1,27 +1,14 @@
 @php($rows = $this->kliens)
 @php($summary = $this->summary)
+@php($statusOptions = $this->statusOptions)
 @php($loadingTargets = 'search,status,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
-@php($statusOptions = [
-    ['value' => '', 'label' => 'Semua status'],
-    ['value' => 'aktif', 'label' => 'Aktif'],
-    ['value' => 'perlu_follow_up', 'label' => 'Perlu Follow Up'],
-    ['value' => 'arsip', 'label' => 'Arsip'],
-])
 @php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
     'value' => $value,
     'label' => $value.' per halaman',
 ])->all())
 
 <div class="space-y-6" id="klien-table">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-            <p class="text-sm font-medium text-[var(--text-muted)]">Master pelanggan</p>
-            <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Pelanggan</h2>
-            <p class="mt-2 max-w-2xl text-sm text-[var(--text-muted)]">
-                Daftar pelanggan tersusun untuk follow up, histori order, dan status tagihan yang masih terbuka.
-            </p>
-        </div>
-
+    <div class="flex justify-end">
         <flux:button variant="primary" href="{{ route('pelanggan.create') }}" wire:navigate icon="plus">
             Tambah Pelanggan
         </flux:button>
@@ -145,10 +132,6 @@
                         @endforeach
                     </flux:table.rows>
                     </flux:table>
-
-                    <p class="mt-4 text-sm text-[var(--text-muted)]">
-                        Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
-                    </p>
                 @endif
             </div>
         </div>

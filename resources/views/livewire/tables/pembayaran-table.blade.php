@@ -1,35 +1,15 @@
 @php($rows = $this->pembayarans)
 @php($summary = $this->summary)
-@php($paymentMethods = $this->paymentMethods)
+@php($statusOptions = $this->statusOptions)
+@php($paymentMethodOptions = $this->paymentMethodOptions)
 @php($loadingTargets = 'search,status,metodePembayaran,perPage,sort,clearFilters,gotoPage,previousPage,nextPage,setPage')
-@php($statusOptions = [
-    ['value' => '', 'label' => 'Semua status'],
-    ['value' => 'belum_bayar', 'label' => 'Belum Bayar'],
-    ['value' => 'sudah_bayar', 'label' => 'Sudah Bayar'],
-])
-@php($paymentMethodOptions = collect($paymentMethods)->map(fn ($label, $value) => [
-    'value' => $value,
-    'label' => $label,
-])->prepend([
-    'value' => '',
-    'label' => 'Semua metode',
-])->values()->all())
 @php($perPageOptions = collect([10, 20, 50])->map(fn ($value) => [
     'value' => $value,
     'label' => $value.' per halaman',
 ])->all())
 
 <div class="space-y-6" id="pembayaran-table">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-            <p class="text-sm font-medium text-[var(--text-muted)]">Transaksi pembayaran</p>
-            <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Pembayaran</h2>
-            <p class="mt-2 max-w-2xl text-sm text-[var(--text-muted)]">
-                Pantau seluruh pembayaran, metode bayar, dan order yang masih perlu diselesaikan.
-            </p>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap justify-end gap-2">
             <flux:button variant="outline" href="{{ route('pembayaran.unpaid') }}" wire:navigate icon="wallet">
                 Kelola Belum Bayar
             </flux:button>
@@ -37,7 +17,6 @@
             <flux:button variant="primary" href="{{ route('pembayaran.create') }}" wire:navigate icon="plus">
                 Tambah Pembayaran
             </flux:button>
-        </div>
     </div>
 
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -184,10 +163,6 @@
                         @endforeach
                     </flux:table.rows>
                     </flux:table>
-
-                    <p class="mt-4 text-sm text-[var(--text-muted)]">
-                        Showing {{ $rows->firstItem() ?? 0 }}-{{ $rows->lastItem() ?? 0 }} of {{ $rows->total() }} entries
-                    </p>
                 @endif
             </div>
         </div>

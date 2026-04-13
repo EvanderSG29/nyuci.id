@@ -156,7 +156,9 @@ test('laundry index supports search, filters, and pagination', function () {
         ->assertOk()
         ->assertSee('Budi Santoso')
         ->assertDontSee('Siti Aminah')
-        ->assertSee('Showing 1-1 of 1 entries');
+        ->assertSee('Showing 1 to 1 of 1 results')
+        ->assertDontSee('Showing 1-1 of 1 entries')
+        ->assertDontSee('cuci-1');
 });
 
 test('laundry status update route stores the finished date', function () {

@@ -5,7 +5,6 @@ namespace App\Livewire\Tables;
 use App\Models\Laundry;
 use App\Models\Jasa;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -93,6 +92,80 @@ class LaundryTable extends Component
     }
 
     #[Computed]
+    public function statusOptions(): array
+    {
+        $statuses = Laundry::query()
+            ->where('toko_id', $this->tokoId())
+            ->select('status')
+            ->selectRaw('count(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        $labels = [
+            'belum_selesai' => 'Belum Selesai',
+            'proses' => 'Proses',
+            'selesai' => 'Selesai',
+        ];
+
+        $options = collect($labels)
+            ->filter(fn (string $label, string $value): bool => (int) ($statuses[$value] ?? 0) > 0)
+            ->map(fn (string $label, string $value): array => [
+                'value' => $value,
+                'label' => $label,
+            ])
+            ->values();
+
+        return $options
+            ->prepend([
+                'value' => '',
+                'label' => 'Semua status',
+            ])
+            ->all();
+    }
+
+    #[Computed]
+    public function paymentOptions(): array
+    {
+        $paidCount = Laundry::query()
+            ->where('toko_id', $this->tokoId())
+            ->whereHas('pembayaran', fn (Builder $builder): Builder => $builder->where('status', 'sudah_bayar'))
+            ->count();
+
+        $unpaidCount = Laundry::query()
+            ->where('toko_id', $this->tokoId())
+            ->where(function (Builder $builder): void {
+                $builder
+                    ->whereDoesntHave('pembayaran')
+                    ->orWhereHas('pembayaran', fn (Builder $relation): Builder => $relation->where('status', 'belum_bayar'));
+            })
+            ->count();
+
+        $options = collect();
+
+        if ($unpaidCount > 0) {
+            $options->push([
+                'value' => 'belum_bayar',
+                'label' => 'Belum Bayar',
+            ]);
+        }
+
+        if ($paidCount > 0) {
+            $options->push([
+                'value' => 'sudah_bayar',
+                'label' => 'Sudah Bayar',
+            ]);
+        }
+
+        return $options
+            ->prepend([
+                'value' => '',
+                'label' => 'Semua pembayaran',
+            ])
+            ->values()
+            ->all();
+    }
+
+    #[Computed]
     public function summary(): array
     {
         $query = Laundry::query()->where('toko_id', $this->tokoId());
@@ -106,12 +179,28 @@ class LaundryTable extends Component
     }
 
     #[Computed]
-    public function jasaOptions(): Collection
+    public function serviceOptions(): array
     {
-        return Jasa::query()
-            ->where('toko_id', $this->tokoId())
-            ->orderBy('nama_jasa')
+        $services = Jasa::query()
+            ->select('jasas.id', 'jasas.nama_jasa', 'jasas.satuan')
+            ->join('laundries', 'laundries.jasa_id', '=', 'jasas.id')
+            ->where('laundries.toko_id', $this->tokoId())
+            ->distinct()
+            ->orderBy('jasas.nama_jasa')
             ->get();
+
+        return $services
+            ->map(fn (Jasa $jasa): array => [
+                'value' => $jasa->id,
+                'label' => $jasa->nama_jasa,
+                'meta' => $jasa->satuan,
+            ])
+            ->prepend([
+                'value' => 0,
+                'label' => 'Semua jasa',
+            ])
+            ->values()
+            ->all();
     }
 
     #[Computed]
@@ -199,7 +288,15 @@ class LaundryTable extends Component
         $this->sortDirection = $this->sortDirection === 'asc' ? 'asc' : 'desc';
         $this->status = in_array($this->status, ['belum_selesai', 'proses', 'selesai'], true) ? $this->status : '';
         $this->dibayar = in_array($this->dibayar, ['belum_bayar', 'sudah_bayar'], true) ? $this->dibayar : '';
-        $this->jasaId = max(0, $this->jasaId);
+        $availableJasaIds = Jasa::query()
+            ->join('laundries', 'laundries.jasa_id', '=', 'jasas.id')
+            ->where('laundries.toko_id', $this->tokoId())
+            ->distinct()
+            ->pluck('jasas.id')
+            ->map(static fn (int|string $id): int => (int) $id)
+            ->all();
+
+        $this->jasaId = in_array((int) $this->jasaId, $availableJasaIds, true) ? (int) $this->jasaId : 0;
     }
 
     private function resolvePerPage(int $value): int
