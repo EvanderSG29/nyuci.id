@@ -526,6 +526,21 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     outline: none;
 }
 
+.nyuci-dashboard-search input::-webkit-search-decoration,
+.nyuci-dashboard-search input::-webkit-search-cancel-button,
+.nyuci-dashboard-search input::-webkit-search-results-button,
+.nyuci-dashboard-search input::-webkit-search-results-decoration {
+    display: none;
+    -webkit-appearance: none;
+}
+
+.nyuci-dashboard-search input::-ms-clear,
+.nyuci-dashboard-search input::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
 .nyuci-dashboard-search input::placeholder {
     color: inherit;
     opacity: 0.72;
