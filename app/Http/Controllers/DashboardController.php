@@ -6,6 +6,8 @@ use App\Models\Klien;
 use App\Models\Laundry;
 use App\Models\Pembayaran;
 use App\Models\Toko;
+use App\Services\DashboardCharts\DashboardChartConfigResolver;
+use App\Services\DashboardCharts\DashboardChartDatasetBuilder;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -14,8 +16,11 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request): View
-    {
+    public function index(
+        Request $request,
+        DashboardChartConfigResolver $chartResolver,
+        DashboardChartDatasetBuilder $chartBuilder,
+    ): View {
         $user = $request->user()->load('toko');
         $toko = $user->toko;
 
@@ -25,7 +30,8 @@ class DashboardController extends Controller
                 'dashboardCards' => Toko::dashboardCardDefaults(),
                 'overview' => $this->emptyOverview(),
                 'highlights' => collect(),
-                'trend' => $this->emptyTrend(),
+                'heroChart' => null,
+                'cardCharts' => [],
                 'statusBreakdown' => $this->emptyBreakdown('Status order'),
                 'paymentBreakdown' => $this->emptyBreakdown('Metode pembayaran'),
                 'topServices' => collect(),
@@ -33,11 +39,10 @@ class DashboardController extends Controller
             ]);
         }
 
-        $today = CarbonImmutable::now()->startOfDay();
-        $trendStart = $today->subDays(13);
-        $trendEnd = $today;
-        $dashboardCards = $toko->dashboardCards();
+        $chartResolver->ensureDefaults($toko);
 
+        $today = CarbonImmutable::now()->startOfDay();
+        $dashboardCards = $toko->dashboardCards();
         $totalLaundry = $toko->laundries()->count();
         $pendingLaundry = $toko->laundries()->where('status', '!=', 'selesai')->count();
         $totalPelanggan = Klien::query()->where('toko_id', $toko->id)->count();
@@ -62,6 +67,7 @@ class DashboardController extends Controller
             ->count();
         $readyPickup = $toko->laundries()
             ->where('status', 'selesai')
+            ->where('is_taken', false)
             ->count();
         $unpaidCount = Laundry::query()
             ->where('toko_id', $toko->id)
@@ -128,140 +134,20 @@ class DashboardController extends Controller
             ],
         ]);
 
+        $chartPayload = $chartResolver->dashboardPayload($toko, $user, $chartBuilder);
+
         return view('dashboard', [
             'toko' => $toko,
             'dashboardCards' => $dashboardCards,
             'overview' => $overview,
             'highlights' => $highlights,
-            'trend' => $this->buildTrend($toko->id, $trendStart, $trendEnd),
+            'heroChart' => $chartPayload['heroChart'] ?? null,
+            'cardCharts' => $chartPayload['cardCharts'] ?? [],
             'statusBreakdown' => $this->buildStatusBreakdown($toko->id),
             'paymentBreakdown' => $this->buildPaymentBreakdown($toko->id),
             'topServices' => $this->buildTopServices($toko->id, $totalLaundry),
             'recentLaundries' => $toko->laundries()->with(['klien', 'jasa', 'pembayaran'])->latest()->take(6)->get(),
         ]);
-    }
-
-    private function buildTrend(int $tokoId, CarbonImmutable $startDate, CarbonImmutable $endDate): array
-    {
-        $period = collect(range(0, $startDate->diffInDays($endDate)))
-            ->map(fn (int $offset) => $startDate->addDays($offset));
-
-        $orderCounts = Laundry::query()
-            ->where('toko_id', $tokoId)
-            ->whereBetween('tanggal_dimulai', [$startDate->toDateString(), $endDate->toDateString()])
-            ->selectRaw('date(tanggal_dimulai) as period_date, count(*) as aggregate_total')
-            ->groupBy('period_date')
-            ->pluck('aggregate_total', 'period_date');
-
-        $finishedCounts = Laundry::query()
-            ->where('toko_id', $tokoId)
-            ->where('status', 'selesai')
-            ->whereBetween('tgl_selesai', [$startDate->toDateString(), $endDate->toDateString()])
-            ->selectRaw('date(tgl_selesai) as period_date, count(*) as aggregate_total')
-            ->groupBy('period_date')
-            ->pluck('aggregate_total', 'period_date');
-
-        $revenueTotals = Pembayaran::query()
-            ->join('laundries', 'laundries.id', '=', 'pembayarans.laundry_id')
-            ->where('laundries.toko_id', $tokoId)
-            ->where('pembayarans.status', 'sudah_bayar')
-            ->whereBetween('pembayarans.tgl_pembayaran', [$startDate->toDateString(), $endDate->toDateString()])
-            ->selectRaw('date(pembayarans.tgl_pembayaran) as period_date, sum(coalesce(pembayarans.total_biaya, pembayarans.total, 0)) as aggregate_total')
-            ->groupBy('period_date')
-            ->pluck('aggregate_total', 'period_date');
-
-        $points = $period->values()->map(function (CarbonImmutable $date) use ($orderCounts, $finishedCounts, $revenueTotals): array {
-            $key = $date->toDateString();
-
-            return [
-                'label' => $date->translatedFormat('d M'),
-                'shortLabel' => $date->format('d/m'),
-                'orders' => (int) ($orderCounts[$key] ?? 0),
-                'finished' => (int) ($finishedCounts[$key] ?? 0),
-                'revenue' => (int) round($revenueTotals[$key] ?? 0),
-            ];
-        });
-
-        $chart = $this->buildLineChart($points);
-
-        return [
-            'heading' => 'Pergerakan order 14 hari terakhir',
-            'period' => $startDate->translatedFormat('d M').' - '.$endDate->translatedFormat('d M'),
-            'totals' => [
-                ['label' => 'Order masuk', 'value' => number_format($points->sum('orders'), 0, ',', '.')],
-                ['label' => 'Order selesai', 'value' => number_format($points->sum('finished'), 0, ',', '.')],
-                ['label' => 'Revenue', 'value' => $this->formatCurrency((int) $points->sum('revenue'))],
-            ],
-            'points' => $chart['points'],
-            'ordersPath' => $chart['ordersPath'],
-            'ordersAreaPath' => $chart['ordersAreaPath'],
-            'finishedPath' => $chart['finishedPath'],
-            'gridLines' => $chart['gridLines'],
-            'axisLabels' => $chart['axisLabels'],
-            'chart' => [
-                'labels' => $points->pluck('shortLabel')->all(),
-                'fullLabels' => $points->pluck('label')->all(),
-                'orders' => $points->pluck('orders')->all(),
-                'finished' => $points->pluck('finished')->all(),
-                'revenue' => $points->pluck('revenue')->all(),
-            ],
-            'hasData' => $points->sum('orders') > 0 || $points->sum('finished') > 0 || $points->sum('revenue') > 0,
-        ];
-    }
-
-    private function buildLineChart(Collection $points): array
-    {
-        $width = 100;
-        $chartTop = 8;
-        $chartBottom = 48;
-        $chartHeight = $chartBottom - $chartTop;
-        $divisor = max($points->count() - 1, 1);
-        $maxValue = max((int) $points->max('orders'), (int) $points->max('finished'), 1);
-
-        $mappedPoints = $points->values()->map(function (array $point, int $index) use ($width, $divisor, $chartTop, $chartBottom, $chartHeight, $maxValue): array {
-            $x = round(4 + (($width - 8) * ($index / $divisor)), 2);
-
-            return [
-                ...$point,
-                'x' => $x,
-                'ordersY' => round($chartBottom - (($point['orders'] / $maxValue) * $chartHeight), 2),
-                'finishedY' => round($chartBottom - (($point['finished'] / $maxValue) * $chartHeight), 2),
-            ];
-        });
-
-        $ordersCoordinates = $mappedPoints
-            ->map(fn (array $point) => $point['x'].' '.$point['ordersY'])
-            ->implode(' L ');
-
-        $finishedCoordinates = $mappedPoints
-            ->map(fn (array $point) => $point['x'].' '.$point['finishedY'])
-            ->implode(' L ');
-
-        $firstPoint = $mappedPoints->first() ?? ['x' => 4];
-        $lastPoint = $mappedPoints->last() ?? ['x' => 96];
-
-        $gridLines = collect(range(0, 3))->map(function (int $index) use ($chartTop, $chartHeight, $maxValue): array {
-            $fraction = $index / 3;
-
-            return [
-                'y' => round($chartTop + ($chartHeight * $fraction), 2),
-                'label' => (string) (int) round($maxValue - ($maxValue * $fraction)),
-            ];
-        });
-
-        $axisLabels = $points
-            ->filter(fn (array $point, int $index) => in_array($index, [0, 3, 6, 9, $points->count() - 1], true))
-            ->values()
-            ->pluck('shortLabel');
-
-        return [
-            'points' => $mappedPoints,
-            'ordersPath' => 'M '.$ordersCoordinates,
-            'ordersAreaPath' => 'M '.$ordersCoordinates.' L '.$lastPoint['x'].' '.$chartBottom.' L '.$firstPoint['x'].' '.$chartBottom.' Z',
-            'finishedPath' => 'M '.$finishedCoordinates,
-            'gridLines' => $gridLines,
-            'axisLabels' => $axisLabels,
-        ];
     }
 
     private function buildStatusBreakdown(int $tokoId): array
@@ -402,29 +288,6 @@ class DashboardController extends Controller
             'attentionLine' => '',
             'paidCount' => 0,
             'unpaidValue' => $this->formatCurrency(0),
-        ];
-    }
-
-    private function emptyTrend(): array
-    {
-        return [
-            'heading' => 'Pergerakan order 14 hari terakhir',
-            'period' => '',
-            'totals' => [],
-            'points' => collect(),
-            'ordersPath' => '',
-            'ordersAreaPath' => '',
-            'finishedPath' => '',
-            'gridLines' => collect(),
-            'axisLabels' => collect(),
-            'chart' => [
-                'labels' => [],
-                'fullLabels' => [],
-                'orders' => [],
-                'finished' => [],
-                'revenue' => [],
-            ],
-            'hasData' => false,
         ];
     }
 

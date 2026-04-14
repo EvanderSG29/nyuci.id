@@ -38,6 +38,10 @@
                 'profile-updated' => ['text' => 'Profil akun berhasil diperbarui.', 'variant' => 'success'],
                 'password-updated' => ['text' => 'Kata sandi berhasil diperbarui.', 'variant' => 'success'],
                 'store-settings-updated' => ['text' => 'Pengaturan toko berhasil diperbarui.', 'variant' => 'success'],
+                'dashboard-chart-defaults-updated' => ['text' => 'Default chart dashboard berhasil diperbarui.', 'variant' => 'success'],
+                'dashboard-chart-overrides-updated' => ['text' => 'Preferensi chart pribadi berhasil diperbarui.', 'variant' => 'success'],
+                'dashboard-chart-default-reset' => ['text' => 'Slot chart berhasil dikembalikan ke default.', 'variant' => 'success'],
+                'dashboard-chart-override-deleted' => ['text' => 'Override chart berhasil dihapus.', 'variant' => 'success'],
                 'verification-link-sent' => ['text' => 'Tautan verifikasi baru berhasil dikirim.', 'variant' => 'success'],
             ];
 

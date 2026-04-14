@@ -23,6 +23,7 @@
     ];
 
     $secondaryItems = [
+        ['label' => 'Pengaturan Dashboard', 'route' => 'pengaturan-dashboard.edit', 'icon' => 'chart-bar', 'active' => 'pengaturan-dashboard.*'],
         ['label' => 'Pengaturan Toko', 'route' => 'pengaturan-toko.edit', 'icon' => 'cog-6-tooth', 'active' => 'pengaturan-toko.*'],
         ['label' => 'Profil Saya', 'route' => 'profile.edit', 'icon' => 'user-circle', 'active' => 'profile.*'],
     ];

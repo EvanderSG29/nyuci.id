@@ -123,4 +123,24 @@ class Toko extends Model
     {
         return $this->hasMany(Klien::class);
     }
+
+    public function dashboardChartPresets()
+    {
+        return $this->hasMany(DashboardChartPreset::class);
+    }
+
+    public function dashboardChartPreset(string $slotKey)
+    {
+        return $this->dashboardChartPresets()->where('slot_key', $slotKey);
+    }
+
+    public function dashboardChartUserOverrides()
+    {
+        return $this->hasManyThrough(
+            DashboardChartUserOverride::class,
+            DashboardChartPreset::class,
+            'toko_id',
+            'dashboard_chart_preset_id'
+        );
+    }
 }

@@ -139,6 +139,10 @@ test('dashboard displays analytics sections and computed values', function () {
     $response
         ->assertOk()
         ->assertSee('Tambah Laundry')
+        ->assertSee('Kelola Pembayaran')
+        ->assertSee('Order Masuk')
+        ->assertSee('Order Selesai')
+        ->assertSee('Revenue')
         ->assertSee('Ringkasan bisnis')
         ->assertSee('Kontributor order paling aktif')
         ->assertSee('Aktivitas terakhir toko Anda')
@@ -147,4 +151,15 @@ test('dashboard displays analytics sections and computed values', function () {
         ->assertSee('Rp 16.500')
         ->assertSee('Rp 32.000')
         ->assertSee('2 order masih aktif dan 2 tagihan butuh tindakan hari ini.');
+});
+
+test('dashboard renders empty state when user has no store', function () {
+    $user = User::factory()->create();
+
+    $this
+        ->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('Dashboard belum aktif')
+        ->assertSee('Lengkapi data toko supaya dashboard bisa dipakai penuh.');
 });

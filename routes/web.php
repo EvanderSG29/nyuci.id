@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RegisterTokoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardChartSettingsController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\JasaController;
 use App\Http\Controllers\KlienController;
@@ -45,6 +46,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/search/global', GlobalSearchController::class)->name('search.global');
+    Route::get('/pengaturan-dashboard', [DashboardChartSettingsController::class, 'edit'])->name('pengaturan-dashboard.edit');
+    Route::patch('/pengaturan-dashboard/defaults', [DashboardChartSettingsController::class, 'updateDefaults'])->name('pengaturan-dashboard.defaults.update');
+    Route::patch('/pengaturan-dashboard/overrides', [DashboardChartSettingsController::class, 'updateOverrides'])->name('pengaturan-dashboard.overrides.update');
+    Route::delete('/pengaturan-dashboard/overrides/{slot}', [DashboardChartSettingsController::class, 'destroyOverride'])->name('pengaturan-dashboard.overrides.destroy');
+    Route::post('/pengaturan-dashboard/reset-default/{slot}', [DashboardChartSettingsController::class, 'resetDefault'])->name('pengaturan-dashboard.defaults.reset');
     Route::patch('/notifikasi/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 

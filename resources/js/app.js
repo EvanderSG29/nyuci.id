@@ -1,8 +1,12 @@
 import './bootstrap';
 import DataTable from 'datatables.net-dt';
 import 'datatables.net-dt/css/dataTables.dataTables.css';
+import { Chart, registerables } from 'chart.js';
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
+
+Chart.register(...registerables);
+window.Chart = Chart;
 
 window.Alpine = Alpine;
 Alpine.plugin(persist);
@@ -740,15 +744,249 @@ const closeNyuciActionMenus = (except = null) => {
     });
 };
 
+const dashboardNumberFormatter = new Intl.NumberFormat('id-ID');
+const isDarkThemeActive = () =>
+    document.documentElement.classList.contains('dark')
+    || document.documentElement.classList.contains('theme-dark');
+
+const hexToRgba = (hex, alpha) => {
+    const normalized = String(hex ?? '').trim();
+
+    if (normalized.startsWith('rgba(') || normalized.startsWith('rgb(')) {
+        return normalized;
+    }
+
+    const value = normalized.replace('#', '');
+
+    if (value.length !== 6) {
+        return `rgba(74, 125, 240, ${alpha})`;
+    }
+
+    const red = Number.parseInt(value.slice(0, 2), 16);
+    const green = Number.parseInt(value.slice(2, 4), 16);
+    const blue = Number.parseInt(value.slice(4, 6), 16);
+
+    return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+};
+
+const parseDashboardChartConfig = (value) => {
+    if (! value) {
+        return null;
+    }
+
+    if (typeof value === 'object') {
+        return value;
+    }
+
+    try {
+        return JSON.parse(value);
+    } catch {
+        return null;
+    }
+};
+
+const formatDashboardMetricValue = (metricFormat, value) =>
+    metricFormat === 'currency'
+        ? `Rp ${dashboardNumberFormatter.format(Math.round(Number(value) || 0))}`
+        : dashboardNumberFormatter.format(Math.round(Number(value) || 0));
+
+const buildDashboardGradient = (chart, color, topAlpha, bottomAlpha) => {
+    const { chartArea, ctx } = chart;
+
+    if (! chartArea) {
+        return hexToRgba(color, bottomAlpha);
+    }
+
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    gradient.addColorStop(0, hexToRgba(color, topAlpha));
+    gradient.addColorStop(0.55, hexToRgba(color, bottomAlpha));
+    gradient.addColorStop(1, hexToRgba(color, 0.02));
+
+    return gradient;
+};
+
+const buildDashboardAxisConfig = (axisFormat, isHero) => {
+    const darkMode = isDarkThemeActive();
+    const tickColor = isHero
+        ? 'rgba(255, 255, 255, 0.72)'
+        : (darkMode ? 'rgba(226, 232, 240, 0.72)' : 'rgba(112, 130, 155, 0.9)');
+    const gridColor = isHero
+        ? 'rgba(255, 255, 255, 0.12)'
+        : (darkMode ? 'rgba(148, 163, 184, 0.18)' : 'rgba(216, 226, 238, 0.84)');
+
+    return {
+        beginAtZero: true,
+        grid: {
+            color: gridColor,
+            drawBorder: false,
+        },
+        ticks: {
+            color: tickColor,
+            callback: (value) => formatDashboardMetricValue(axisFormat, value),
+        },
+        border: {
+            display: false,
+        },
+    };
+};
+
+const buildDashboardChartConfig = (payload) => {
+    const chartPayload = payload?.chart ?? {};
+    const isHero = payload?.surface === 'hero';
+    const chartType = chartPayload.type === 'bar' ? 'bar' : 'line';
+    const accentColor = payload?.accent_color ?? '#4a7df0';
+    const datasets = Array.isArray(chartPayload.data?.datasets) ? chartPayload.data.datasets : [];
+    const showPoints = Boolean(payload?.show_points);
+    const axes = chartPayload.axes ?? { y: 'number' };
+    const data = {
+        labels: Array.isArray(chartPayload.data?.labels) ? chartPayload.data.labels : [],
+        datasets: datasets.map((dataset, index) => {
+            const isPrimary = index === 0;
+            const color = dataset.borderColor ?? (isPrimary ? accentColor : 'rgba(148, 163, 184, 0.8)');
+            const alpha = isHero ? (isPrimary ? 0.22 : 0.16) : (chartType === 'bar' ? 0.65 : 0.18);
+            const gradientAlphaTop = isHero
+                ? (isPrimary ? 0.42 : 0.22)
+                : (isPrimary ? 0.24 : 0.16);
+            const gradientAlphaBottom = isHero
+                ? (isPrimary ? 0.06 : 0.03)
+                : (isPrimary ? 0.07 : 0.05);
+
+            return {
+                ...dataset,
+                borderColor: color,
+                backgroundColor: chartType === 'line'
+                    ? ((context) => buildDashboardGradient(context.chart, color, gradientAlphaTop, gradientAlphaBottom))
+                    : (dataset.backgroundColor ?? hexToRgba(color, alpha)),
+                pointBackgroundColor: dataset.pointBackgroundColor ?? color,
+                pointBorderColor: dataset.pointBorderColor ?? color,
+                borderWidth: dataset.borderWidth ?? (isHero ? 3 : 2),
+                borderRadius: dataset.borderRadius ?? 10,
+                barPercentage: dataset.barPercentage ?? 0.78,
+                categoryPercentage: dataset.categoryPercentage ?? 0.8,
+                fill: chartType === 'line' ? Boolean(dataset.fill) : false,
+                tension: dataset.tension ?? (isHero ? 0.42 : 0.38),
+                pointRadius: showPoints ? (dataset.pointRadius ?? 3) : 0,
+                pointHoverRadius: showPoints ? (dataset.pointHoverRadius ?? 5) : 0,
+                pointHitRadius: dataset.pointHitRadius ?? 12,
+                yAxisID: dataset.axis_id ?? 'y',
+            };
+        }),
+    };
+
+    const darkMode = isDarkThemeActive();
+    const baseTooltip = {
+        backgroundColor: darkMode ? '#0f172a' : '#ffffff',
+        titleColor: darkMode ? '#f8fafc' : '#142338',
+        bodyColor: darkMode ? '#cbd5e1' : '#43566d',
+        borderColor: darkMode ? 'rgba(148, 163, 184, 0.22)' : '#d8e2ee',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 14,
+        caretPadding: 10,
+        titleMarginBottom: 8,
+        displayColors: true,
+        callbacks: {
+            title(items) {
+                const meta = items[0]?.dataset?.meta?.[items[0].dataIndex];
+
+                return meta?.label ?? items[0]?.label ?? '';
+            },
+            label(context) {
+                const meta = context.dataset?.meta?.[context.dataIndex] ?? {};
+                const value = meta.formattedValue ?? context.formattedValue ?? context.raw ?? 0;
+                const line = `${context.dataset?.label ?? ''}: ${value}`;
+
+                if (meta.deltaText) {
+                    return [line, meta.deltaText];
+                }
+
+                return line;
+            },
+        },
+    };
+
+    return {
+        type: chartType,
+        data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    display: Boolean(chartPayload.showLegend),
+                },
+                tooltip: baseTooltip,
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: isHero
+                            ? 'rgba(255, 255, 255, 0.08)'
+                            : (darkMode ? 'rgba(148, 163, 184, 0.14)' : 'rgba(216, 226, 238, 0.78)'),
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        color: isHero
+                            ? 'rgba(255, 255, 255, 0.72)'
+                            : (darkMode ? 'rgba(226, 232, 240, 0.72)' : 'rgba(112, 130, 155, 0.9)'),
+                    },
+                },
+                y: buildDashboardAxisConfig(axes.y ?? 'number', isHero),
+                ...(axes.y1
+                    ? {
+                        y1: {
+                            ...buildDashboardAxisConfig(axes.y1, isHero),
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                                drawBorder: false,
+                            },
+                        },
+                    }
+                    : {}),
+            },
+        },
+    };
+};
+
+const initializeDashboardChart = (root) => {
+    if (!(root instanceof HTMLElement) || root.dataset.dashboardChartMounted === '1') {
+        return;
+    }
+
+    const payload = parseDashboardChartConfig(root.dataset.dashboardChart);
+    const canvas = root.querySelector('canvas');
+
+    if (! payload || !(canvas instanceof HTMLCanvasElement) || typeof Chart === 'undefined') {
+        return;
+    }
+
+    const chart = new Chart(canvas, buildDashboardChartConfig(payload));
+
+    root._dashboardChartInstance = chart;
+    root.dataset.dashboardChartMounted = '1';
+};
+
+const initializeDashboardCharts = () => {
+    document.querySelectorAll('[data-dashboard-chart]').forEach(initializeDashboardChart);
+};
+
 Alpine.start();
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeNyuciDataTables);
+    document.addEventListener('DOMContentLoaded', initializeDashboardCharts);
 } else {
     initializeNyuciDataTables();
+    initializeDashboardCharts();
 }
 
 document.addEventListener('livewire:navigated', initializeNyuciDataTables);
+document.addEventListener('livewire:navigated', initializeDashboardCharts);
 document.addEventListener('click', (event) => {
     const previewTrigger = event.target.closest('[data-detail-url]');
 

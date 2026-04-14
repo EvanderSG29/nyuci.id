@@ -457,6 +457,10 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     position: relative;
 }
 
+.nyuci-dashboard-shell [data-flux-main] {
+    padding: 0 !important;
+}
+
 .nyuci-dashboard-navbar {
     position: sticky;
     top: 0;
@@ -745,6 +749,10 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     border: 1px solid rgb(255 255 255 / 0.1);
     background: linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.04));
     backdrop-filter: blur(14px);
+}
+
+.nyuci-dashboard-chart-shell canvas {
+    display: block;
 }
 
 .nyuci-dashboard-chart-pill {
