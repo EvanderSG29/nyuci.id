@@ -51,6 +51,7 @@
                 ]"
                 :order="[[3, 'desc']]"
                 search-placeholder="Cari laundry..."
+                :initial-search="request('search', '')"
             >
                 <x-slot:filters>
                     <x-datatable-select name="status" :options="$statusOptions" placeholder="Filter Status" />

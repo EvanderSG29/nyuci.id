@@ -138,9 +138,10 @@ test('dashboard displays analytics sections and computed values', function () {
 
     $response
         ->assertOk()
-        ->assertSee('Pergerakan order 14 hari terakhir')
-        ->assertSee('Pendapatan bulan ini')
-        ->assertSee('Komposisi kanal pembayaran')
+        ->assertSee('Tambah Laundry')
+        ->assertSee('Ringkasan bisnis')
+        ->assertSee('Kontributor order paling aktif')
+        ->assertSee('Aktivitas terakhir toko Anda')
         ->assertSee('Cuci Express')
         ->assertSee('Setrika Premium')
         ->assertSee('Rp 16.500')

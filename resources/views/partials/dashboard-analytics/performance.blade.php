@@ -1,5 +1,5 @@
 <section class="grid gap-6 xl:grid-cols-[1fr_1fr]">
-    <x-card class="rounded-[2rem] p-6">
+    <x-card class="nyuci-dashboard-panel rounded-[1.85rem] p-6">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p class="text-sm font-semibold text-[var(--text-muted)]">Layanan terlaris</p>
@@ -13,12 +13,12 @@
         </div>
 
         @forelse ($topServices as $service)
-            <div class="nyuci-service-row mt-4 rounded-3xl p-4">
+            <div class="nyuci-dashboard-service mt-4 rounded-[1.35rem] p-4">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <p class="text-base font-semibold text-[var(--text-strong)]">{{ $service['name'] }}</p>
                         <p class="mt-1 text-sm text-[var(--text-muted)]">
-                            {{ $service['count'] }} order - {{ $service['qty'] }} {{ $service['unit'] }}
+                            {{ $service['count'] }} order • {{ $service['qty'] }} {{ $service['unit'] }}
                         </p>
                     </div>
 
@@ -30,7 +30,7 @@
                 </div>
             </div>
         @empty
-            <div class="mt-6 rounded-3xl border border-dashed border-[var(--border-soft)] bg-[var(--bg-surface)] px-6 py-10 text-center">
+            <div class="mt-6 rounded-[1.5rem] border border-dashed border-[var(--border-soft)] bg-[var(--bg-surface)] px-6 py-10 text-center">
                 <p class="text-base font-medium text-[var(--text-main)]">Belum ada layanan yang bisa dibandingkan.</p>
                 <p class="mt-2 text-sm text-[var(--text-muted)]">
                     Tambahkan order terlebih dahulu agar performa tiap jasa bisa dibaca.
@@ -39,7 +39,7 @@
         @endforelse
     </x-card>
 
-    <x-card as="section" class="rounded-[2rem] p-6">
+    <x-card as="section" class="nyuci-dashboard-panel rounded-[1.85rem] p-6">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p class="text-sm font-semibold text-[var(--text-muted)]">Laundry terbaru</p>
@@ -51,7 +51,7 @@
         </div>
 
         @if ($recentLaundries->isEmpty())
-            <div class="mt-6 rounded-3xl border border-dashed border-[var(--border-soft)] bg-[var(--bg-surface)] px-6 py-10 text-center">
+            <div class="mt-6 rounded-[1.5rem] border border-dashed border-[var(--border-soft)] bg-[var(--bg-surface)] px-6 py-10 text-center">
                 <p class="text-base font-medium text-[var(--text-main)]">Belum ada data laundry.</p>
                 <p class="mt-2 text-sm text-[var(--text-muted)]">Mulai dari order pertama agar dashboard ini langsung terisi.</p>
                 <div class="mt-5">
@@ -63,12 +63,12 @@
         @else
             <div class="mt-6 space-y-3 lg:hidden">
                 @foreach ($recentLaundries as $laundry)
-                    <x-card class="rounded-3xl bg-[var(--bg-surface)]">
+                    <div class="nyuci-dashboard-activity rounded-[1.35rem] p-4">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <p class="font-semibold text-[var(--text-strong)]">{{ $laundry->nama }}</p>
                                 <p class="mt-1 text-sm text-[var(--text-muted)]">
-                                    {{ $laundry->jenis_jasa_label }} - {{ $laundry->satuan_label }}
+                                    {{ $laundry->jenis_jasa_label }} • {{ $laundry->satuan_label }}
                                 </p>
                             </div>
                             <x-status-badge :variant="$laundry->status === 'selesai' ? 'success' : ($laundry->status === 'proses' ? 'paid' : 'pending')">
@@ -80,7 +80,7 @@
                             <span>{{ $laundry->created_at->format('d M Y') }}</span>
                             <span>{{ $laundry->pembayaran?->status === 'sudah_bayar' ? 'Sudah bayar' : 'Belum bayar' }}</span>
                         </div>
-                    </x-card>
+                    </div>
                 @endforeach
             </div>
 

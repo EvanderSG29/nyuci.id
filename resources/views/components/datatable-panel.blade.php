@@ -8,6 +8,7 @@
     'createLabel' => 'New',
     'order' => [],
     'searchPlaceholder' => 'Search...',
+    'initialSearch' => '',
 ])
 
 @php
@@ -19,6 +20,7 @@
         'detailFlyoutName' => $detailFlyoutName,
         'order' => array_values($order),
         'searchPlaceholder' => $searchPlaceholder,
+        'initialSearch' => trim((string) $initialSearch),
     ];
 @endphp
 

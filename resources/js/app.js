@@ -55,6 +55,175 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    Alpine.data('dashboardChrome', (config = {}) => ({
+        isDashboard: Boolean(config.isDashboard),
+        searchEnabled: Boolean(config.searchEnabled),
+        searchUrl: config.searchUrl ?? '',
+        scrolled: false,
+        query: '',
+        open: false,
+        loading: false,
+        error: null,
+        results: {
+            query: '',
+            groups: [],
+            message: null,
+        },
+        searchAbortController: null,
+        activeSearchToken: 0,
+
+        init() {
+            if (! this.isDashboard) {
+                return;
+            }
+
+            const syncScrollState = () => {
+                this.scrolled = window.scrollY > 16;
+            };
+
+            syncScrollState();
+            window.addEventListener('scroll', syncScrollState, { passive: true });
+
+            this.$watch('query', (value) => {
+                this.performSearch(value);
+            });
+        },
+
+        performSearch(value) {
+            const query = value.trim();
+
+            if (! this.searchEnabled || query.length < 2) {
+                this.abortSearch();
+                this.loading = false;
+                this.error = null;
+                this.results = {
+                    query,
+                    groups: [],
+                    message: null,
+                };
+                this.open = false;
+
+                return;
+            }
+
+            if (! this.searchUrl) {
+                return;
+            }
+
+            const token = ++this.activeSearchToken;
+            const url = new URL(this.searchUrl, window.location.origin);
+            url.searchParams.set('query', query);
+
+            this.abortSearch();
+            this.loading = true;
+            this.error = null;
+            this.open = true;
+            this.results = {
+                query,
+                groups: [],
+                message: null,
+            };
+            this.searchAbortController = new AbortController();
+
+            fetch(url.toString(), {
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                signal: this.searchAbortController.signal,
+            })
+                .then(async (response) => {
+                    if (! response.ok) {
+                        throw new Error(`Search request failed with status ${response.status}`);
+                    }
+
+                    return response.json();
+                })
+                .then((payload) => {
+                    if (token !== this.activeSearchToken) {
+                        return;
+                    }
+
+                    this.results = {
+                        query: payload.query ?? query,
+                        groups: Array.isArray(payload.groups) ? payload.groups : [],
+                        message: payload.message ?? null,
+                    };
+                    this.loading = false;
+                    this.error = null;
+                    this.open = true;
+                })
+                .catch((error) => {
+                    if (error?.name === 'AbortError') {
+                        return;
+                    }
+
+                    if (token !== this.activeSearchToken) {
+                        return;
+                    }
+
+                    this.loading = false;
+                    this.error = 'Pencarian gagal dimuat. Coba lagi.';
+                    this.results = {
+                        query,
+                        groups: [],
+                        message: null,
+                    };
+                    this.open = true;
+                });
+        },
+
+        abortSearch() {
+            if (! this.searchAbortController) {
+                return;
+            }
+
+            this.searchAbortController.abort();
+            this.searchAbortController = null;
+        },
+
+        closeSearch() {
+            this.open = false;
+        },
+
+        openSearch() {
+            if (! this.searchEnabled || this.query.trim().length < 2) {
+                return;
+            }
+
+            this.open = true;
+        },
+
+        clearSearch() {
+            this.abortSearch();
+            this.query = '';
+            this.loading = false;
+            this.error = null;
+            this.results = {
+                query: '',
+                groups: [],
+                message: null,
+            };
+            this.open = false;
+        },
+
+        shouldShowSearch() {
+            return this.isDashboard
+                && this.searchEnabled
+                && this.open
+                && (
+                    this.loading
+                    || this.error !== null
+                    || this.query.trim().length >= 2
+                    || this.hasSearchResults()
+                );
+        },
+
+        hasSearchResults() {
+            return Array.isArray(this.results.groups) && this.results.groups.length > 0;
+        },
+    }));
+
     Alpine.data('nyuciFilterSelect', (config = {}) => ({
         open: false,
         query: '',
@@ -442,6 +611,10 @@ const syncSearchInput = (root, config) => {
 
     searchInput.placeholder = config?.searchPlaceholder ?? 'Search...';
     searchInput.autocomplete = 'off';
+
+    if (typeof config?.initialSearch === 'string' && config.initialSearch.trim() !== '' && searchInput.value === '') {
+        searchInput.value = config.initialSearch.trim();
+    }
 };
 
 const bindToolbarAction = (root, dataTable, config) => async (event) => {
@@ -510,6 +683,7 @@ const initializeNyuciDataTable = (root) => {
 
     const config = parseDatatableConfig(root.dataset.nyuciDatatable);
     const table = root.querySelector('table');
+    const initialSearch = typeof config?.initialSearch === 'string' ? config.initialSearch.trim() : '';
 
     if (! config || ! table) {
         return;
@@ -535,6 +709,9 @@ const initializeNyuciDataTable = (root) => {
             topEnd: 'search',
             bottomStart: 'info',
             bottomEnd: 'paging',
+        },
+        search: {
+            search: initialSearch,
         },
         initComplete: () => syncSearchInput(root, config),
         drawCallback: () => syncSearchInput(root, config),

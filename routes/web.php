@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RegisterTokoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\JasaController;
 use App\Http\Controllers\KlienController;
 use App\Http\Controllers\LaundryController;
@@ -43,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/register/toko', [RegisterTokoController::class, 'store'])->name('register.toko.store');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/search/global', GlobalSearchController::class)->name('search.global');
     Route::patch('/notifikasi/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 

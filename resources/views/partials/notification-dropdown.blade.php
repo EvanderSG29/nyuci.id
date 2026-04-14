@@ -4,7 +4,7 @@
 @endphp
 
 <flux:dropdown position="bottom" align="end">
-    <flux:button variant="subtle" square aria-label="Notifikasi" class="relative">
+    <flux:button variant="subtle" square aria-label="Notifikasi" class="relative {{ ($isDashboardRoute ?? false) ? 'nyuci-dashboard-icon-button' : '' }}">
         <flux:icon.bell variant="outline" class="size-5" />
 
         @if ($unreadCount > 0)

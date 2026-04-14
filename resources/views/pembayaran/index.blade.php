@@ -44,6 +44,7 @@
                 ]"
                 :order="[[3, 'desc']]"
                 search-placeholder="Cari pembayaran..."
+                :initial-search="request('search', '')"
             >
                 <x-slot:filters>
                     <x-datatable-select name="status" :options="$statusOptions" placeholder="Filter Status" />
