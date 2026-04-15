@@ -90,159 +90,12 @@ class NyuciDemoSeeder extends Seeder
         ['name' => 'Putri Ramadhani', 'city' => 'Makassar', 'email' => false],
     ];
 
-    private const LAUNDRY_BLUEPRINTS = [
-        [
-            'service' => 'cuci_kering_lipat_reguler',
-            'client' => 0,
-            'qty' => 2.50,
-            'status' => 'belum_selesai',
-            'days_ago' => 13,
-            'eta_days' => 3,
-            'payment' => 'cash_unpaid',
-        ],
-        [
-            'service' => 'cuci_kering_lipat_premium',
-            'client' => 1,
-            'qty' => 4.00,
-            'status' => 'belum_selesai',
-            'days_ago' => 12,
-            'eta_days' => 3,
-            'payment' => 'qris_pending_a',
-        ],
-        [
-            'service' => 'cuci_setrika_reguler',
-            'client' => 2,
-            'qty' => 3.00,
-            'status' => 'belum_selesai',
-            'days_ago' => 4,
-            'eta_days' => 3,
-            'payment' => 'none',
-        ],
-        [
-            'service' => 'cuci_setrika_express',
-            'client' => 3,
-            'qty' => 2.00,
-            'status' => 'belum_selesai',
-            'days_ago' => 0,
-            'eta_days' => 1,
-            'payment' => 'transfer_unpaid_a',
-        ],
-        [
-            'service' => 'setrika_saja',
-            'client' => 4,
-            'qty' => 3.50,
-            'status' => 'proses',
-            'days_ago' => 11,
-            'eta_days' => 2,
-            'payment' => 'cash_paid_a',
-        ],
-        [
-            'service' => 'dry_cleaning_jas',
-            'client' => 5,
-            'qty' => 1.00,
-            'status' => 'proses',
-            'days_ago' => 9,
-            'eta_days' => 4,
-            'payment' => 'transfer_paid_a',
-        ],
-        [
-            'service' => 'dry_cleaning_kebaya',
-            'client' => 6,
-            'qty' => 1.00,
-            'status' => 'proses',
-            'days_ago' => 5,
-            'eta_days' => 4,
-            'payment' => 'qris_pending_b',
-        ],
-        [
-            'service' => 'laundry_koin_paket_7_kg',
-            'client' => 7,
-            'qty' => 1.00,
-            'status' => 'proses',
-            'days_ago' => 1,
-            'eta_days' => 1,
-            'payment' => 'none',
-        ],
-        [
-            'service' => 'cuci_kering_lipat_reguler',
-            'client' => 8,
-            'qty' => 5.00,
-            'status' => 'selesai',
-            'days_ago' => 10,
-            'eta_days' => 3,
-            'completed_after_days' => 4,
-            'payment' => 'qris_paid_a',
-        ],
-        [
-            'service' => 'cuci_setrika_reguler',
-            'client' => 9,
-            'qty' => 4.00,
-            'status' => 'selesai',
-            'days_ago' => 8,
-            'eta_days' => 3,
-            'completed_after_days' => 3,
-            'payment' => 'cash_paid_b',
-        ],
-        [
-            'service' => 'cuci_setrika_express',
-            'client' => 10,
-            'qty' => 2.50,
-            'status' => 'selesai',
-            'days_ago' => 7,
-            'eta_days' => 1,
-            'completed_after_days' => 1,
-            'payment' => 'transfer_paid_b',
-        ],
-        [
-            'service' => 'setrika_saja',
-            'client' => 11,
-            'qty' => 6.00,
-            'status' => 'selesai',
-            'days_ago' => 6,
-            'eta_days' => 2,
-            'completed_after_days' => 2,
-            'payment' => 'ewallet_unpaid',
-        ],
-        [
-            'service' => 'dry_cleaning_jas',
-            'client' => 0,
-            'qty' => 2.00,
-            'status' => 'selesai',
-            'days_ago' => 6,
-            'eta_days' => 4,
-            'completed_after_days' => 4,
-            'payment' => 'ewallet_paid',
-        ],
-        [
-            'service' => 'dry_cleaning_kebaya',
-            'client' => 1,
-            'qty' => 1.00,
-            'status' => 'selesai',
-            'days_ago' => 5,
-            'eta_days' => 4,
-            'completed_after_days' => 4,
-            'payment' => 'qris_paid_b',
-        ],
-        [
-            'service' => 'laundry_koin_paket_7_kg',
-            'client' => 2,
-            'qty' => 1.00,
-            'status' => 'selesai',
-            'days_ago' => 3,
-            'eta_days' => 1,
-            'completed_after_days' => 1,
-            'payment' => 'cash_paid_c',
-        ],
-        [
-            'service' => 'cuci_kering_lipat_premium',
-            'client' => 3,
-            'qty' => 1.50,
-            'status' => 'selesai',
-            'days_ago' => 2,
-            'eta_days' => 3,
-            'completed_after_days' => 2,
-            'payment' => 'transfer_unpaid_b',
-        ],
+    private const MONTHLY_ACTIVITY_COUNTS = [1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5, 5];
+
+    private const PAYMENT_BY_STATUS = [
+        'belum_selesai' => ['cash_unpaid', 'qris_pending_a', 'transfer_unpaid_a'],
+        'proses' => ['cash_paid_a', 'transfer_paid_a', 'qris_pending_b'],
+        'selesai' => ['qris_paid_a', 'cash_paid_b', 'transfer_paid_b', 'ewallet_paid', 'qris_paid_b', 'cash_paid_c'],
     ];
 
     public function run(): void
@@ -307,10 +160,12 @@ class NyuciDemoSeeder extends Seeder
                 'pembayaran' => $this->freshStats(),
             ];
 
+            $this->clearStoreTransactions($toko);
             $services = $this->seedServices($toko, $stats);
             $clients = $this->seedClients($toko, $stats);
+            $blueprints = $this->buildLaundryBlueprints($toko);
 
-            foreach (self::LAUNDRY_BLUEPRINTS as $index => $blueprint) {
+            foreach ($blueprints as $index => $blueprint) {
                 $laundry = $this->seedLaundry(
                     $toko,
                     $clients[$blueprint['client']],
@@ -336,6 +191,81 @@ class NyuciDemoSeeder extends Seeder
                 'stats' => $stats,
             ];
         });
+    }
+
+    private function clearStoreTransactions(Toko $toko): void
+    {
+        $laundryIds = Laundry::query()
+            ->where('toko_id', $toko->id)
+            ->pluck('id');
+
+        if ($laundryIds->isEmpty()) {
+            return;
+        }
+
+        Pembayaran::query()
+            ->whereIn('laundry_id', $laundryIds->all())
+            ->delete();
+
+        Laundry::query()
+            ->whereIn('id', $laundryIds->all())
+            ->delete();
+    }
+
+    /**
+     * @return list<array{
+     *     service: string,
+     *     client: int,
+     *     qty: float,
+     *     status: string,
+     *     started_at: string,
+     *     eta_days: int,
+     *     completed_after_days?: int,
+     *     payment: string
+     * }>
+     */
+    private function buildLaundryBlueprints(Toko $toko): array
+    {
+        $monthStart = today()->startOfMonth();
+        $blueprints = [];
+        $serviceCount = count(self::SERVICES);
+        $clientCount = count(self::CLIENTS);
+
+        foreach (self::MONTHLY_ACTIVITY_COUNTS as $monthIndex => $count) {
+            $month = (clone $monthStart)->subMonthsNoOverflow(count(self::MONTHLY_ACTIVITY_COUNTS) - 1 - $monthIndex);
+            $maxDay = $month->isSameMonth(today())
+                ? max(2, today()->day - 1)
+                : max(2, $month->daysInMonth - 2);
+
+            for ($slot = 0; $slot < $count; $slot++) {
+                $status = $slot === 0
+                    ? 'belum_selesai'
+                    : ($slot === 1 ? 'proses' : 'selesai');
+
+                $paymentOptions = self::PAYMENT_BY_STATUS[$status];
+                $globalIndex = count($blueprints);
+                $service = self::SERVICES[($monthIndex + $slot + $toko->id) % $serviceCount]['slug'];
+                $client = ($monthIndex * 2 + $slot) % $clientCount;
+                $qty = round(1.0 + ((($monthIndex + $slot + $toko->id) % 6) * 0.5), 2);
+                $etaDays = 1 + (($monthIndex + $slot) % 4);
+                $startAt = (clone $month)->day(min(2 + ($slot * 2), $maxDay));
+
+                $blueprints[] = [
+                    'service' => $service,
+                    'client' => $client,
+                    'qty' => $qty,
+                    'status' => $status,
+                    'started_at' => $startAt->toDateString(),
+                    'eta_days' => $etaDays,
+                    'completed_after_days' => $status === 'selesai'
+                        ? min($etaDays, 1 + (($globalIndex + $slot) % 3))
+                        : null,
+                    'payment' => $paymentOptions[($globalIndex + $slot) % count($paymentOptions)],
+                ];
+            }
+        }
+
+        return $blueprints;
     }
 
     private function ensureDemoStore(): void
@@ -426,7 +356,8 @@ class NyuciDemoSeeder extends Seeder
      *     client: int,
      *     qty: float,
      *     status: string,
-     *     days_ago: int,
+     *     started_at?: string,
+     *     days_ago?: int,
      *     eta_days: int,
      *     payment: string,
      *     completed_after_days?: int
@@ -441,10 +372,13 @@ class NyuciDemoSeeder extends Seeder
     private function seedLaundry(Toko $toko, Klien $klien, Jasa $jasa, array $blueprint, array &$stats): Laundry
     {
         $qty = (float) $blueprint['qty'];
-        $tanggalDimulai = today()->subDays($blueprint['days_ago'])->toDateString();
-        $estimasiSelesai = today()->subDays($blueprint['days_ago'])->addDays($blueprint['eta_days'])->toDateString();
+        $startAt = isset($blueprint['started_at'])
+            ? Carbon::parse($blueprint['started_at'])->startOfDay()
+            : today()->subDays($blueprint['days_ago']);
+        $tanggalDimulai = $startAt->toDateString();
+        $estimasiSelesai = $startAt->copy()->addDays($blueprint['eta_days'])->toDateString();
         $tglSelesai = $blueprint['status'] === 'selesai'
-            ? today()->subDays($blueprint['days_ago'])->addDays($blueprint['completed_after_days'] ?? $blueprint['eta_days'])->toDateString()
+            ? $startAt->copy()->addDays($blueprint['completed_after_days'] ?? $blueprint['eta_days'])->toDateString()
             : null;
 
         [$laundry, $action] = $this->syncLaundryModel([

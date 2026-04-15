@@ -75,7 +75,7 @@
                 <flux:header
                     container
                     x-bind:class="{ 'is-scrolled': scrolled }"
-                    class="nyuci-app-header nyuci-dashboard-navbar !border-b !border-transparent !bg-transparent"
+                    class="nyuci-app-header nyuci-dashboard-navbar !border-b"
                 >
                     <div class="flex w-full items-center gap-3 lg:gap-4">
                         <flux:sidebar.toggle class="nyuci-dashboard-icon-button lg:hidden" />

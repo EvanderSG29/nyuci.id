@@ -909,6 +909,21 @@ const buildDashboardChartConfig = (payload) => {
         type: chartType,
         data,
         options: {
+            layout: {
+                padding: isHero
+                    ? {
+                        top: 8,
+                        right: 6,
+                        bottom: 28,
+                        left: 6,
+                    }
+                    : {
+                        top: 4,
+                        right: 4,
+                        bottom: 8,
+                        left: 4,
+                    },
+            },
             responsive: true,
             maintainAspectRatio: false,
             interaction: {
