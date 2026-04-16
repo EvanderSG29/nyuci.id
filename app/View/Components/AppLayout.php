@@ -12,11 +12,28 @@ class AppLayout extends Component
     ) {
     }
 
+    protected function appName(): string
+    {
+        $appName = trim((string) config('app.name', ''));
+
+        return $appName !== '' && $appName !== 'Laravel' ? $appName : 'Nyuci.id';
+    }
+
+    protected function pageTitle(): string
+    {
+        $title = trim($this->title);
+
+        return $title !== '' ? $title : $this->appName();
+    }
+
     /**
      * Get the view / contents that represents the component.
      */
     public function render(): View
     {
-        return view('layouts.app');
+        return view('layouts.app', [
+            'appName' => $this->appName(),
+            'pageTitle' => $this->pageTitle(),
+        ]);
     }
 }

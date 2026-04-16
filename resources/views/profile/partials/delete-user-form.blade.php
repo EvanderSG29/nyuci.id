@@ -10,6 +10,7 @@
     </header>
 
     <x-danger-button
+        type="button"
         x-data=""
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
     >{{ __('Hapus Akun') }}</x-danger-button>

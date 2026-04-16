@@ -1,0 +1,45 @@
+NYUCI.ID Proprietary Source-Available License
+
+Copyright (c) 2026 Evander Smid Gidion
+All rights reserved.
+
+1. Access grant
+
+You may view, download, and locally inspect this repository solely for:
+- evaluation of the software;
+- security review;
+- preparing proposed contributions back to the copyright holder.
+
+2. Restrictions
+
+Except with prior written permission from the copyright holder, you may not:
+- use the software in production;
+- copy, publish, distribute, sublicense, lease, lend, or sell the software;
+- host the software or provide it as a service to third parties;
+- create or distribute derivative works;
+- remove or alter copyright, license, or notice files;
+- use the trademarks, product name, logo, brand assets, or domain names associated with NYUCI.ID.
+
+3. Contributions
+
+Contributions submitted to this repository are governed by CONTRIBUTING.md. No ownership transfer is implied unless explicitly agreed in writing.
+
+4. Third-party software
+
+This license applies only to the original work in this repository. Third-party packages, frameworks, fonts, and dependencies remain subject to their own licenses.
+
+5. Reservation of rights
+
+No rights are granted except those expressly stated in this license. All other rights are reserved.
+
+6. Termination
+
+Any breach of this license terminates your rights under it immediately.
+
+7. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+8. Commercial and other permissions
+
+If you need production use, redistribution, white-labeling, hosting rights, or other commercial rights, contact the copyright holder as described in COMMERCIAL-LICENSE.md.

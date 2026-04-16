@@ -2,20 +2,26 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Fortify\PasswordValidationRules;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Toko;
-use Illuminate\Auth\Events\Registered;
+use App\Otp\RegisterUserOtp;
+use App\Support\Auth\RegisterOtpState;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use SadiqSalau\LaravelOtp\Facades\Otp;
+use Throwable;
 
 class RegisteredUserController extends Controller
 {
+    use PasswordValidationRules;
+
     /**
      * Display the registration view.
      */
@@ -26,33 +32,44 @@ class RegisteredUserController extends Controller
 
     /**
      * Handle an incoming registration request.
-     *
-     * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
+            'password' => $this->passwordRules(),
+        ])->validate();
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $email = Str::lower(trim($validated['email']));
+        $sentAt = now();
+        $expiresAt = $sentAt->copy()->addMinutes((int) config('otp.expires', 15));
 
-        // Auto-create Toko untuk user baru
-        Toko::create([
-            'user_id' => $user->id,
-            'nama_toko' => $request->name . ' Laundry',
-        ]);
+        try {
+            Otp::identifier($email)->send(
+                new RegisterUserOtp(
+                    name: $validated['name'],
+                    email: $email,
+                    passwordHash: Hash::make($validated['password']),
+                ),
+                Notification::route('mail', $email),
+            );
+        } catch (Throwable $exception) {
+            Otp::identifier($email)->clear();
+            report($exception);
 
-        event(new Registered($user));
+            return back()
+                ->withInput([
+                    'name' => $validated['name'],
+                    'email' => $email,
+                ])
+                ->with('warning', 'Kode OTP gagal dikirim. Periksa konfigurasi email lalu coba lagi.');
+        }
 
-        Auth::login($user);
+        RegisterOtpState::put($request->session(), $email, $expiresAt, $sentAt);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()
+            ->route('register.otp.notice')
+            ->with('success', 'Kode OTP berhasil dikirim ke email Anda. Masukkan kode untuk menyelesaikan pendaftaran.');
     }
 }

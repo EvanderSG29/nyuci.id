@@ -1,10 +1,10 @@
 <x-guest-layout title="Verifikasi Email">
-    <div class="mb-4 text-sm text-slate-600">
+    <div class="mb-4 text-sm text-[var(--text-muted)]">
         {{ __('Terima kasih telah mendaftar! Sebelum memulai, bisakah Anda memverifikasi alamat email dengan mengklik tautan yang baru saja kami kirimkan? Jika Anda tidak menerima email, kami akan dengan senang hati mengirimkan yang lain.') }}
     </div>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 text-sm font-medium text-[#1d4ed8]">
+        <div class="mb-4 text-sm font-medium text-[var(--primary-ink)]">
             {{ __('Tautan verifikasi baru telah dikirim ke alamat email yang Anda berikan saat pendaftaran.') }}
         </div>
     @endif
@@ -23,7 +23,7 @@
         <form method="POST" action="{{ route('logout') }}">
             @csrf
 
-            <button type="submit" class="rounded-md text-sm text-slate-600 underline hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
+            <button type="submit" class="rounded-md text-sm text-[var(--text-muted)] underline hover:text-[var(--text-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
                 {{ __('Keluar') }}
             </button>
         </form>

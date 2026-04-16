@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\StoreSettingsUpdateRequest;
+use App\Models\Toko;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +20,18 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Display the store settings form.
+     */
+    public function editStore(Request $request): View
+    {
+        return view('settings.store', [
+            'user' => $request->user(),
+            'dashboardCards' => $request->user()->toko?->dashboardCards() ?? Toko::dashboardCardDefaults(),
+            'dashboardCardOptions' => Toko::dashboardCardOptions(),
         ]);
     }
 
@@ -40,16 +54,30 @@ class ProfileController extends Controller
 
         $user->save();
 
-        $user->toko()->updateOrCreate(
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Update the authenticated user's store settings.
+     */
+    public function updateStore(StoreSettingsUpdateRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        $request->user()->toko()->updateOrCreate(
             [],
             [
                 'nama_toko' => $validated['nama_toko'],
                 'alamat' => $validated['alamat'] ?: null,
                 'no_hp' => $validated['no_hp'] ?: null,
+                'payment_gateway_qris_payload' => $validated['payment_gateway_qris_payload'] ?? null,
+                'payment_gateway_qris_merchant_name' => $validated['payment_gateway_qris_merchant_name'] ?? null,
+                'payment_gateway_checkout_ttl_minutes' => $validated['payment_gateway_checkout_ttl_minutes'] ?? null,
+                'dashboard_cards' => Toko::normalizeDashboardCards($validated['dashboard_cards'] ?? []),
             ]
         );
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('pengaturan-toko.edit')->with('status', 'store-settings-updated');
     }
 
     /**

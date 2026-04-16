@@ -27,20 +27,20 @@
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-slate-300 text-[var(--primary)] shadow-sm focus:ring-[var(--primary)]" name="remember">
-                <span class="ms-2 text-sm text-slate-600">{{ __('Ingat saya') }}</span>
+                <input id="remember_me" type="checkbox" class="rounded border-[var(--border-soft)] text-[var(--primary)] shadow-sm focus:ring-[var(--primary)]" name="remember">
+                <span class="ms-2 text-sm text-[var(--text-muted)]">{{ __('Ingat saya') }}</span>
             </label>
         </div>
 
         <div class="mt-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 @if (Route::has('password.request'))
-                    <a class="rounded-md text-sm text-slate-600 underline hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2" href="{{ route('password.request') }}">
+                    <a class="rounded-md text-sm text-[var(--text-muted)] underline hover:text-[var(--text-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2" href="{{ route('password.request') }}">
                         {{ __('Lupa kata sandi?') }}
                     </a>
                 @endif
                 @if (Route::has('register'))
-                    <a class="rounded-md text-sm text-slate-600 underline hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2" href="{{ route('register') }}">
+                    <a class="rounded-md text-sm text-[var(--text-muted)] underline hover:text-[var(--text-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2" href="{{ route('register') }}">
                         Baru?, Buat 1 Akun!
                     </a>
                 @endif

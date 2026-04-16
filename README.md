@@ -1,6 +1,6 @@
 # 🧺 NYUCI.ID - Laundry Management System
 
-Aplikasi manajemen toko laundry **built-in Indonesia** untuk pemilik toko dan staff. Designed khusus untuk kebutuhan operasional toko laundry modern dengan fitur lengkap dari input order hingga tracking pembayaran.
+Aplikasi manajemen toko laundry untuk operasional harian toko laundry Indonesia. Dokumentasi ini mencerminkan rilis **v1.2.0** dengan fokus pada analytics, workflow operasional, dan checkout QRIS publik.
 
 <!-- **Live Demo:** [nyuci.id](https://nyuci.id) -->
 
@@ -12,94 +12,92 @@ Aplikasi manajemen toko laundry **built-in Indonesia** untuk pemilik toko dan st
 - [Prasyarat](#-prasyarat)
 - [Instalasi](#-instalasi)
 - [Struktur Database](#-struktur-database)
-- [API Endpoints](#-api-endpoints)
+- [Endpoint Aplikasi](#-endpoint-aplikasi)
 - [Development Guide](#-development-guide)
 - [Troubleshooting](#-troubleshooting)
 - [Roadmap](#-roadmap)
+- [Lisensi](#-lisensi)
 
 ---
 
 ## ✨ Fitur Utama
 
-### ✅ Versi 1.0.0 (Current)
+### ✅ Versi 1.2.0 (Current)
 
 #### 👥 **User & Authentication**
-- Register akun pemilik toko
-- Login dengan email & password
-<!-- - Two-factor authentication (2FA) -->
-- Profile management (edit data, change password)
-- Session management & logout
+- Register akun pemilik toko dengan verifikasi OTP via email
+- Login dengan email dan password
+- Resend OTP dengan throttle untuk onboarding yang lebih aman
+- Profile management untuk update data akun dan password
+- Session management, logout, dan proteksi route berbasis auth
 
-#### 🏪 **Toko Management**
-- Register/setup toko baru per pemilik
-- Edit informasi toko (nama, alamat, nomor HP)
-- Satu pemilik bisa manage satu toko
+#### 🏪 **Toko & Pengaturan**
+- Register toko baru setelah akun aktif
+- Update identitas toko, kontak, dan preferensi pengaturan toko
+- Simpan konfigurasi QRIS statis per toko untuk checkout publik
+- Halaman pengaturan dashboard untuk preset dan override chart
 
-#### 📦 **Order Laundry (Laundries)**
-- Input order laundry pelanggan (nama, nomor HP, berat, tanggal)
-- Pilih jenis layanan: Cuci | Setrika | Keduanya
-- Set estimasi tanggal selesai
-- Track status order (pending, diambil, belum diambil)
-- Toggle status "sudah diambil" / "belum diambil"
-- View daftar order terbaru di dashboard
+#### 📦 **Operasional Laundry**
+- CRUD data pelanggan (`pelanggan`) dan biaya jasa (`biaya-jasa`)
+- CRUD order laundry dengan preview detail cepat
+- Update status laundry tanpa keluar dari daftar utama
+- Tabel operasional server-side untuk laundry, pelanggan, jasa, dan pembayaran
 
-#### 💰 **Managemen Pembayaran**
-- Input pembayaran per order
-- Track status pembayaran: "belum bayar" | "sudah bayar"
-- Mark pembayaran sebagai paid
-- Lihat riwayat pembayaran
+#### 💰 **Pembayaran & Checkout**
+- CRUD pembayaran per order laundry
+- Daftar pembayaran belum lunas dengan aksi cepat
+- Public checkout QRIS dari halaman detail pembayaran
+- Sinkron status pembayaran dari sesi checkout QRIS statis
+- Salin link checkout untuk dibagikan ke pelanggan
 
-#### 📊 **Dashboard**
-- Stats: Total order, pending pickup, pembayaran terselesaikan
-- Daftar order terbaru (5 order terakhir)
-- Quick overview omset hari ini
+#### 📊 **Dashboard & Insight**
+- Dashboard analytics dengan hero metrics, insights, chart breakdowns, dan performance cards
+- Global search untuk akses cepat ke modul penting
+- Chart cards yang bisa dikustom per toko dan per user
+- Notification center untuk aktivitas aplikasi
+- Demo seeder untuk menyiapkan data contoh pengujian
 
 ---
 
 ## 🛠️ Prasyarat
 
-- **PHP** ≥ 8.3
-- **Composer** (dependency manager PHP)
-- **Node.js** ≥ 18 (untuk frontend assets)
-- **MySQL/MariaDB** ≥ 5.7
-- **Git** (untuk version control)
+- **PHP** >= 8.3
+- **Composer**
+- **Node.js** >= 18
+- **MySQL/MariaDB** >= 5.7
+- **Git**
 
 **Untuk Windows:**
-- XAMPP (sudah include Apache, PHP, MySQL)
-- Atau PHP & MySQL standalone
+- XAMPP
+- Atau instalasi PHP + MySQL standalone
 
 ---
 
 ## 📥 Instalasi
 
-### 1️⃣ **Clone Repository**
+### 1️⃣ Clone Repository
 
 ```bash
 git clone https://github.com/EvanderSG29/nyuci.id.git
 cd nyuci.id
+git checkout develop
 ```
 
-### 2️⃣ **Install Dependencies**
+### 2️⃣ Install Dependencies
 
 ```bash
-# Install PHP dependencies menggunakan Composer
 composer install
-
-# Install JavaScript dependencies
 npm install
 ```
 
-### 3️⃣ **Setup Environment**
+### 3️⃣ Setup Environment
 
 ```bash
-# Copy .env.example ke .env
 cp .env.example .env
-
-# Generate application key
 php artisan key:generate
 ```
 
-### 4️⃣ **Konfigurasi Database**
+### 4️⃣ Konfigurasi Database
 
 Edit file `.env`:
 
@@ -112,13 +110,30 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Buat database:
+Lalu jalankan:
 
 ```bash
 php artisan migrate
 ```
 
-### 5️⃣ **Build Frontend Assets**
+### 5️⃣ Konfigurasi Email OTP
+
+Fitur registrasi OTP membutuhkan mail transport yang valid. Sesuaikan SMTP di `.env`, atau gunakan contoh di `.env.mailtrap.io` untuk environment pengujian.
+
+### 6️⃣ Konfigurasi QRIS Statis
+
+Siapkan payload QRIS statis dari hasil scan QR merchant, lalu isi `.env`:
+
+```env
+PAYMENT_GATEWAY_DRIVER=qris_static
+PAYMENT_GATEWAY_CHECKOUT_TTL_MINUTES=30
+PAYMENT_GATEWAY_QRIS_STATIC_PAYLOAD=...
+PAYMENT_GATEWAY_QRIS_STATIC_MERCHANT_NAME=...
+```
+
+Jika belum dikonfigurasi, halaman checkout akan menampilkan warning konfigurasi.
+
+### 7️⃣ Build Frontend Assets
 
 ```bash
 # Development
@@ -128,88 +143,119 @@ npm run dev
 npm run build
 ```
 
-### 6️⃣ **Start Server**
+### 8️⃣ Start Server
 
 ```bash
-# Buka terminal baru
 php artisan serve
-
-# Akses: http://localhost:8000
 ```
+
+Akses aplikasi di `http://localhost:8000`.
 
 ---
 
 ## 🗄️ Struktur Database
 
-### Users Table
-```
-id, email, password, email_verified_at, two_factor_*, timestamps
-```
-
-### Tokos Table
-```
-id, user_id (FK), nama_toko, alamat, no_hp, timestamps
+### Users
+```text
+id, email, password, email_verified_at, timestamps
 ```
 
-### Laundries Table
-```
-id, toko_id (FK), nama, no_hp, berat, tanggal, layanan, 
-estimasi_selesai, is_taken, timestamps
-```
-
-### Pembayarans Table
-```
-id, laundry_id (FK), total, status, timestamps
+### Tokos
+```text
+id, user_id, nama_toko, alamat, no_hp, background_preferences,
+dashboard settings, QRIS settings, timestamps
 ```
 
-**Relasi:**
-- User 1 → 1 Toko
-- Toko 1 → Many Laundries
-- Laundry 1 → 1 Pembayaran
+### Kliens
+```text
+id, toko_id, nama, no_hp, email, catatan, timestamps
+```
+
+### Jasas
+```text
+id, toko_id, nama_jasa, harga, satuan, deskripsi, timestamps
+```
+
+### Laundries
+```text
+id, toko_id, klien_id, jasa_id, nama, no_hp, berat, tanggal,
+estimasi_selesai, layanan, is_taken, status phase, timestamps
+```
+
+### Pembayarans
+```text
+id, laundry_id, total, status, gateway metadata,
+gateway token, gateway paid timestamps, timestamps
+```
+
+### Supporting Tables
+```text
+notifications, dashboard_chart_presets, dashboard_chart_user_overrides
+```
+
+**Relasi utama:**
+- User 1 -> 1 Toko
+- Toko 1 -> many Klien, Jasa, Laundries
+- Laundry 1 -> 1 Pembayaran
 
 ---
 
-## 🔗 API Endpoints
+## 🔗 Endpoint Aplikasi
 
-### Authentication
-```
-GET  /                          → Home/Dashboard redirect
-GET  /forgot-password           → Password reset page
-```
+### Public / Guest
 
-### Toko Management
-```
-GET  /register/toko             → Form register toko
-POST /register/toko             → Submit register toko
-```
-
-### Laundry Management
-```
-GET    /laundry                 → List semua laundry
-GET    /laundry/create          → Form input laundry baru
-POST   /laundry                 → Submit input laundry
-GET    /laundry/{id}            → Detail laundry
-GET    /laundry/{id}/edit       → Form edit laundry
-PUT    /laundry/{id}            → Submit edit laundry
-DELETE /laundry/{id}            → Hapus laundry
-GET    /laundry/{id}/toggle     → Toggle status is_taken
+```text
+GET  /                           -> Home / redirect dashboard
+GET  /register                   -> Form register
+POST /register                   -> Submit register
+GET  /register/otp               -> Form verifikasi OTP
+POST /register/otp               -> Verifikasi OTP
+POST /register/otp/resend        -> Kirim ulang OTP
+GET  /forgot-password            -> Form reset password
+GET  /bayar/{pembayaran}/{token} -> Checkout publik QRIS
+POST /bayar/{pembayaran}/{token}/sync -> Sinkron status QRIS
 ```
 
-### Pembayaran Management
-```
-GET    /pembayaran              → List semua pembayaran
-GET    /pembayaran/create       → Form input pembayaran
-POST   /pembayaran              → Submit input pembayaran
-GET    /pembayaran/{id}         → Detail pembayaran
-GET    /pembayaran/{id}/paid    → Mark as paid
-DELETE /pembayaran/{id}         → Hapus pembayaran
-```
+### Authenticated
 
-### Profile
-```
-GET   /profile                  → Edit profile page
-PATCH /profile                  → Update profile
-DELETE /profile                 → Delete account
+```text
+GET|POST   /register/toko
+GET        /dashboard
+GET        /search/global
+
+GET|PATCH|DELETE pengaturan dashboard:
+/pengaturan-dashboard
+/pengaturan-dashboard/defaults
+/pengaturan-dashboard/overrides
+/pengaturan-dashboard/overrides/{slot}
+/pengaturan-dashboard/reset-default/{slot}
+
+PATCH      /notifikasi/{notification}/read
+POST       /notifikasi/read-all
+
+Resource   /biaya-jasa
+GET        /biaya-jasa/data
+GET        /biaya-jasa/{jasa}/preview
+
+Resource   /pelanggan
+GET        /pelanggan/data
+GET        /pelanggan/{klien}/preview
+
+Resource   /laundry
+GET        /laundry/data
+GET        /laundry/{laundry}/preview
+PATCH      /laundry/{laundry}/status
+
+Resource   /pembayaran
+GET        /pembayaran/belum-bayar
+GET        /pembayaran/belum-bayar/data
+GET        /pembayaran/data
+GET        /pembayaran/{pembayaran}/preview
+GET        /pembayaran/{pembayaran}/paid
+POST       /pembayaran/{pembayaran}/gateway
+
+GET|PATCH  /pengaturan-toko
+GET|PATCH|DELETE /profile
 ```
 
 ---
@@ -218,70 +264,50 @@ DELETE /profile                 → Delete account
 
 ### Struktur Folder
 
-```
+```text
 app/
-├── Actions/              → Business logic (Fortify actions)
-├── Http/
-│   ├── Controllers/      → Request handlers
-│   ├── Requests/         → Form validation rules
-│   └── Responses/        → JSON responses
-├── Models/               → Database models
-│   ├── User.php
-│   ├── Toko.php
-│   ├── Laundry.php
-│   └── Pembayaran.php
-├── Policies/             → Authorization policies
-└── Providers/            → Service providers
+├── DataTables/           -> Server-side table builders
+├── Http/Controllers/     -> Route handlers
+├── Http/Requests/        -> Validation rules
+├── Models/               -> User, Toko, Klien, Jasa, Laundry, Pembayaran
+├── Notifications/        -> Mail and in-app notifications
+├── Otp/                  -> Register OTP flow
+└── Services/             -> Dashboard charts, payment gateway
 
 database/
-├── migrations/           → Database schema changes
-└── factories/            → Test data generators
-
-routes/
-├── web.php               → Web routes
-└── console.php           → Artisan commands
+├── migrations/           -> Schema changes
+└── seeders/              -> Demo and initial data
 
 resources/
-├── css/                  → Stylesheets
-├── js/                   → JavaScript
-└── views/                → Blade templates
+├── css/                  -> Application styles
+├── js/                   -> Frontend behavior and charts
+└── views/                -> Blade templates
 
 tests/
-├── Feature/              → Feature tests
-└── Unit/                 → Unit tests
+├── Feature/              -> Feature coverage
+└── Unit/                 -> Unit coverage
 ```
 
 ### Workflow Development
 
-**Lihat:** [DEVELOPMENT.md](DEVELOPMENT.md) untuk guide lengkap
+Lihat [DEVELOPMENT.md](DEVELOPMENT.md) untuk panduan development lengkap.
 
 ### Testing
 
 ```bash
-# Run semua test
 php artisan test
-
-# Run test spesifik
-php artisan test tests/Feature/LaundryTest.php
-
-# Dengan coverage
+php artisan test tests/Feature/PembayaranGatewayTest.php
 php artisan test --coverage
 ```
 
 ### Database
 
 ```bash
-# Run migration
 php artisan migrate
-
-# Rollback migration
 php artisan migrate:rollback
-
-# Fresh migration (reset + migrate)
 php artisan migrate:fresh
-
-# Seed data (jika ada seeder)
 php artisan db:seed
+php artisan nyuci:seed-demo
 ```
 
 ---
@@ -290,101 +316,92 @@ php artisan db:seed
 
 ### Problem: `php artisan serve` error
 
-**Solution:**
 ```bash
-# Clear cache
 php artisan cache:clear
 php artisan config:clear
 php artisan view:clear
-
-# Generate key
 php artisan key:generate
 ```
 
-### Problem: Migration error "SQLSTATE[HY000]"
+### Problem: migration gagal
 
-**Solution:**
 ```bash
-# Pastikan database sudah dibuat dan credentials di .env benar
 php artisan migrate:fresh
 ```
 
-### Problem: 500 error di browser
+### Problem: registrasi OTP tidak terkirim
 
-**Solution:**
 ```bash
-# Check log
+# Cek konfigurasi SMTP di .env atau .env.mailtrap.io
+php artisan config:clear
 tail storage/logs/laravel.log
-
-# Clear all cache
-php artisan optimize:clear
 ```
 
-### Problem: npm run dev tidak jalan
+### Problem: asset frontend tidak ter-build
 
-**Solution:**
 ```bash
-# Clear cache npm
 npm cache clean --force
-
-# Reinstall
 rm -rf node_modules package-lock.json
 npm install
-npm run dev
+npm run build
 ```
 
 ---
 
 ## 🗺️ Roadmap
 
-### 🔄 Versi 1.1.0 (Upcoming)
-- [ ] Staff Management + Authorization
-- [ ] Pricing Management per layanan
-- [ ] Role-based access control (Pemilik, Staff, Kasir)
-
-### 🔄 Versi 1.2.0 (Planned)
-- [ ] Advanced Dashboard dengan Analytics
+### 🔄 Versi 1.3.0 (Planned)
+- [ ] Staff management dan role-based access control
 - [ ] Report generation (PDF/Excel)
 - [ ] WhatsApp integration untuk notifikasi pelanggan
+- [ ] Approval workflow operasional internal
 
 ### 🔄 Versi 2.0.0 (Future)
 - [ ] Multi-tenant support
-- [ ] Mobile app (React Native/Flutter)
-- [ ] Payment gateway integration (Midtrans, Stripe)
+- [ ] Mobile app
 - [ ] Inventory management
+- [ ] Public API untuk integrasi pihak ketiga
 
 ---
 
 ## 🤝 Contributing
 
-Kontribusi sangat diterima! Silakan baca [CONTRIBUTING.md](CONTRIBUTING.md) untuk guidelines.
+Kontribusi tetap diterima. Baca [CONTRIBUTING.md](CONTRIBUTING.md) sebelum membuat issue atau pull request.
 
 ### Branch Convention
 
-```
-main             → Production (release branch)
-develop          → Development (working branch)
-feature/*        → Fitur baru (feature/staff-management)
-bugfix/*         → Bug fix (bugfix/login-issue)
-hotfix/*         → Hot fix production (hotfix/critical-bug)
+```text
+main             -> Production / release branch
+develop          -> Active development branch
+feature/*        -> Fitur baru
+bugfix/*         -> Bug fix
+hotfix/*         -> Hot fix production
+release/*        -> Kandidat rilis
 ```
 
 ### Commit Message Format
 
-```
+```text
 feat: deskripsi fitur baru
 fix: deskripsi perbaikan bug
 docs: perubahan dokumentasi
 refactor: perubahan struktur code
-style: formatting/linting
-test: tambah/update test
+style: formatting atau linting
+test: tambah atau update test
+chore: dependency atau config updates
 ```
 
 ---
 
 ## 📄 Lisensi
 
-Proyek ini menggunakan Lisensi MIT. Lihat [LICENSE](LICENSE) untuk detail.
+Repository ini menggunakan lisensi **proprietary source-available**. Kode sumber dipublikasikan untuk evaluasi, review, dan kontribusi terbatas, tetapi tidak boleh dipakai, diubah, didistribusikan, di-host, atau dikomersialkan tanpa izin tertulis dari pemegang hak cipta.
+
+Dokumen hukum yang berlaku:
+- [LICENSE](LICENSE)
+- [NOTICE.md](NOTICE.md)
+- [TRADEMARKS.md](TRADEMARKS.md)
+- [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md)
 
 ---
 
@@ -398,7 +415,7 @@ Proyek ini menggunakan Lisensi MIT. Lihat [LICENSE](LICENSE) untuk detail.
 
 ## 👨‍💻 Author
 
-**Evander SG**  
+**Evander SG**
 - GitHub: [@EvanderSG29](https://github.com/EvanderSG29)
 - Email: smidgidionevander@gmail.com
 
@@ -406,7 +423,9 @@ Proyek ini menggunakan Lisensi MIT. Lihat [LICENSE](LICENSE) untuk detail.
 
 <div align="center">
 
-**Made with ❤️ for Indonesian laundry business owners**
+**Last Updated:** 2026-04-16  
+**Current Version:** 1.2.0  
+**Status:** 🟢 Stable Release
 
 [⬆ Kembali ke atas](#-nyuciid---laundry-management-system)
 

@@ -39,6 +39,29 @@
             object-fit: contain;
         }
 
+        .navbar-brand {
+            min-width: 0;
+        }
+
+        .navbar-brand span {
+            min-width: 0;
+        }
+
+        .navbar-brand .text-light {
+            font-size: 1rem;
+            display: block;
+            line-height: 1.1;
+        }
+
+        .navbar-brand small {
+            display: block;
+            max-width: 12rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .card,
         .surface-card {
             border: 1px solid var(--nyuci-border);

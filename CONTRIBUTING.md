@@ -15,6 +15,23 @@ Kami menjunjung tinggi komunitas yang respectful dan inclusive. Harap:
 
 ---
 
+## 📄 Lisensi & Hak Kontribusi
+
+Repository ini menggunakan lisensi **proprietary source-available**, bukan open-source license.
+
+- Source code hanya boleh dipakai untuk evaluasi internal, security review, dan kontribusi balik ke maintainer.
+- Anda tidak boleh mendistribusikan ulang, meng-host, menjual, menyewakan, memublikasikan build produksi, atau membuat layanan komersial berbasis repo ini tanpa izin tertulis.
+- Nama, logo, identitas produk, dan domain `NYUCI.ID` tetap menjadi milik maintainer dan tidak ikut dilisensikan.
+- Dengan mengirim issue, pull request, patch, atau kontribusi lain, Anda menyatakan bahwa Anda memiliki hak atas kontribusi tersebut dan memberikan kepada maintainer lisensi non-eksklusif, global, bebas royalti, tidak dapat dibatalkan, untuk menggunakan, memodifikasi, menggabungkan, melisensikan ulang, dan mendistribusikan kontribusi itu sebagai bagian dari proyek ini.
+
+Dokumen yang mengatur hal ini:
+- [LICENSE](LICENSE)
+- [NOTICE.md](NOTICE.md)
+- [TRADEMARKS.md](TRADEMARKS.md)
+- [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md)
+
+---
+
 ## 🐛 Melaporkan Bug
 
 ### Sebelum Report
@@ -203,6 +220,7 @@ Closes #123 (ganti dengan nomor issue)
 - [ ] Code sudah di-review sendiri
 - [ ] Documentation updated (jika perlu)
 - [ ] Tests added/updated
+- [ ] Contribution tidak melanggar lisensi proprietary repo
 - [ ] No new warnings
 - [ ] Commit message jelas & descriptive
 
@@ -243,6 +261,7 @@ Closes #45
 - [x] Database migration sudah created
 - [x] Unit & feature tests sudah written
 - [x] Documentation updated (DEVELOPMENT.md)
+- [x] Contribution sesuai lisensi repository
 - [x] No breaking changes
 
 ## 📸 Screenshots
@@ -364,8 +383,8 @@ PR akan di-review dengan criteria:
 Jika PR di-merge ke develop & ready for release:
 
 1. **Testing & QA** - Full testing di staging
-2. **Release Branch** - Buat release branch dari develop
-3. **Version Tag** - Tag dengan semantic versioning (v1.1.0)
+2. **Release Branch** - Buat branch `release/vX.Y.Z` dari develop
+3. **Version Tag** - Tag dengan semantic versioning (contoh `v1.2.0`)
 4. **Merge to Main** - Merge release ke main branch
 5. **CHANGELOG Update** - Document changes di CHANGELOG.md
 6. **Publish Release** - Announce di GitHub Releases

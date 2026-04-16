@@ -1,5 +1,5 @@
 <x-guest-layout title="Konfirmasi Password">
-    <div class="mb-4 text-sm text-slate-600">
+    <div class="mb-4 text-sm text-[var(--text-muted)]">
         {{ __('Ini adalah area aman aplikasi. Silakan konfirmasi kata sandi Anda sebelum melanjutkan.') }}
     </div>
 

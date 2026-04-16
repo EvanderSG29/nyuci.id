@@ -1,5 +1,5 @@
 <x-guest-layout title="Lupa Password">
-    <div class="mb-4 text-sm text-slate-600">
+    <div class="mb-4 text-sm text-[var(--text-muted)]">
         {{ __('Lupa kata sandi? Tidak masalah. Beri tahu kami alamat email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi.') }}
     </div>
 

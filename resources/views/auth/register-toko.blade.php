@@ -1,7 +1,7 @@
 <x-guest-layout title="Informasi Toko">
     <div class="mb-6">
-        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Lengkapi Informasi Toko</h1>
-        <p class="mt-2 text-sm text-slate-600">
+        <h1 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Lengkapi Informasi Toko</h1>
+        <p class="mt-2 text-sm text-[var(--text-muted)]">
             Akun berhasil dibuat. Satu langkah lagi, isi data toko agar dashboard siap dipakai.
         </p>
     </div>

@@ -9,7 +9,22 @@ class GuestLayout extends Component
 {
     public function __construct(
         public string $title = 'Nyuci.id',
+        public string $variant = 'auth',
     ) {
+    }
+
+    protected function appName(): string
+    {
+        $appName = trim((string) config('app.name', ''));
+
+        return $appName !== '' && $appName !== 'Laravel' ? $appName : 'Nyuci.id';
+    }
+
+    protected function pageTitle(): string
+    {
+        $title = trim($this->title);
+
+        return $title !== '' ? $title : $this->appName();
     }
 
     /**
@@ -17,6 +32,10 @@ class GuestLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.guest');
+        return view('layouts.guest', [
+            'appName' => $this->appName(),
+            'pageTitle' => $this->pageTitle(),
+            'variant' => $this->variant,
+        ]);
     }
 }
