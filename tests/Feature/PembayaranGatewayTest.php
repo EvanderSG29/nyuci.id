@@ -87,12 +87,19 @@ test('gateway issue creates QRIS checkout session and stores static gateway data
         'status' => 'belum_bayar',
     ]);
 
-    $this
+    $response = $this
         ->actingAs($user)
         ->post(route('pembayaran.gateway.issue', $payment))
-        ->assertRedirect();
+        ->assertRedirect(route('pembayaran.show', $payment))
+        ->assertSessionHas('open_new_tab_url')
+        ->assertSessionHas('open_new_tab_name', config('payment_gateway.checkout_window_name', 'nyuci-qris-checkout'));
 
     $payment->refresh();
+
+    $response->assertSessionHas('open_new_tab_url', route('pembayaran.gateway.checkout', [
+        'pembayaran' => $payment->id,
+        'token' => $payment->gateway_token,
+    ]));
 
     expect($payment->metode_pembayaran)->toBe('qris');
     expect($payment->gateway_provider)->toBe('qris_static');
@@ -138,8 +145,47 @@ test('gateway checkout page renders payment summary and qr image', function () {
         ->assertOk()
         ->assertSee('Checkout QRIS')
         ->assertSee('Nyuci Gateway')
+        ->assertSee('Sisa waktu pembayaran')
         ->assertSee('Muat Ulang Status')
+        ->assertDontSee('Masuk dan lanjutkan pekerjaan Anda.')
+        ->assertDontSee('Tampilan tenang, alur kerja cepat, dan nyaman dipakai setiap hari.')
         ->assertSee('data:image/svg+xml;base64,', false);
+});
+
+test('gateway checkout page shows expired state when session has passed the deadline', function () {
+    configureGatewayStatic();
+
+    $user = createGatewayOwner();
+    [$klien, $jasa, $laundry] = createGatewayLaundry($user->toko);
+
+    $payment = Pembayaran::create([
+        'klien_id' => $klien->id,
+        'laundry_id' => $laundry->id,
+        'total' => 20000,
+        'total_biaya' => 20000,
+        'metode_pembayaran' => 'qris',
+        'tgl_pembayaran' => null,
+        'catatan' => null,
+        'status' => 'belum_bayar',
+        'gateway_provider' => 'qris_static',
+        'gateway_reference' => 'REF-EXPIRED',
+        'gateway_invoice_id' => 'INV-EXPIRED',
+        'gateway_token' => 'expired-checkout-token',
+        'gateway_qr_image' => 'data:image/svg+xml;base64,'.base64_encode('<svg></svg>'),
+        'gateway_request_date' => now()->subHour()->toDateString(),
+        'gateway_expires_at' => now()->subMinute(),
+        'gateway_status' => 'pending',
+        'gateway_payload' => [
+            'merchant_name' => 'Nyuci Gateway',
+            'qris_text' => '000201010212',
+        ],
+    ]);
+
+    $this
+        ->get(route('pembayaran.gateway.checkout', ['pembayaran' => $payment->id, 'token' => $payment->gateway_token]))
+        ->assertOk()
+        ->assertSee('Sesi pembayaran kedaluwarsa')
+        ->assertSee('Hubungi admin untuk membuat sesi QRIS baru');
 });
 
 test('gateway sync reflects manual payment confirmation', function () {
@@ -177,7 +223,7 @@ test('gateway sync reflects manual payment confirmation', function () {
 
     $payment->update([
         'status' => 'sudah_bayar',
-        'tgl_pembayaran' => '2026-04-09',
+        'tgl_pembayaran' => null,
     ]);
 
     $this
@@ -192,4 +238,5 @@ test('gateway sync reflects manual payment confirmation', function () {
     expect($payment->gateway_customer_name)->toBe('Gateway Customer');
     expect($payment->gateway_method_by)->toBe('QRIS Statis');
     expect($payment->gateway_paid_at)->not()->toBeNull();
+    expect($payment->tgl_pembayaran)->not()->toBeNull();
 });

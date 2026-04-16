@@ -11,6 +11,8 @@ use Throwable;
 
 class PembayaranGatewayController extends Controller
 {
+    private const CHECKOUT_WINDOW_NAME = 'nyuci-qris-checkout';
+
     public function issue(Request $request, Pembayaran $pembayaran, StaticQrisGateway $gateway): RedirectResponse
     {
         $this->authorize('update', $pembayaran);
@@ -33,12 +35,20 @@ class PembayaranGatewayController extends Controller
             $pembayaran->setGatewaySession($session);
         }
 
+        $checkoutUrl = route('pembayaran.gateway.checkout', [
+            'pembayaran' => $pembayaran->id,
+            'token' => $pembayaran->gateway_token ?? $session['token'] ?? '',
+        ]);
+
         return redirect()
-            ->route('pembayaran.gateway.checkout', [
-                'pembayaran' => $pembayaran->id,
-                'token' => $pembayaran->gateway_token ?? $session['token'] ?? '',
-            ])
-            ->with('success', $session['created'] ? 'Sesi QRIS berhasil dibuat.' : 'Sesi QRIS masih aktif.');
+            ->route('pembayaran.show', $pembayaran)
+            ->with([
+                'success' => ($session['created'] ?? false)
+                    ? 'Sesi QRIS berhasil dibuat dan dibuka di tab baru.'
+                    : 'Sesi QRIS aktif dibuka di tab baru.',
+                'open_new_tab_url' => $checkoutUrl,
+                'open_new_tab_name' => (string) config('payment_gateway.checkout_window_name', self::CHECKOUT_WINDOW_NAME),
+            ]);
     }
 
     public function checkout(Pembayaran $pembayaran, string $token, StaticQrisGateway $gateway): View

@@ -7,14 +7,18 @@ use App\DataTables\UnpaidLaundryTable;
 use App\Http\Requests\PembayaranRequest;
 use App\Models\Laundry;
 use App\Models\Pembayaran;
+use App\Services\PaymentGateway\StaticQrisGateway;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Throwable;
 
 class PembayaranController extends Controller
 {
+    private const CHECKOUT_WINDOW_NAME = 'nyuci-qris-checkout';
+
     private const PAYMENT_METHODS = [
         'cash' => 'Cash',
         'qris' => 'QRIS',
@@ -99,10 +103,11 @@ class PembayaranController extends Controller
             'selectedLaundry' => $selectedLaundry,
             'selectedLaundryId' => $selectedLaundry?->id,
             'paymentMethods' => self::PAYMENT_METHODS,
+            'checkoutTabName' => $this->checkoutWindowName(),
         ]);
     }
 
-    public function store(PembayaranRequest $request): RedirectResponse
+    public function store(PembayaranRequest $request, StaticQrisGateway $gateway): RedirectResponse
     {
         $toko = $request->user()?->toko;
 
@@ -126,16 +131,19 @@ class PembayaranController extends Controller
             return back()->withErrors(['laundry_id' => 'Laundry ini sudah memiliki data pembayaran.'])->withInput();
         }
 
-        Pembayaran::create($this->buildPaymentPayload($laundry, $validated));
+        $pembayaran = Pembayaran::create($this->buildPaymentPayload($laundry, $validated));
 
-        return redirect()->route('pembayaran.index')->with('success', 'Pembayaran berhasil disimpan.');
+        return $this->finalizePaymentFlow($pembayaran, $validated, $gateway, 'Pembayaran berhasil disimpan.');
     }
 
     public function show(Pembayaran $pembayaran): View
     {
         $this->authorize('view', $pembayaran);
 
-        return view('pembayaran.show', ['pembayaran' => $pembayaran->load('laundry.toko', 'laundry.klien', 'laundry.jasa', 'klien')]);
+        return view('pembayaran.show', [
+            'pembayaran' => $pembayaran->load('laundry.toko', 'laundry.klien', 'laundry.jasa', 'klien'),
+            'checkoutTabName' => $this->checkoutWindowName(),
+        ]);
     }
 
     public function edit(Pembayaran $pembayaran): View
@@ -145,10 +153,11 @@ class PembayaranController extends Controller
         return view('pembayaran.edit', [
             'pembayaran' => $pembayaran->load('laundry.klien', 'laundry.jasa'),
             'paymentMethods' => self::PAYMENT_METHODS,
+            'checkoutTabName' => $this->checkoutWindowName(),
         ]);
     }
 
-    public function update(PembayaranRequest $request, Pembayaran $pembayaran): RedirectResponse
+    public function update(PembayaranRequest $request, Pembayaran $pembayaran, StaticQrisGateway $gateway): RedirectResponse
     {
         $this->authorize('update', $pembayaran);
 
@@ -175,21 +184,7 @@ class PembayaranController extends Controller
 
         $pembayaran->update($this->buildPaymentPayload($laundry, $validated));
 
-        if ($validated['status'] === 'sudah_bayar') {
-            $pembayaran->forceFill([
-                'gateway_status' => 'paid',
-                'gateway_paid_at' => $pembayaran->gateway_paid_at ?? now(),
-            ])->save();
-        } elseif ($pembayaran->gatewayHasSession()) {
-            $pembayaran->clearGatewaySession();
-        } else {
-            $pembayaran->forceFill([
-                'gateway_status' => null,
-                'gateway_paid_at' => null,
-            ])->save();
-        }
-
-        return redirect()->route('pembayaran.index')->with('success', 'Pembayaran berhasil diperbarui.');
+        return $this->finalizePaymentFlow($pembayaran, $validated, $gateway, 'Pembayaran berhasil diperbarui.');
     }
 
     public function destroy(Pembayaran $pembayaran): RedirectResponse
@@ -209,10 +204,14 @@ class PembayaranController extends Controller
             'tgl_pembayaran' => $pembayaran->tgl_pembayaran ?? now()->toDateString(),
         ]);
 
-        $pembayaran->forceFill([
-            'gateway_status' => 'paid',
-            'gateway_paid_at' => $pembayaran->gateway_paid_at ?? now(),
-        ])->save();
+        if ($pembayaran->metode_pembayaran === 'qris') {
+            $pembayaran->forceFill([
+                'gateway_status' => 'paid',
+                'gateway_paid_at' => $pembayaran->gateway_paid_at ?? now(),
+            ])->save();
+        } else {
+            $pembayaran->clearGatewaySession();
+        }
 
         return back()->with('success', 'Status pembayaran diperbarui.');
     }
@@ -233,9 +232,81 @@ class PembayaranController extends Controller
             'total' => $totalBiaya,
             'total_biaya' => $totalBiaya,
             'metode_pembayaran' => $validated['metode_pembayaran'],
-            'tgl_pembayaran' => $validated['tgl_pembayaran'],
+            'tgl_pembayaran' => $validated['status'] === 'sudah_bayar'
+                ? ($validated['tgl_pembayaran'] ?? now()->toDateString())
+                : null,
             'catatan' => $validated['catatan'] ?: null,
             'status' => $validated['status'],
         ];
+    }
+
+    private function finalizePaymentFlow(Pembayaran $pembayaran, array $validated, StaticQrisGateway $gateway, string $successMessage): RedirectResponse
+    {
+        $pembayaran->refresh();
+
+        if ($validated['metode_pembayaran'] === 'qris') {
+            if ($validated['status'] === 'sudah_bayar') {
+                $pembayaran->forceFill([
+                    'gateway_status' => 'paid',
+                    'gateway_paid_at' => $pembayaran->gateway_paid_at ?? now(),
+                    'tgl_pembayaran' => $pembayaran->tgl_pembayaran ?? now()->toDateString(),
+                ])->save();
+
+                return redirect()->route('pembayaran.index')->with('success', $successMessage);
+            }
+
+            return $this->redirectToGatewayCheckout($pembayaran, $gateway);
+        }
+
+        if ($pembayaran->gateway_token || $pembayaran->gateway_status !== null || $pembayaran->gateway_paid_at !== null || $pembayaran->gateway_payload !== null) {
+            $pembayaran->clearGatewaySession();
+        }
+
+        return redirect()->route('pembayaran.index')->with('success', $successMessage);
+    }
+
+    private function redirectToGatewayCheckout(Pembayaran $pembayaran, StaticQrisGateway $gateway): RedirectResponse
+    {
+        try {
+            $session = $gateway->issue($pembayaran->fresh());
+        } catch (Throwable $e) {
+            return redirect()
+                ->route('pembayaran.edit', $pembayaran)
+                ->with('warning', $e->getMessage());
+        }
+
+        if ($session['created'] ?? false) {
+            $pembayaran->setGatewaySession($session);
+            $pembayaran->refresh();
+        }
+
+        $checkoutUrl = route('pembayaran.gateway.checkout', [
+            'pembayaran' => $pembayaran->id,
+            'token' => $pembayaran->gateway_token ?? $session['token'] ?? '',
+        ]);
+
+        return $this->redirectWithCheckoutTab(
+            $pembayaran,
+            $checkoutUrl,
+            ($session['created'] ?? false)
+                ? 'Sesi QRIS berhasil dibuat dan dibuka di tab baru.'
+                : 'Sesi QRIS aktif dibuka di tab baru.'
+        );
+    }
+
+    private function redirectWithCheckoutTab(Pembayaran $pembayaran, string $checkoutUrl, string $successMessage): RedirectResponse
+    {
+        return redirect()
+            ->route('pembayaran.show', $pembayaran)
+            ->with([
+                'success' => $successMessage,
+                'open_new_tab_url' => $checkoutUrl,
+                'open_new_tab_name' => $this->checkoutWindowName(),
+            ]);
+    }
+
+    private function checkoutWindowName(): string
+    {
+        return (string) config('payment_gateway.checkout_window_name', self::CHECKOUT_WINDOW_NAME);
     }
 }

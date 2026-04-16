@@ -55,6 +55,9 @@ class Toko extends Model
         'nama_toko',
         'alamat',
         'no_hp',
+        'payment_gateway_qris_payload',
+        'payment_gateway_qris_merchant_name',
+        'payment_gateway_checkout_ttl_minutes',
         'background_mode',
         'background_color',
         'dashboard_cards',
@@ -64,7 +67,56 @@ class Toko extends Model
     {
         return [
             'dashboard_cards' => 'array',
+            'payment_gateway_checkout_ttl_minutes' => 'integer',
         ];
+    }
+
+    public function hasCustomPaymentGatewayQrisPayload(): bool
+    {
+        return filled(trim((string) $this->payment_gateway_qris_payload));
+    }
+
+    public function resolvedPaymentGatewayQrisPayload(): string
+    {
+        if ($this->hasCustomPaymentGatewayQrisPayload()) {
+            return trim((string) $this->payment_gateway_qris_payload);
+        }
+
+        return trim((string) config('payment_gateway.qris_static.payload', ''));
+    }
+
+    public function resolvedPaymentGatewayQrisMerchantName(): ?string
+    {
+        $merchantName = trim((string) ($this->payment_gateway_qris_merchant_name ?? ''));
+
+        if ($merchantName !== '') {
+            return $merchantName;
+        }
+
+        $fallbackMerchantName = trim((string) config('payment_gateway.qris_static.merchant_name', ''));
+
+        return $fallbackMerchantName !== '' ? $fallbackMerchantName : null;
+    }
+
+    public function resolvedPaymentGatewayCheckoutTtlMinutes(): int
+    {
+        $ttl = $this->payment_gateway_checkout_ttl_minutes;
+
+        if (is_int($ttl) && $ttl > 0) {
+            return $ttl;
+        }
+
+        return max((int) config('payment_gateway.checkout_ttl_minutes', 30), 1);
+    }
+
+    public function paymentGatewayQrisConfigSource(): string
+    {
+        return $this->hasCustomPaymentGatewayQrisPayload() ? 'toko' : 'server';
+    }
+
+    public function hasResolvedPaymentGatewayQrisConfig(): bool
+    {
+        return $this->resolvedPaymentGatewayQrisPayload() !== '';
     }
 
     public static function dashboardCardDefaults(): array

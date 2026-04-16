@@ -22,6 +22,7 @@ class DashboardChartUserOverride extends Model
         'secondary_metric_override',
         'accent_color_override',
         'show_points_override',
+        'show_previous_comparison_override',
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class DashboardChartUserOverride extends Model
             'use_custom' => 'boolean',
             'period_length_override' => 'integer',
             'show_points_override' => 'boolean',
+            'show_previous_comparison_override' => 'boolean',
         ];
     }
 

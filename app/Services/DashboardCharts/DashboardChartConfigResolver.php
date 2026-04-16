@@ -60,6 +60,7 @@ class DashboardChartConfigResolver
             'secondary_metric' => 'revenue_paid',
             'accent_color' => '#ffffff',
             'show_points' => true,
+            'show_previous_comparison' => true,
         ],
         'card_1' => [
             'label' => 'Order Masuk',
@@ -73,6 +74,7 @@ class DashboardChartConfigResolver
             'secondary_metric' => null,
             'accent_color' => '#ff6d3a',
             'show_points' => true,
+            'show_previous_comparison' => true,
         ],
         'card_2' => [
             'label' => 'Order Selesai',
@@ -86,6 +88,7 @@ class DashboardChartConfigResolver
             'secondary_metric' => null,
             'accent_color' => '#10b981',
             'show_points' => true,
+            'show_previous_comparison' => true,
         ],
         'card_3' => [
             'label' => 'Revenue',
@@ -99,6 +102,7 @@ class DashboardChartConfigResolver
             'secondary_metric' => null,
             'accent_color' => '#4a7df0',
             'show_points' => false,
+            'show_previous_comparison' => true,
         ],
     ];
 
@@ -189,7 +193,10 @@ class DashboardChartConfigResolver
         foreach (self::slotKeys() as $slotKey) {
             $preset = $presets->get($slotKey);
             $override = ($user && $preset) ? $overrides->get($preset->id) : null;
-            $presetAttributes = $preset?->toArray() ?? $this->defaultPresetAttributes($slotKey, $toko);
+            $presetAttributes = array_merge(
+                $this->defaultPresetAttributes($slotKey, $toko),
+                $preset?->toArray() ?? []
+            );
 
             $slots[$slotKey] = [
                 'definition' => self::slotDefinitions()[$slotKey],
@@ -237,7 +244,10 @@ class DashboardChartConfigResolver
         return collect(self::slotKeys())->mapWithKeys(function (string $slotKey) use ($presets, $overrides, $toko, $user): array {
             $preset = $presets->get($slotKey);
             $override = ($user && $preset) ? $overrides->get($preset->id) : null;
-            $presetAttributes = $preset?->toArray() ?? $this->defaultPresetAttributes($slotKey, $toko);
+            $presetAttributes = array_merge(
+                $this->defaultPresetAttributes($slotKey, $toko),
+                $preset?->toArray() ?? []
+            );
 
             return [
                 $slotKey => $this->mergePresetAndOverride($presetAttributes, $override),
@@ -303,6 +313,7 @@ class DashboardChartConfigResolver
                 'secondary_metric_override' => $attributes['secondary_metric'],
                 'accent_color_override' => $attributes['accent_color'],
                 'show_points_override' => $attributes['show_points'],
+                'show_previous_comparison_override' => $attributes['show_previous_comparison'],
             ])->save();
         }
     }
@@ -348,6 +359,7 @@ class DashboardChartConfigResolver
             'secondary_metric' => $definition['secondary_metric'],
             'accent_color' => $definition['accent_color'],
             'show_points' => $definition['show_points'],
+            'show_previous_comparison' => $definition['show_previous_comparison'] ?? true,
         ];
     }
 
@@ -367,6 +379,7 @@ class DashboardChartConfigResolver
             'secondary_metric' => $override->secondary_metric_override,
             'accent_color' => $override->accent_color_override,
             'show_points' => $override->show_points_override,
+            'show_previous_comparison' => $override->show_previous_comparison_override,
         ];
 
         foreach ($overrideValues as $key => $value) {
@@ -397,6 +410,7 @@ class DashboardChartConfigResolver
             'secondary_metric' => $secondaryMetric !== '' ? $secondaryMetric : null,
             'accent_color' => $accentColor !== '' ? $accentColor : $default['accent_color'],
             'show_points' => filter_var($payload['show_points'] ?? $default['show_points'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default['show_points'],
+            'show_previous_comparison' => filter_var($payload['show_previous_comparison'] ?? $default['show_previous_comparison'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default['show_previous_comparison'],
         ];
     }
 }

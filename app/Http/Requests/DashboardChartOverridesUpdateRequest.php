@@ -28,6 +28,7 @@ class DashboardChartOverridesUpdateRequest extends FormRequest
             $rules["overrides.$slotKey.secondary_metric"] = ['nullable', Rule::in(array_keys(DashboardChartConfigResolver::metricOptions()))];
             $rules["overrides.$slotKey.accent_color"] = ['nullable', 'string', 'max:32'];
             $rules["overrides.$slotKey.show_points"] = ['nullable', 'boolean'];
+            $rules["overrides.$slotKey.show_previous_comparison"] = ['nullable', 'boolean'];
         }
 
         return $rules;

@@ -6,6 +6,7 @@ use App\Models\Laundry;
 use App\Models\Pembayaran;
 use App\Models\Toko;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -27,10 +28,11 @@ class DashboardChartDatasetBuilder
         $secondaryMetric = isset($config['secondary_metric']) && $config['secondary_metric'] !== ''
             ? (string) $config['secondary_metric']
             : null;
+        $showPreviousComparison = (bool) ($config['show_previous_comparison'] ?? true);
 
         $series = collect(array_filter([
-            $this->buildSeries($toko, $primaryMetric, $range, $accentColor, true),
-            $secondaryMetric ? $this->buildSeries($toko, $secondaryMetric, $range, $this->secondaryColor($accentColor), false) : null,
+            $this->buildSeries($toko, $primaryMetric, $range, $accentColor, true, $showPreviousComparison),
+            $secondaryMetric ? $this->buildSeries($toko, $secondaryMetric, $range, $this->secondaryColor($accentColor), false, $showPreviousComparison) : null,
         ]))->values();
 
         $series = $this->assignAxes($series);
@@ -45,6 +47,7 @@ class DashboardChartDatasetBuilder
             'chart_type' => $chartType === 'bar' ? 'bar' : 'line',
             'surface' => $config['slot_key'] === 'hero' ? 'hero' : 'surface',
             'show_points' => (bool) ($config['show_points'] ?? true),
+            'show_previous_comparison' => $showPreviousComparison,
             'period_label' => $range['label'],
             'summary_items' => $series->map(fn (array $item): array => $item['summary'])->all(),
             'has_data' => $series->pluck('data')->flatten()->contains(fn ($value) => is_numeric($value) && (float) $value !== 0.0),
@@ -89,7 +92,7 @@ class DashboardChartDatasetBuilder
         ];
     }
 
-    private function buildSeries(Toko $toko, string $metricKey, array $range, string $accentColor, bool $isPrimary): array
+    private function buildSeries(Toko $toko, string $metricKey, array $range, string $accentColor, bool $isPrimary, bool $showPreviousComparison): array
     {
         $definition = DashboardChartConfigResolver::metricOptions()[$metricKey] ?? DashboardChartConfigResolver::metricOptions()['orders_created'];
         $values = [];
@@ -102,7 +105,7 @@ class DashboardChartDatasetBuilder
 
         foreach ($values as $index => $value) {
             $previous = $values[$index - 1] ?? null;
-            $meta[] = $this->pointMeta($metricKey, $value, $previous, $range['buckets'][$index]['label']);
+            $meta[] = $this->pointMeta($metricKey, $value, $previous, $range['buckets'][$index]['label'], $showPreviousComparison);
         }
 
         $summaryMode = $this->summaryModeForMetric($metricKey);
@@ -132,7 +135,7 @@ class DashboardChartDatasetBuilder
                 'label' => $definition['label'],
                 'value' => $this->formatMetricValue($metricKey, (int) $summaryValue),
                 'caption' => $summaryMode === 'sum' ? 'Total periode' : 'Posisi terakhir',
-                'trend' => $this->trendText($metricKey, $values),
+                'trend' => $this->trendText($metricKey, $values, $showPreviousComparison),
             ],
         ];
     }
@@ -236,21 +239,29 @@ class DashboardChartDatasetBuilder
         }
 
         $value = match ($metricKey) {
-            'orders_created' => Laundry::query()
-                ->where('toko_id', $toko->id)
-                ->whereBetween('tanggal_dimulai', [$start->toDateString(), $end->toDateString()])
-                ->count(),
-            'orders_completed' => Laundry::query()
-                ->where('toko_id', $toko->id)
-                ->where('status', 'selesai')
-                ->whereBetween('tgl_selesai', [$start->toDateString(), $end->toDateString()])
-                ->count(),
-            'revenue_paid' => (int) Pembayaran::query()
-                ->join('laundries', 'laundries.id', '=', 'pembayarans.laundry_id')
-                ->where('laundries.toko_id', $toko->id)
-                ->where('pembayarans.status', 'sudah_bayar')
-                ->whereBetween('pembayarans.tgl_pembayaran', [$start->toDateString(), $end->toDateString()])
-                ->sum(DB::raw('coalesce(pembayarans.total_biaya, pembayarans.total, 0)')),
+            'orders_created' => $this->dateRangeQuery(
+                Laundry::query()->where('toko_id', $toko->id),
+                'tanggal_dimulai',
+                $start,
+                $end,
+            )->count(),
+            'orders_completed' => $this->dateRangeQuery(
+                Laundry::query()
+                    ->where('toko_id', $toko->id)
+                    ->where('status', 'selesai'),
+                'tgl_selesai',
+                $start,
+                $end,
+            )->count(),
+            'revenue_paid' => (int) $this->dateRangeQuery(
+                Pembayaran::query()
+                    ->join('laundries', 'laundries.id', '=', 'pembayarans.laundry_id')
+                    ->where('laundries.toko_id', $toko->id)
+                    ->where('pembayarans.status', 'sudah_bayar'),
+                'pembayarans.tgl_pembayaran',
+                $start,
+                $end,
+            )->sum(DB::raw('coalesce(pembayarans.total_biaya, pembayarans.total, 0)')),
             'orders_active' => Laundry::query()
                 ->where('toko_id', $toko->id)
                 ->whereDate('tanggal_dimulai', '<=', $end->toDateString())
@@ -307,6 +318,13 @@ class DashboardChartDatasetBuilder
         return $value;
     }
 
+    private function dateRangeQuery(Builder $query, string $column, CarbonImmutable $start, CarbonImmutable $end): Builder
+    {
+        return $query
+            ->whereDate($column, '>=', $start->toDateString())
+            ->whereDate($column, '<=', $end->toDateString());
+    }
+
     private function summaryModeForMetric(string $metricKey): string
     {
         return in_array($metricKey, ['orders_active', 'orders_due', 'ready_pickup', 'unpaid_count', 'unpaid_value', 'active_customers'], true)
@@ -321,9 +339,9 @@ class DashboardChartDatasetBuilder
             : number_format($value, 0, ',', '.');
     }
 
-    private function trendText(string $metricKey, array $values): ?string
+    private function trendText(string $metricKey, array $values, bool $showPreviousComparison): ?string
     {
-        if (count($values) < 2) {
+        if (! $showPreviousComparison || count($values) < 2) {
             return null;
         }
 
@@ -348,7 +366,7 @@ class DashboardChartDatasetBuilder
         );
     }
 
-    private function pointMeta(string $metricKey, int $value, ?int $previous, string $label): array
+    private function pointMeta(string $metricKey, int $value, ?int $previous, string $label, bool $showPreviousComparison): array
     {
         $delta = $previous === null ? null : $value - $previous;
         $deltaPercent = $previous !== null && $previous !== 0
@@ -361,7 +379,7 @@ class DashboardChartDatasetBuilder
             'rawValue' => $value,
             'deltaAbs' => $delta,
             'deltaPercent' => $deltaPercent,
-            'deltaText' => $delta === null
+            'deltaText' => ! $showPreviousComparison || $delta === null
                 ? null
                 : sprintf(
                     '%s%s (%s%s%%) vs sebelumnya',

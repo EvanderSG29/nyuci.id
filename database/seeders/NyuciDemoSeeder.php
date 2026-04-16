@@ -24,6 +24,14 @@ class NyuciDemoSeeder extends Seeder
 
     public const DEMO_STORE_NAME = 'Nyuci Demo Store';
 
+    private const DEMO_LAUNDRY_COUNT = 30;
+
+    private const DEMO_MONTH_COVERAGE_COUNT = 12;
+
+    private const DEMO_RECENT_ACTIVITY_COUNT = 10;
+
+    private const LAUNDRY_STATUSES = ['belum_selesai', 'proses', 'selesai'];
+
     private const SERVICES = [
         [
             'slug' => 'cuci_kering_lipat_reguler',
@@ -89,8 +97,6 @@ class NyuciDemoSeeder extends Seeder
         ['name' => 'Kevin Simanjuntak', 'city' => 'Medan', 'email' => false],
         ['name' => 'Putri Ramadhani', 'city' => 'Makassar', 'email' => false],
     ];
-
-    private const MONTHLY_ACTIVITY_COUNTS = [1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5, 5];
 
     private const PAYMENT_BY_STATUS = [
         'belum_selesai' => ['cash_unpaid', 'qris_pending_a', 'transfer_unpaid_a'],
@@ -226,46 +232,176 @@ class NyuciDemoSeeder extends Seeder
      */
     private function buildLaundryBlueprints(Toko $toko): array
     {
-        $monthStart = today()->startOfMonth();
+        $dates = $this->buildLaundryDatePlan();
+        $serviceAssignments = $this->buildAssignments(array_column(self::SERVICES, 'slug'), self::DEMO_LAUNDRY_COUNT);
+        $clientAssignments = $this->buildAssignments(range(0, count(self::CLIENTS) - 1), self::DEMO_LAUNDRY_COUNT);
         $blueprints = [];
-        $serviceCount = count(self::SERVICES);
-        $clientCount = count(self::CLIENTS);
 
-        foreach (self::MONTHLY_ACTIVITY_COUNTS as $monthIndex => $count) {
-            $month = (clone $monthStart)->subMonthsNoOverflow(count(self::MONTHLY_ACTIVITY_COUNTS) - 1 - $monthIndex);
-            $maxDay = $month->isSameMonth(today())
-                ? max(2, today()->day - 1)
-                : max(2, $month->daysInMonth - 2);
+        foreach ($dates as $index => $startedAt) {
+            [$status, $payment] = $this->blueprintProfileForIndex($index);
+            $etaDays = random_int(1, 5);
 
-            for ($slot = 0; $slot < $count; $slot++) {
-                $status = $slot === 0
-                    ? 'belum_selesai'
-                    : ($slot === 1 ? 'proses' : 'selesai');
-
-                $paymentOptions = self::PAYMENT_BY_STATUS[$status];
-                $globalIndex = count($blueprints);
-                $service = self::SERVICES[($monthIndex + $slot + $toko->id) % $serviceCount]['slug'];
-                $client = ($monthIndex * 2 + $slot) % $clientCount;
-                $qty = round(1.0 + ((($monthIndex + $slot + $toko->id) % 6) * 0.5), 2);
-                $etaDays = 1 + (($monthIndex + $slot) % 4);
-                $startAt = (clone $month)->day(min(2 + ($slot * 2), $maxDay));
-
-                $blueprints[] = [
-                    'service' => $service,
-                    'client' => $client,
-                    'qty' => $qty,
-                    'status' => $status,
-                    'started_at' => $startAt->toDateString(),
-                    'eta_days' => $etaDays,
-                    'completed_after_days' => $status === 'selesai'
-                        ? min($etaDays, 1 + (($globalIndex + $slot) % 3))
-                        : null,
-                    'payment' => $paymentOptions[($globalIndex + $slot) % count($paymentOptions)],
-                ];
-            }
+            $blueprints[] = [
+                'service' => $serviceAssignments[$index],
+                'client' => $clientAssignments[$index],
+                'qty' => round(random_int(10, 60) / 10, 2),
+                'status' => $status,
+                'started_at' => $startedAt,
+                'eta_days' => $etaDays,
+                'completed_after_days' => $status === 'selesai'
+                    ? random_int(1, $etaDays)
+                    : null,
+                'payment' => $payment,
+            ];
         }
 
         return $blueprints;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function buildLaundryDatePlan(): array
+    {
+        $today = today()->startOfDay();
+        $usedDates = [];
+        $dates = [];
+
+        for ($monthsBack = self::DEMO_MONTH_COVERAGE_COUNT - 1; $monthsBack >= 0; $monthsBack--) {
+            $month = $today->copy()->startOfMonth()->subMonthsNoOverflow($monthsBack);
+            $dates[] = $this->pickUniqueDateInMonth($month, $usedDates, $today);
+        }
+
+        foreach ($this->buildRecentDateCandidates($today) as $candidate) {
+            if (count($dates) >= self::DEMO_MONTH_COVERAGE_COUNT + self::DEMO_RECENT_ACTIVITY_COUNT) {
+                break;
+            }
+
+            if (! isset($usedDates[$candidate])) {
+                $usedDates[$candidate] = true;
+                $dates[] = $candidate;
+            }
+        }
+
+        $historyStart = $today->copy()->startOfMonth()->subMonthsNoOverflow(self::DEMO_MONTH_COVERAGE_COUNT - 1)->startOfDay();
+
+        while (count($dates) < self::DEMO_LAUNDRY_COUNT) {
+            $dates[] = $this->pickUniqueDateInRange($historyStart, $today, $usedDates);
+        }
+
+        sort($dates);
+
+        return array_values($dates);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function buildRecentDateCandidates(Carbon $today): array
+    {
+        $candidates = [];
+
+        for ($offset = 0; $offset < 30; $offset++) {
+            $candidates[] = $today->copy()->subDays($offset)->toDateString();
+        }
+
+        shuffle($candidates);
+
+        return $candidates;
+    }
+
+    /**
+     * @param  array<string, bool>  $usedDates
+     */
+    private function pickUniqueDateInMonth(Carbon $month, array &$usedDates, Carbon $today): string
+    {
+        $maxDay = $month->isSameMonth($today)
+            ? min($today->day, $month->daysInMonth)
+            : $month->daysInMonth;
+
+        $days = range(1, max($maxDay, 1));
+        shuffle($days);
+
+        foreach ($days as $day) {
+            $date = $month->copy()->day($day)->toDateString();
+
+            if (! isset($usedDates[$date])) {
+                $usedDates[$date] = true;
+
+                return $date;
+            }
+        }
+
+        throw new \RuntimeException('Unable to generate a unique monthly seed date.');
+    }
+
+    /**
+     * @param  array<string, bool>  $usedDates
+     */
+    private function pickUniqueDateInRange(Carbon $start, Carbon $end, array &$usedDates): string
+    {
+        $offsets = range(0, max($start->diffInDays($end), 0));
+        shuffle($offsets);
+
+        foreach ($offsets as $offset) {
+            $date = $start->copy()->addDays($offset)->toDateString();
+
+            if (! isset($usedDates[$date])) {
+                $usedDates[$date] = true;
+
+                return $date;
+            }
+        }
+
+        throw new \RuntimeException('Unable to generate a unique historical seed date.');
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function blueprintProfileForIndex(int $index): array
+    {
+        return match ($index) {
+            0 => ['belum_selesai', 'qris_pending_a'],
+            1 => ['proses', 'qris_pending_b'],
+            2 => ['selesai', 'qris_paid_a'],
+            3 => ['selesai', 'qris_paid_b'],
+            4 => ['belum_selesai', 'cash_unpaid'],
+            5 => ['proses', 'transfer_paid_a'],
+            6 => ['selesai', 'ewallet_paid'],
+            default => $this->randomBlueprintProfile(),
+        };
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function randomBlueprintProfile(): array
+    {
+        $status = self::LAUNDRY_STATUSES[random_int(0, count(self::LAUNDRY_STATUSES) - 1)];
+        $paymentOptions = self::PAYMENT_BY_STATUS[$status];
+
+        return [
+            $status,
+            $paymentOptions[random_int(0, count($paymentOptions) - 1)],
+        ];
+    }
+
+    /**
+     * @param  list<int|string>  $requiredValues
+     * @return list<int|string>
+     */
+    private function buildAssignments(array $requiredValues, int $count): array
+    {
+        $assignments = $requiredValues;
+
+        while (count($assignments) < $count) {
+            $assignments[] = $requiredValues[random_int(0, count($requiredValues) - 1)];
+        }
+
+        shuffle($assignments);
+
+        return array_values($assignments);
     }
 
     private function ensureDemoStore(): void

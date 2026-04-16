@@ -58,6 +58,9 @@
             if (session('status') && isset($statusToToast[session('status')])) {
                 $flashToasts[] = [...$statusToToast[session('status')], 'duration' => 5000];
             }
+
+            $openNewTabUrl = session('open_new_tab_url');
+            $openNewTabName = session('open_new_tab_name');
         @endphp
 
         <div
@@ -294,6 +297,18 @@
                             window.Flux?.toast(toast);
                         }, index * 120);
                     });
+                });
+            </script>
+        @endif
+
+        @if ($openNewTabUrl)
+            <script>
+                queueMicrotask(() => {
+                    const checkoutUrl = @js($openNewTabUrl);
+                    const checkoutTabName = @js($openNewTabName ?: config('payment_gateway.checkout_window_name', 'nyuci-qris-checkout'));
+                    const checkoutWindow = window.open(checkoutUrl, checkoutTabName, 'noopener');
+
+                    checkoutWindow?.focus();
                 });
             </script>
         @endif

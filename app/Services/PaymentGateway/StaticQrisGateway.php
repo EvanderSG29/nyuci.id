@@ -3,6 +3,7 @@
 namespace App\Services\PaymentGateway;
 
 use App\Models\Pembayaran;
+use App\Models\Toko;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
@@ -23,16 +24,17 @@ class StaticQrisGateway
             return ['created' => false, ...$this->snapshot($pembayaran)];
         }
 
-        $this->ensureConfigured();
+        $configuration = $this->configurationFor($pembayaran->laundry?->toko);
+        $this->ensureConfigured($configuration['payload']);
 
-        $staticPayload = $this->staticPayload();
+        $staticPayload = $configuration['payload'];
         $reference = $this->buildReference($pembayaran);
         $invoiceId = $this->buildInvoiceId($pembayaran);
         $qrisText = $this->buildDynamicPayload($staticPayload, (int) $pembayaran->resolved_total);
-        $merchantName = $this->merchantNameFromPayload($staticPayload);
+        $merchantName = $this->merchantNameFromPayload($staticPayload, $configuration['merchant_name']);
         $qrImage = $this->renderQrImageDataUri($qrisText);
         $requestDate = CarbonImmutable::now();
-        $expiresAt = $requestDate->addMinutes($this->ttlMinutes());
+        $expiresAt = $requestDate->addMinutes($configuration['ttl_minutes']);
 
         return [
             'created' => true,
@@ -162,10 +164,10 @@ class StaticQrisGateway
         return sprintf('INV-%s-%s', $pembayaran->id, Str::upper(Str::random(8)));
     }
 
-    private function ensureConfigured(): void
+    private function ensureConfigured(string $staticPayload): void
     {
-        if ($this->staticPayload() === '') {
-            throw new RuntimeException('QRIS statis belum dikonfigurasi di file environment. Isi PAYMENT_GATEWAY_QRIS_STATIC_PAYLOAD.');
+        if (trim($staticPayload) === '') {
+            throw new RuntimeException('QRIS statis belum dikonfigurasi. Isi payload QRIS di pengaturan toko atau PAYMENT_GATEWAY_QRIS_STATIC_PAYLOAD.');
         }
     }
 
@@ -174,14 +176,18 @@ class StaticQrisGateway
         return (string) config('payment_gateway.driver', 'qris_static');
     }
 
-    private function staticPayload(): string
+    private function configurationFor(?Toko $toko): array
     {
-        return trim((string) config('payment_gateway.qris_static.payload', ''));
+        return [
+            'payload' => $toko?->resolvedPaymentGatewayQrisPayload() ?? trim((string) config('payment_gateway.qris_static.payload', '')),
+            'merchant_name' => $toko?->resolvedPaymentGatewayQrisMerchantName(),
+            'ttl_minutes' => $toko?->resolvedPaymentGatewayCheckoutTtlMinutes() ?? max((int) config('payment_gateway.checkout_ttl_minutes', 30), 1),
+        ];
     }
 
-    private function merchantNameFromPayload(string $payload): string
+    private function merchantNameFromPayload(string $payload, ?string $configuredMerchant = null): string
     {
-        $configuredMerchant = trim((string) config('payment_gateway.qris_static.merchant_name', ''));
+        $configuredMerchant = trim((string) ($configuredMerchant ?? ''));
 
         if ($configuredMerchant !== '') {
             return $configuredMerchant;
@@ -192,11 +198,6 @@ class StaticQrisGateway
         return is_string($merchantName) && trim($merchantName) !== ''
             ? $merchantName
             : 'QRIS Statis';
-    }
-
-    private function ttlMinutes(): int
-    {
-        return max((int) config('payment_gateway.checkout_ttl_minutes', 30), 1);
     }
 
     private function buildDynamicPayload(string $staticPayload, int $amount): string

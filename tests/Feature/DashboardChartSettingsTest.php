@@ -47,6 +47,7 @@ function dashboardChartSlotPayload(string $slotKey, array $overrides = []): arra
         'secondary_metric' => $definition['secondary_metric'],
         'accent_color' => $definition['accent_color'],
         'show_points' => $definition['show_points'],
+        'show_previous_comparison' => $definition['show_previous_comparison'] ?? true,
     ], $overrides);
 }
 
@@ -204,10 +205,35 @@ test('dashboard chart settings page seeds defaults and chart payloads remain str
 
     expect($payload['heroChart']['chart']['data']['labels'])->toHaveCount(12);
     expect($payload['heroChart']['chart']['data']['datasets'])->toHaveCount(2);
+    expect($payload['heroChart']['show_previous_comparison'])->toBeTrue();
     expect($payload['heroChart']['axes'])->toHaveKey('y1');
+    expect($payload['heroChart']['summary_items'][0]['trend'])->not->toBeNull();
     expect($payload['cardCharts']['card_1']['chart']['data']['labels'])->toHaveCount(30);
     expect($payload['cardCharts']['card_1']['chart']['data']['datasets'][0]['meta'][0]['deltaText'])->toBeNull();
     expect($payload['cardCharts']['card_1']['chart']['data']['datasets'][0]['meta'][1]['deltaText'])->not->toBeNull();
+    expect(collect($payload['cardCharts']['card_1']['chart']['data']['datasets'][0]['data'])->contains(fn ($value) => $value > 0))->toBeTrue();
+    expect(collect($payload['cardCharts']['card_2']['chart']['data']['datasets'][0]['data'])->contains(fn ($value) => $value > 0))->toBeTrue();
+    expect(collect($payload['cardCharts']['card_3']['chart']['data']['datasets'][0]['data'])->contains(fn ($value) => $value > 0))->toBeTrue();
+});
+
+test('dashboard chart comparison visibility is validated as boolean', function () {
+    Carbon::setTestNow('2026-04-02 09:00:00');
+
+    $user = createDashboardChartSettingsOwner();
+
+    $this
+        ->actingAs($user)
+        ->get(route('pengaturan-dashboard.edit'))
+        ->assertOk();
+
+    $this
+        ->actingAs($user)
+        ->patch(route('pengaturan-dashboard.defaults.update'), dashboardChartDefaultsPayload([
+            'hero' => [
+                'show_previous_comparison' => 'maybe',
+            ],
+        ]))
+        ->assertSessionHasErrors(['charts.hero.show_previous_comparison']);
 });
 
 test('dashboard chart defaults can be updated and reset back to seeded values', function () {
@@ -227,6 +253,7 @@ test('dashboard chart defaults can be updated and reset back to seeded values', 
             'hero' => [
                 'title' => 'Ringkasan Utama',
                 'subtitle' => 'Versi toko',
+                'show_previous_comparison' => false,
             ],
             'card_3' => [
                 'title' => 'Kas Masuk',
@@ -237,6 +264,7 @@ test('dashboard chart defaults can be updated and reset back to seeded values', 
 
     expect(DashboardChartPreset::query()->where('toko_id', $toko->id)->where('slot_key', 'hero')->value('title'))->toBe('Ringkasan Utama');
     expect(DashboardChartPreset::query()->where('toko_id', $toko->id)->where('slot_key', 'card_3')->value('title'))->toBe('Kas Masuk');
+    expect(DashboardChartPreset::query()->where('toko_id', $toko->id)->where('slot_key', 'hero')->value('show_previous_comparison'))->toBeFalse();
 
     $this
         ->actingAs($user)
@@ -247,6 +275,7 @@ test('dashboard chart defaults can be updated and reset back to seeded values', 
     $resolver = app(DashboardChartConfigResolver::class);
 
     expect($resolver->presetsForStore($toko)->firstWhere('slot_key', 'hero')->title)->toBe('Dashboard');
+    expect($resolver->presetsForStore($toko)->firstWhere('slot_key', 'hero')->show_previous_comparison)->toBeTrue();
 });
 
 test('dashboard chart overrides can be enabled and removed', function () {
@@ -274,16 +303,19 @@ test('dashboard chart overrides can be enabled and removed', function () {
                 'secondary_metric' => 'revenue_paid',
                 'accent_color' => '#ffffff',
                 'show_points' => true,
+                'show_previous_comparison' => false,
             ],
         ]))
         ->assertRedirect(route('pengaturan-dashboard.edit'))
         ->assertSessionHas('status', 'dashboard-chart-overrides-updated');
 
     expect(DashboardChartUserOverride::query()->count())->toBe(1);
+    expect(DashboardChartPreset::query()->where('toko_id', $toko->id)->where('slot_key', 'hero')->value('show_previous_comparison'))->toBeTrue();
 
     $effective = app(DashboardChartConfigResolver::class)->effectiveConfigs($toko, $user);
 
     expect($effective['hero']['title'])->toBe('Dashboard Pribadi');
+    expect($effective['hero']['show_previous_comparison'])->toBeFalse();
 
     $this
         ->actingAs($user)
@@ -293,4 +325,5 @@ test('dashboard chart overrides can be enabled and removed', function () {
 
     expect(DashboardChartUserOverride::query()->count())->toBe(0);
     expect(app(DashboardChartConfigResolver::class)->effectiveConfigs($toko, $user)['hero']['title'])->toBe('Dashboard');
+    expect(app(DashboardChartConfigResolver::class)->effectiveConfigs($toko, $user)['hero']['show_previous_comparison'])->toBeTrue();
 });

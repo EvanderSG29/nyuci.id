@@ -19,9 +19,18 @@ class PembayaranRequest extends FormRequest
         return [
             'laundry_id' => ['required', 'integer', 'exists:laundries,id'],
             'metode_pembayaran' => ['required', 'string', 'max:50', Rule::in(self::METHODS)],
-            'tgl_pembayaran' => ['required', 'date'],
+            'tgl_pembayaran' => [Rule::requiredIf($this->input('status') === 'sudah_bayar'), 'nullable', 'date'],
             'catatan' => ['nullable', 'string', 'max:1000'],
             'status' => ['required', Rule::in(['belum_bayar', 'sudah_bayar'])],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'tgl_pembayaran' => blank($this->input('tgl_pembayaran'))
+                ? null
+                : $this->input('tgl_pembayaran'),
+        ]);
     }
 }

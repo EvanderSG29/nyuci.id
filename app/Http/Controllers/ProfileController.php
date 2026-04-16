@@ -70,6 +70,9 @@ class ProfileController extends Controller
                 'nama_toko' => $validated['nama_toko'],
                 'alamat' => $validated['alamat'] ?: null,
                 'no_hp' => $validated['no_hp'] ?: null,
+                'payment_gateway_qris_payload' => $validated['payment_gateway_qris_payload'] ?? null,
+                'payment_gateway_qris_merchant_name' => $validated['payment_gateway_qris_merchant_name'] ?? null,
+                'payment_gateway_checkout_ttl_minutes' => $validated['payment_gateway_checkout_ttl_minutes'] ?? null,
                 'dashboard_cards' => Toko::normalizeDashboardCards($validated['dashboard_cards'] ?? []),
             ]
         );

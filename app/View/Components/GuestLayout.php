@@ -9,6 +9,7 @@ class GuestLayout extends Component
 {
     public function __construct(
         public string $title = 'Nyuci.id',
+        public string $variant = 'auth',
     ) {
     }
 
@@ -34,6 +35,7 @@ class GuestLayout extends Component
         return view('layouts.guest', [
             'appName' => $this->appName(),
             'pageTitle' => $this->pageTitle(),
+            'variant' => $this->variant,
         ]);
     }
 }

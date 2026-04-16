@@ -238,7 +238,13 @@
                         @endif
 
                         @if ($pembayaran->status !== 'sudah_bayar')
-                            <form method="POST" action="{{ route('pembayaran.gateway.issue', $pembayaran) }}" class="mt-4">
+                            <form
+                                method="POST"
+                                action="{{ route('pembayaran.gateway.issue', $pembayaran) }}"
+                                class="mt-4"
+                                x-data
+                                @submit="window.open('about:blank', @js($checkoutTabName ?? config('payment_gateway.checkout_window_name', 'nyuci-qris-checkout')), 'noopener')"
+                            >
                                 @csrf
                                 <button type="submit" class="nyuci-btn-primary w-full">
                                     Buat / Refresh QRIS

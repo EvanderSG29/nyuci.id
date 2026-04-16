@@ -21,6 +21,7 @@ class DashboardChartPreset extends Model
         'secondary_metric',
         'accent_color',
         'show_points',
+        'show_previous_comparison',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class DashboardChartPreset extends Model
         return [
             'period_length' => 'integer',
             'show_points' => 'boolean',
+            'show_previous_comparison' => 'boolean',
         ];
     }
 

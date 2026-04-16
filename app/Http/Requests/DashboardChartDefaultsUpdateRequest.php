@@ -27,6 +27,7 @@ class DashboardChartDefaultsUpdateRequest extends FormRequest
             $rules["charts.$slotKey.secondary_metric"] = ['nullable', Rule::in(array_keys(DashboardChartConfigResolver::metricOptions()))];
             $rules["charts.$slotKey.accent_color"] = ['nullable', 'string', 'max:32'];
             $rules["charts.$slotKey.show_points"] = ['nullable', 'boolean'];
+            $rules["charts.$slotKey.show_previous_comparison"] = ['nullable', 'boolean'];
         }
 
         return $rules;

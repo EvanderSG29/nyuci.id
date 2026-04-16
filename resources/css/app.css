@@ -1586,6 +1586,35 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     font-weight: 700;
 }
 
+.nyuci-payment-preview-action {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1.25rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border-main);
+}
+
+.nyuci-payment-preview-action-copy {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.nyuci-payment-preview-action-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-strong);
+}
+
+.nyuci-payment-preview-action-text {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--text-main);
+}
+
+.nyuci-payment-preview-action-link {
+    width: 100%;
+}
+
 .nyuci-detail-state.is-error .nyuci-detail-state-title {
     color: var(--danger);
 }

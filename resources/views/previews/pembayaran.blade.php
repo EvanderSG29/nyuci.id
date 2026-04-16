@@ -1,6 +1,7 @@
 @php
     $customerName = $pembayaran->klien?->nama_klien ?? $pembayaran->laundry?->klien?->nama_klien ?? $pembayaran->laundry?->nama ?? '-';
     $serviceName = $pembayaran->laundry?->jasa?->nama_jasa ?? $pembayaran->laundry?->jenis_jasa_label ?? '-';
+    $detailUrl = route('pembayaran.show', $pembayaran);
     $statusVariant = $pembayaran->status === 'sudah_bayar' ? 'nyuci-badge-success' : 'nyuci-badge-pending';
     $gatewayVariant = match ($pembayaran->gateway_status_variant) {
         'paid' => 'success',
@@ -35,3 +36,16 @@
         <x-detail-preview-item label="Catatan" :value="$pembayaran->catatan" />
     @endif
 </x-detail-preview>
+
+<div class="nyuci-payment-preview-action">
+    <div class="nyuci-payment-preview-action-copy">
+        <p class="nyuci-payment-preview-action-title">Butuh halaman detail lengkap?</p>
+        <p class="nyuci-payment-preview-action-text">
+            Buka halaman penuh untuk melihat invoice, gateway QRIS, dan aksi lanjutan pembayaran dalam satu tampilan.
+        </p>
+    </div>
+
+    <a href="{{ $detailUrl }}" class="nyuci-btn-primary nyuci-payment-preview-action-link">
+        Lihat Detail Lengkap
+    </a>
+</div>

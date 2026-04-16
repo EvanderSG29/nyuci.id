@@ -229,6 +229,20 @@
                                                 </select>
                                                 <x-input-error class="mt-2" :messages="$errors->get('charts.'.$slotKey.'.show_points')" />
                                             </div>
+
+                                            <div>
+                                                <x-input-label for="default-show-previous-comparison-{{ $slotKey }}" :value="__('Tampilkan perbandingan vs sebelumnya')" />
+                                                <select
+                                                    id="default-show-previous-comparison-{{ $slotKey }}"
+                                                    name="charts[{{ $slotKey }}][show_previous_comparison]"
+                                                    class="mt-1 block w-full rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] px-3 py-2 text-[var(--text-main)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)]"
+                                                >
+                                                    @php($defaultShowPreviousComparison = (int) data_get($slotData, 'preset.show_previous_comparison', true))
+                                                    <option value="1" @selected((string) old('charts.'.$slotKey.'.show_previous_comparison', $defaultShowPreviousComparison) === '1')>Ya</option>
+                                                    <option value="0" @selected((string) old('charts.'.$slotKey.'.show_previous_comparison', $defaultShowPreviousComparison) === '0')>Tidak</option>
+                                                </select>
+                                                <x-input-error class="mt-2" :messages="$errors->get('charts.'.$slotKey.'.show_previous_comparison')" />
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach
@@ -439,6 +453,21 @@
                                                         <option value="0" @selected((string) old('overrides.'.$slotKey.'.show_points', (int) $slotData['effective']['show_points']) === '0')>Tidak</option>
                                                     </select>
                                                     <x-input-error class="mt-2" :messages="$errors->get('overrides.'.$slotKey.'.show_points')" />
+                                                </div>
+
+                                                <div>
+                                                    <x-input-label for="override-show-previous-comparison-{{ $slotKey }}" :value="__('Tampilkan perbandingan vs sebelumnya')" />
+                                                    <select
+                                                        id="override-show-previous-comparison-{{ $slotKey }}"
+                                                        name="overrides[{{ $slotKey }}][show_previous_comparison]"
+                                                        class="mt-1 block w-full rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] px-3 py-2 text-[var(--text-main)] shadow-sm focus:border-[var(--primary)] focus:ring-[var(--primary)]"
+                                                        x-bind:disabled="!custom"
+                                                    >
+                                                        @php($defaultEffectiveShowPreviousComparison = (int) data_get($slotData, 'effective.show_previous_comparison', true))
+                                                        <option value="1" @selected((string) old('overrides.'.$slotKey.'.show_previous_comparison', $defaultEffectiveShowPreviousComparison) === '1')>Ya</option>
+                                                        <option value="0" @selected((string) old('overrides.'.$slotKey.'.show_previous_comparison', $defaultEffectiveShowPreviousComparison) === '0')>Tidak</option>
+                                                    </select>
+                                                    <x-input-error class="mt-2" :messages="$errors->get('overrides.'.$slotKey.'.show_previous_comparison')" />
                                                 </div>
                                             </div>
                                         </div>
