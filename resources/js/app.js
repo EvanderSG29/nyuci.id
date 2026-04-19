@@ -77,10 +77,6 @@ document.addEventListener('alpine:init', () => {
         activeSearchToken: 0,
 
         init() {
-            if (! this.isDashboard) {
-                return;
-            }
-
             const syncScrollState = () => {
                 this.scrolled = window.scrollY > 16;
             };
@@ -212,8 +208,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         shouldShowSearch() {
-            return this.isDashboard
-                && this.searchEnabled
+            return this.searchEnabled
                 && this.open
                 && (
                     this.loading

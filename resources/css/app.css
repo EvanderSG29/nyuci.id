@@ -271,6 +271,72 @@ body {
     flex-shrink: 0;
 }
 
+.nyuci-subpage-header,
+.nyuci-subpage-header > * {
+    min-width: 0;
+}
+
+.nyuci-subpage-header-content,
+.nyuci-subpage-header-content > * {
+    min-width: 0;
+}
+
+.nyuci-subpage-header-content > :where(.flex, [class*='flex']) {
+    flex-wrap: wrap;
+    row-gap: 0.75rem;
+}
+
+.nyuci-subpage-heading {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.nyuci-subpage-header-content :where(h1, h2) {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.98rem + 0.65vw, 1.5rem);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: var(--text-strong);
+}
+
+.nyuci-subpage-header-content :where(h3) {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--text-strong);
+}
+
+.nyuci-subpage-header-content :where(p) {
+    margin: 0;
+    line-height: 1.45;
+}
+
+.nyuci-subpage-breadcrumb-shell {
+    position: relative;
+    z-index: 30;
+    border-bottom: 1px solid var(--border-main);
+    background: color-mix(in srgb, var(--bg-card) 94%, var(--bg-surface));
+}
+
+.nyuci-subpage-breadcrumb-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.95rem 0;
+    scrollbar-width: none;
+}
+
+.nyuci-subpage-breadcrumb-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.nyuci-subpage-breadcrumb-shell .nyuci-breadcrumbs {
+    width: max-content;
+    min-width: 100%;
+    overflow: visible;
+}
+
 .nyuci-pill-soft {
     border-color: color-mix(in srgb, var(--primary) 35%, transparent);
 }
@@ -479,6 +545,14 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     box-shadow: 0 18px 36px rgb(15 23 42 / 0.12);
     backdrop-filter: blur(20px);
     animation: nyuci-dashboard-navbar-drop 0.28s ease;
+}
+
+.nyuci-subpage-navbar.is-scrolled {
+    animation: none;
+}
+
+.nyuci-subpage-navbar .nyuci-dashboard-search {
+    min-height: 3.1rem;
 }
 
 @keyframes nyuci-dashboard-navbar-drop {
@@ -1248,6 +1322,10 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     color: #ffffff;
 }
 
+.dark .nyuci-subpage-breadcrumb-shell {
+    background: color-mix(in srgb, var(--bg-card) 90%, var(--bg-surface));
+}
+
 .dark .nyuci-dashboard-search {
     border-color: rgb(255 255 255 / 0.18);
     background: rgb(255 255 255 / 0.1);
@@ -1838,6 +1916,15 @@ table.dataTable.no-footer {
 }
 
 @media (max-width: 767px) {
+    .nyuci-subpage-breadcrumb-scroll {
+        padding: 0.8rem 0;
+    }
+
+    .nyuci-subpage-breadcrumb-shell .nyuci-breadcrumbs {
+        gap: 0.6rem;
+        font-size: 0.84rem;
+    }
+
     .nyuci-toolbar-group {
         flex-wrap: wrap;
     }
@@ -1858,6 +1945,12 @@ table.dataTable.no-footer {
     .dt-container .dt-search input {
         width: 100%;
         min-width: 0;
+    }
+}
+
+@media print {
+    .no-print {
+        display: none !important;
     }
 }
 
