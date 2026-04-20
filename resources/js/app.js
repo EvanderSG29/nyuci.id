@@ -12,7 +12,7 @@ window.Alpine = Alpine;
 Alpine.plugin(persist);
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('themeManager', () => ({
+    const createThemeManagerState = () => ({
         themeMode: Alpine.$persist(window.NyuciTheme?.getStoredMode() ?? 'auto').as('selected-radio'),
         resolvedTheme: window.NyuciTheme?.resolveTheme(window.NyuciTheme?.getStoredMode() ?? 'auto') ?? 'light',
         mediaQuery: null,
@@ -57,7 +57,36 @@ document.addEventListener('alpine:init', () => {
         toggleSimpleTheme() {
             this.themeMode = this.resolvedTheme === 'dark' ? 'light' : 'dark';
         },
-    }));
+    });
+
+    Alpine.data('themeManager', createThemeManagerState);
+
+    Alpine.data('welcomePage', (previewImages = {}) => {
+        const themeState = createThemeManagerState();
+
+        return {
+            ...themeState,
+            scrolled: false,
+            previewImages,
+
+            currentPreview(key) {
+                const activeTheme = this.resolvedTheme === 'dark' ? 'dark' : 'light';
+
+                return this.previewImages[key]?.[activeTheme] ?? this.previewImages[key]?.light ?? '';
+            },
+
+            init() {
+                themeState.init.call(this);
+
+                const syncScrollState = () => {
+                    this.scrolled = window.scrollY > 24;
+                };
+
+                syncScrollState();
+                window.addEventListener('scroll', syncScrollState, { passive: true });
+            },
+        };
+    });
 
     Alpine.data('settingsGuard', (config = {}) => ({
         saveSucceeded: Boolean(config.saveSucceeded),

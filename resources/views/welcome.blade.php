@@ -1,4 +1,20 @@
 <!DOCTYPE html>
+@php
+    $welcomeImages = [
+        'dashboard' => [
+            'light' => asset('images/welcome/dashboard-light.png'),
+            'dark' => asset('images/welcome/dashboard-dark.png'),
+        ],
+        'edit' => [
+            'light' => asset('images/welcome/edit-light.png'),
+            'dark' => asset('images/welcome/edit-dark.png'),
+        ],
+        'payment' => [
+            'light' => asset('images/welcome/payment-light.png'),
+            'dark' => asset('images/welcome/payment-dark.png'),
+        ],
+    ];
+@endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -12,31 +28,28 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" rel="stylesheet" />
 
+        @include('layouts.partials.theme-init')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body
-        x-data="{
-            scrolled: false,
-            init() {
-                const syncScrollState = () => {
-                    this.scrolled = window.scrollY > 24;
-                };
-
-                syncScrollState();
-                window.addEventListener('scroll', syncScrollState, { passive: true });
-            },
-        }"
+        x-data="welcomePage(@js($welcomeImages))"
+        :class="{ 'dark theme-dark': resolvedTheme === 'dark' }"
         class="nyuci-landing-shell min-h-screen antialiased"
     >
         <header class="nyuci-landing-nav" :class="{ 'is-scrolled': scrolled }">
             <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
                 <a href="{{ route('home') }}" class="flex items-center gap-3">
                     <span class="nyuci-landing-brandmark">
-                        <x-application-logo variant="white" class="h-9 w-9" />
+                        <span class="nyuci-logo-light">
+                            <x-application-logo variant="black" class="h-9 w-9" />
+                        </span>
+                        <span class="nyuci-logo-dark">
+                            <x-application-logo variant="white" class="h-9 w-9" />
+                        </span>
                     </span>
-                    <div>
-                        <p class="text-sm font-semibold uppercase tracking-[0.28em] text-white">Nyuci.id</p>
-                        <p class="text-xs text-white/60">Software operasional laundry modern</p>
+                    <div class="nyuci-landing-brandtext">
+                        <p class="nyuci-landing-brandtitle text-sm font-semibold uppercase tracking-[0.28em]">Nyuci.id</p>
+                        <p class="nyuci-landing-brandsubtitle text-xs">Software operasional laundry modern</p>
                     </div>
                 </a>
 
@@ -47,7 +60,8 @@
                     <a href="#cta" class="nyuci-landing-nav-link">CTA</a>
                 </nav>
 
-                <div class="flex items-center gap-3 max-sm:w-full max-sm:justify-between sm:ml-2">
+                <div class="nyuci-landing-actions flex items-center gap-3 max-sm:w-full max-sm:justify-between sm:ml-2">
+                    <x-theme-switch />
                     <a href="{{ route('login') }}" class="nyuci-landing-btn-secondary">
                         Masuk
                     </a>
@@ -68,11 +82,11 @@
                             Inspirasi Grayscale, disesuaikan untuk Nyuci.id
                         </span>
 
-                        <h1 class="mt-6 text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl lg:text-7xl">
+                        <h1 class="nyuci-landing-hero-title mt-6 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl lg:text-7xl">
                             Semua order, status, dan pembayaran dalam satu alur yang enak dipakai.
                         </h1>
 
-                        <p class="mt-6 max-w-xl text-base leading-8 text-white/72 sm:text-lg">
+                        <p class="nyuci-landing-hero-copy mt-6 max-w-xl text-base leading-8 sm:text-lg">
                             Nyuci.id membantu kasir dan owner melihat order masuk, memperbarui proses laundry, lalu menutup pembayaran
                             tanpa membuka layar yang terasa berat. Fokusnya sederhana: cepat dibaca, cepat dipakai, dan tetap rapi.
                         </p>
@@ -87,7 +101,6 @@
                                 </a>
                             @endif
                         </div>
-
                     </div>
 
                     <div class="relative">
@@ -104,7 +117,8 @@
                             </div>
 
                             <img
-                                src="{{ asset('storage/halaman_dashboard.png') }}"
+                                :src="currentPreview('dashboard')"
+                                src="{{ asset('images/welcome/dashboard-light.png') }}"
                                 alt="Dashboard Nyuci.id untuk memantau order, revenue, dan aktivitas laundry."
                                 class="nyuci-product-frame-image"
                             >
@@ -192,11 +206,11 @@
             <section id="fitur" class="nyuci-landing-band-dark scroll-mt-28">
                 <div class="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
                     <div class="max-w-3xl">
-                        <span class="nyuci-section-label text-white/56">Fitur kunci</span>
-                        <h2 class="mt-4 text-3xl font-semibold tracking-[-0.03em] text-white sm:text-5xl">
+                        <span class="nyuci-section-label nyuci-section-label-on-dark">Fitur kunci</span>
+                        <h2 class="nyuci-landing-dark-heading mt-4 text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">
                             Alur kerja yang terasa ringan saat dipakai, bukan hanya terlihat bagus di demo.
                         </h2>
-                        <p class="mt-5 text-base leading-8 text-white/68 sm:text-lg">
+                        <p class="nyuci-landing-dark-copy mt-5 text-base leading-8 sm:text-lg">
                             Dua section ini menampilkan bagian yang paling sering dipakai setelah dashboard: memperbarui order dan memeriksa detail invoice.
                             Layout dibuat alternating supaya ritmenya tetap hidup saat di-scroll.
                         </p>
@@ -206,10 +220,10 @@
                         <article class="nyuci-showcase-panel lg:flex-row">
                             <div class="nyuci-showcase-copy">
                                 <span class="nyuci-section-label text-[var(--primary)]">Edit order</span>
-                                <h3 class="mt-4 text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+                                <h3 class="nyuci-landing-dark-heading mt-4 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
                                     Ubah status dan detail laundry tanpa form yang melelahkan.
                                 </h3>
-                                <p class="mt-4 text-base leading-8 text-white/68">
+                                <p class="nyuci-landing-dark-copy mt-4 text-base leading-8">
                                     Tampilan edit difokuskan ke field yang benar-benar penting saat operasional berjalan: pelanggan, layanan, qty,
                                     status laundry, tanggal mulai, dan estimasi selesai. Sisanya diletakkan rapi tanpa mengganggu ritme kerja.
                                 </p>
@@ -242,7 +256,8 @@
                                     </div>
 
                                     <img
-                                        src="{{ asset('storage/edit_page.png') }}"
+                                        :src="currentPreview('edit')"
+                                        src="{{ asset('images/welcome/edit-light.png') }}"
                                         alt="Form edit laundry di Nyuci.id untuk memperbarui status dan detail order."
                                         class="nyuci-product-frame-image"
                                     >
@@ -253,10 +268,10 @@
                         <article class="nyuci-showcase-panel lg:flex-row-reverse">
                             <div class="nyuci-showcase-copy">
                                 <span class="nyuci-section-label text-[var(--primary)]">Detail pembayaran</span>
-                                <h3 class="mt-4 text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
+                                <h3 class="nyuci-landing-dark-heading mt-4 text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
                                     Invoice, status pembayaran, dan QRIS disajikan dalam tampilan yang tetap bersih.
                                 </h3>
-                                <p class="mt-4 text-base leading-8 text-white/68">
+                                <p class="nyuci-landing-dark-copy mt-4 text-base leading-8">
                                     Saat admin membuka detail, informasi penting tidak tersebar ke banyak tab. Klien, total, metode bayar,
                                     status laundry, hingga referensi gateway tetap berada di satu layar yang gampang dipahami.
                                 </p>
@@ -289,7 +304,8 @@
                                     </div>
 
                                     <img
-                                        src="{{ asset('storage/detail_page.png') }}"
+                                        :src="currentPreview('payment')"
+                                        src="{{ asset('images/welcome/payment-light.png') }}"
                                         alt="Halaman detail pembayaran Nyuci.id dengan invoice, QRIS, dan status transaksi."
                                         class="nyuci-product-frame-image"
                                     >
@@ -330,7 +346,7 @@
         </main>
 
         <footer class="nyuci-landing-footer">
-            <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-6 text-sm text-white/52 sm:px-6 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+            <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-6 text-sm sm:px-6 sm:flex-row sm:items-center sm:justify-between lg:px-8">
                 <p>&copy; {{ now()->year }} Nyuci.id. Landing page publik untuk software operasional laundry.</p>
                 <p>Tampilan depan menonjolkan dashboard, edit order, dan detail pembayaran.</p>
             </div>
