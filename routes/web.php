@@ -13,6 +13,7 @@ use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PembayaranGatewayController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -46,7 +47,17 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/search/global', GlobalSearchController::class)->name('search.global');
-    Route::get('/pengaturan-dashboard', [DashboardChartSettingsController::class, 'edit'])->name('pengaturan-dashboard.edit');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
+    Route::get('/settings/toko', [SettingsController::class, 'store'])->name('settings.toko');
+    Route::patch('/settings/toko', [SettingsController::class, 'updateStoreIdentity'])->name('settings.toko.update');
+    Route::get('/settings/personalisasi', [SettingsController::class, 'personalization'])->name('settings.personalisasi');
+    Route::get('/settings/pembayaran/qris', [SettingsController::class, 'paymentQris'])->name('settings.payment.qris');
+    Route::patch('/settings/pembayaran/qris', [SettingsController::class, 'updatePaymentQris'])->name('settings.payment.qris.update');
+    Route::get('/settings/pembayaran/metode-lainnya', [SettingsController::class, 'paymentMethods'])->name('settings.payment.methods');
+    Route::get('/settings/dashboard', [SettingsController::class, 'dashboard'])->name('settings.dashboard');
+
+    Route::get('/pengaturan-dashboard', fn () => redirect()->route('settings.dashboard'))->name('pengaturan-dashboard.edit');
     Route::patch('/pengaturan-dashboard/defaults', [DashboardChartSettingsController::class, 'updateDefaults'])->name('pengaturan-dashboard.defaults.update');
     Route::patch('/pengaturan-dashboard/overrides', [DashboardChartSettingsController::class, 'updateOverrides'])->name('pengaturan-dashboard.overrides.update');
     Route::delete('/pengaturan-dashboard/overrides/{slot}', [DashboardChartSettingsController::class, 'destroyOverride'])->name('pengaturan-dashboard.overrides.destroy');
@@ -74,10 +85,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembayaran/{pembayaran}/paid', [PembayaranController::class, 'markAsPaid'])->name('pembayaran.paid');
     Route::post('/pembayaran/{pembayaran}/gateway', [PembayaranGatewayController::class, 'issue'])->name('pembayaran.gateway.issue');
 
-    Route::get('/pengaturan-toko', [ProfileController::class, 'editStore'])->name('pengaturan-toko.edit');
+    Route::get('/pengaturan-toko', fn () => redirect()->route('settings.toko'))->name('pengaturan-toko.edit');
     Route::patch('/pengaturan-toko', [ProfileController::class, 'updateStore'])->name('pengaturan-toko.update');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', fn () => redirect()->route('settings.profile'))->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });

@@ -3,10 +3,14 @@
     $appName = $appName ?? config('app.name', 'Nyuci.id');
     $pageTitle = trim($__env->yieldContent('title', $pageTitle ?? $title ?? $appName));
     $pageTitle = $pageTitle !== '' ? $pageTitle : $appName;
+    $pageNavbarEyebrow = trim((string) ($pageNavbarEyebrow ?? ''));
     $storeName = Auth::user()->toko?->nama_toko ?? 'Laundry digital';
     $isDashboardRoute = request()->routeIs('dashboard');
     $routeName = request()->route()?->getName();
     $globalSearchEnabled = Auth::user()?->toko !== null;
+    $routeSegmentLabels = [
+        'settings' => 'Pengaturan',
+    ];
     $normalizeBreadcrumbLabel = static function (?string $label): string {
         return \Illuminate\Support\Str::of((string) $label)
             ->replace(['-', '_'], ' ')
@@ -24,7 +28,7 @@
 
             if (Route::has($parentRoute) && $parentRoute !== 'dashboard.index' && $parentRoute !== $routeName) {
                 $breadcrumbs->push([
-                    'label' => \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $segments[0])),
+                    'label' => $routeSegmentLabels[$segments[0]] ?? \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $segments[0])),
                     'url' => route($parentRoute),
                 ]);
             }
@@ -45,6 +49,7 @@
         ->map(fn ($segment) => str($segment)->substr(0, 1)->upper()->toString())
         ->implode('');
     $userInitials = $userInitials !== '' ? $userInitials : 'NY';
+    $hasPageIntro = isset($pageIntro) && ! $pageIntro->isEmpty();
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -70,6 +75,8 @@
                 'profile-updated' => ['text' => 'Profil akun berhasil diperbarui.', 'variant' => 'success'],
                 'password-updated' => ['text' => 'Kata sandi berhasil diperbarui.', 'variant' => 'success'],
                 'store-settings-updated' => ['text' => 'Pengaturan toko berhasil diperbarui.', 'variant' => 'success'],
+                'store-identity-updated' => ['text' => 'Informasi toko berhasil diperbarui.', 'variant' => 'success'],
+                'payment-qris-updated' => ['text' => 'Pengaturan QRIS berhasil diperbarui.', 'variant' => 'success'],
                 'dashboard-chart-defaults-updated' => ['text' => 'Default chart dashboard berhasil diperbarui.', 'variant' => 'success'],
                 'dashboard-chart-overrides-updated' => ['text' => 'Preferensi chart pribadi berhasil diperbarui.', 'variant' => 'success'],
                 'dashboard-chart-default-reset' => ['text' => 'Slot chart berhasil dikembalikan ke default.', 'variant' => 'success'],
@@ -134,7 +141,16 @@
                             @include('partials.notification-dropdown')
 
                             <a
-                                href="{{ route('profile.edit') }}"
+                                href="{{ route('settings.profile') }}"
+                                wire:navigate
+                                class="nyuci-dashboard-icon-button inline-flex size-11 items-center justify-center rounded-2xl"
+                                aria-label="Buka pengaturan"
+                            >
+                                <flux:icon.cog-6-tooth variant="outline" class="size-5" />
+                            </a>
+
+                            <a
+                                href="{{ route('settings.profile') }}"
                                 wire:navigate
                                 class="nyuci-dashboard-profile"
                                 aria-label="Buka profil"
@@ -159,20 +175,16 @@
                             <flux:sidebar.toggle class="nyuci-dashboard-icon-button mt-0.5 shrink-0 lg:hidden" />
 
                             <div class="nyuci-subpage-header min-w-0 flex-1">
-                                <p class="nyuci-dashboard-nav-kicker text-[11px] font-semibold uppercase tracking-[0.24em]">
-                                    {{ $storeName }}
-                                </p>
+                                <div class="nyuci-subpage-heading">
+                                    @if ($pageNavbarEyebrow !== '')
+                                        <p class="nyuci-subpage-eyebrow nyuci-dashboard-nav-kicker text-[11px] font-semibold uppercase tracking-[0.24em]">
+                                            {{ $pageNavbarEyebrow }}
+                                        </p>
+                                    @endif
 
-                                <div class="nyuci-subpage-header-content mt-2">
-                                    @isset($header)
-                                        {{ $header }}
-                                    @else
-                                        <div class="nyuci-subpage-heading">
-                                            <h1 class="text-lg font-semibold leading-tight tracking-tight text-[var(--text-strong)] sm:text-xl">
-                                                {{ $pageTitle }}
-                                            </h1>
-                                        </div>
-                                    @endisset
+                                    <h1 class="nyuci-subpage-title text-[var(--text-strong)]">
+                                        {{ $pageTitle }}
+                                    </h1>
                                 </div>
                             </div>
                         </div>
@@ -189,7 +201,16 @@
                             @include('partials.notification-dropdown')
 
                             <a
-                                href="{{ route('profile.edit') }}"
+                                href="{{ route('settings.profile') }}"
+                                wire:navigate
+                                class="nyuci-dashboard-icon-button inline-flex size-11 items-center justify-center rounded-2xl"
+                                aria-label="Buka pengaturan"
+                            >
+                                <flux:icon.cog-6-tooth variant="outline" class="size-5" />
+                            </a>
+
+                            <a
+                                href="{{ route('settings.profile') }}"
                                 wire:navigate
                                 class="nyuci-dashboard-profile"
                                 aria-label="Buka profil"
@@ -239,6 +260,14 @@
                                 </div>
                             </div>
                         </div>
+
+                        @if ($hasPageIntro)
+                            <div class="nyuci-page-intro-shell" data-page-intro>
+                                <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 sm:px-6 lg:px-8">
+                                    {{ $pageIntro }}
+                                </div>
+                            </div>
+                        @endif
                     @endunless
 
                     <div class="min-w-0">

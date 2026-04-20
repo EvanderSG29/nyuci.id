@@ -276,41 +276,36 @@ body {
     min-width: 0;
 }
 
-.nyuci-subpage-header-content,
-.nyuci-subpage-header-content > * {
-    min-width: 0;
-}
-
-.nyuci-subpage-header-content > :where(.flex, [class*='flex']) {
-    flex-wrap: wrap;
-    row-gap: 0.75rem;
-}
-
 .nyuci-subpage-heading {
     display: grid;
-    gap: 0.2rem;
+    gap: 0.3rem;
 }
 
-.nyuci-subpage-header-content :where(h1, h2) {
+.nyuci-subpage-eyebrow {
     margin: 0;
-    font-size: clamp(1.15rem, 0.98rem + 0.65vw, 1.5rem);
-    font-weight: 700;
-    line-height: 1.12;
-    letter-spacing: -0.02em;
-    color: var(--text-strong);
-}
-
-.nyuci-subpage-header-content :where(h3) {
-    margin: 0;
-    font-size: 1rem;
     line-height: 1.2;
+}
+
+.nyuci-subpage-title {
+    margin: 0;
+    font-size: clamp(1rem, 0.97rem + 0.18vw, 1.125rem);
     font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
     color: var(--text-strong);
 }
 
-.nyuci-subpage-header-content :where(p) {
-    margin: 0;
-    line-height: 1.45;
+.nyuci-page-intro-shell {
+    padding-top: 1.25rem;
+}
+
+.nyuci-page-intro-card {
+    background: color-mix(in srgb, var(--bg-card) 92%, var(--bg-surface));
+}
+
+.nyuci-page-intro-copy {
+    display: grid;
+    gap: 0.4rem;
 }
 
 .nyuci-subpage-breadcrumb-shell {
@@ -1035,6 +1030,84 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     border-radius: 1rem;
 }
 
+.nyuci-sidebar-footer-link {
+    color: var(--text-main);
+}
+
+.nyuci-sidebar-footer-link:hover {
+    color: var(--text-strong);
+}
+
+.nyuci-settings-layout {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.nyuci-settings-sidebar {
+    align-self: start;
+    border: 1px solid var(--border-main);
+    border-radius: 1.75rem;
+    background: color-mix(in srgb, var(--bg-card) 92%, var(--bg-surface));
+    padding: 1rem;
+    box-shadow: 0 22px 50px rgb(15 23 42 / 0.08);
+}
+
+.nyuci-settings-nav-link,
+.nyuci-settings-nav-parent {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3rem;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    padding: 0.75rem 0.9rem;
+    color: var(--text-main);
+    font-size: 0.92rem;
+    font-weight: 600;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.nyuci-settings-nav-link:hover,
+.nyuci-settings-nav-parent:hover {
+    border-color: var(--border-soft);
+    background: var(--bg-surface);
+    color: var(--text-strong);
+}
+
+.nyuci-settings-nav-link.is-active,
+.nyuci-settings-nav-parent.is-active {
+    border-color: color-mix(in srgb, var(--primary) 32%, transparent);
+    background: color-mix(in srgb, var(--primary-soft) 76%, var(--bg-card));
+    color: var(--text-strong);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.dark .nyuci-settings-nav-link.is-active,
+.dark .nyuci-settings-nav-parent.is-active {
+    border-color: color-mix(in srgb, var(--primary) 34%, transparent);
+    background: color-mix(in srgb, var(--primary-soft) 46%, var(--bg-surface));
+    box-shadow: inset 0 0 0 1px rgb(96 165 250 / 0.12);
+}
+
+.nyuci-settings-nav-link.is-child {
+    min-height: 2.6rem;
+    border-radius: 0.9rem;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.86rem;
+}
+
+.nyuci-settings-nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    flex-shrink: 0;
+    border-radius: 0.8rem;
+    background: color-mix(in srgb, var(--primary-soft) 72%, var(--bg-card));
+    color: var(--primary-ink);
+}
+
 .nyuci-gradient-brand {
     background: linear-gradient(135deg, var(--accent-deep), var(--primary));
 }
@@ -1303,6 +1376,18 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     .nyuci-donut-chart {
         width: 7.5rem;
         height: 7.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .nyuci-settings-layout {
+        grid-template-columns: minmax(16rem, 18.5rem) minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .nyuci-settings-sidebar {
+        position: sticky;
+        top: 7.75rem;
     }
 }
 

@@ -88,23 +88,6 @@
                             @endif
                         </div>
 
-                        <div class="mt-10 grid gap-4 sm:grid-cols-3">
-                            <div class="nyuci-proof-card">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-white/52">Ringkas</p>
-                                <p class="mt-3 text-lg font-semibold text-white">Dashboard langsung kebaca</p>
-                                <p class="mt-2 text-sm leading-6 text-white/62">Order aktif, revenue, dan antrian harian terlihat tanpa klik berlapis.</p>
-                            </div>
-                            <div class="nyuci-proof-card">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-white/52">Cepat</p>
-                                <p class="mt-3 text-lg font-semibold text-white">Update proses dalam beberapa field</p>
-                                <p class="mt-2 text-sm leading-6 text-white/62">Edit status, estimasi selesai, dan detail order tetap nyaman di layar kecil.</p>
-                            </div>
-                            <div class="nyuci-proof-card">
-                                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-white/52">Terkontrol</p>
-                                <p class="mt-3 text-lg font-semibold text-white">Invoice dan pembayaran tetap jelas</p>
-                                <p class="mt-2 text-sm leading-6 text-white/62">Detail klien, QRIS, dan status lunas tampil rapi dalam satu tampilan.</p>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="relative">

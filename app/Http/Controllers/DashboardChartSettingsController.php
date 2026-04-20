@@ -38,7 +38,7 @@ class DashboardChartSettingsController extends Controller
         $resolver->updateDefaults($toko, $request->validated('charts'));
 
         return redirect()
-            ->route('pengaturan-dashboard.edit')
+            ->route('settings.dashboard')
             ->with('status', 'dashboard-chart-defaults-updated');
     }
 
@@ -52,7 +52,7 @@ class DashboardChartSettingsController extends Controller
         $resolver->updateOverrides($toko, $user, $request->validated('overrides'));
 
         return redirect()
-            ->route('pengaturan-dashboard.edit')
+            ->route('settings.dashboard')
             ->with('status', 'dashboard-chart-overrides-updated');
     }
 
@@ -67,7 +67,7 @@ class DashboardChartSettingsController extends Controller
         $resolver->deleteOverride($toko, $user, $slot);
 
         return redirect()
-            ->route('pengaturan-dashboard.edit')
+            ->route('settings.dashboard')
             ->with('status', 'dashboard-chart-override-deleted');
     }
 
@@ -81,7 +81,7 @@ class DashboardChartSettingsController extends Controller
         $resolver->resetPreset($toko, $slot);
 
         return redirect()
-            ->route('pengaturan-dashboard.edit')
+            ->route('settings.dashboard')
             ->with('status', 'dashboard-chart-default-reset');
     }
 }

@@ -28,8 +28,8 @@
                 <p class="text-xs text-[var(--text-muted)]">{{ Auth::user()->email }}</p>
             </div>
 
-            <a href="{{ route('profile.edit') }}" class="inline-flex items-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-medium text-[var(--text-main)] shadow-sm transition hover:border-[var(--primary)] hover:text-[var(--text-strong)]">
-                Profil
+            <a href="{{ route('settings.profile') }}" class="inline-flex items-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-medium text-[var(--text-main)] shadow-sm transition hover:border-[var(--primary)] hover:text-[var(--text-strong)]">
+                Pengaturan
             </a>
 
             <form method="POST" action="{{ route('logout') }}">

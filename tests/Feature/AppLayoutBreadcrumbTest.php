@@ -17,6 +17,13 @@ function extractBreadcrumbMarkup(string $content): string
     return $matches[0] ?? '';
 }
 
+function extractSubpageNavbarMarkup(string $content): string
+{
+    preg_match('/<header[^>]*nyuci-subpage-navbar[^>]*>[\s\S]*?<\/header>/i', $content, $matches);
+
+    return $matches[0] ?? '';
+}
+
 function createAppUserWithStore(): User
 {
     $user = User::factory()->create();
@@ -96,16 +103,63 @@ test('non-dashboard index pages render one breadcrumb strip inside main and do n
 
         $content = $response->getContent();
         $breadcrumb = extractBreadcrumbMarkup($content);
+        $navbar = extractSubpageNavbarMarkup($content);
 
         expect(substr_count($content, 'data-page-breadcrumbs'))->toBe(1);
         expect($content)->toMatch('/data-flux-main[\s\S]*data-page-breadcrumbs/');
+        expect($content)->toContain('class="nyuci-subpage-title text-[var(--text-strong)]"');
         expect($breadcrumb)->toContain('Beranda');
         expect($breadcrumb)->toContain($label);
         expect(substr_count($breadcrumb, $label))->toBe(1);
+        expect($navbar)->not->toContain('Nyuci Breadcrumb');
     }
 });
 
-test('payment detail keeps action buttons and renders breadcrumb box once', function () {
+test('settings profile keeps navbar compact and excludes body intro copy', function () {
+    $user = createAppUserWithStore();
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('settings.profile'));
+
+    $response
+        ->assertOk()
+        ->assertSee('Pengaturan utama')
+        ->assertSee('Profil')
+        ->assertSee('Subsection aktif');
+
+    $navbar = extractSubpageNavbarMarkup($response->getContent());
+
+    expect($navbar)->toContain('Pengaturan utama');
+    expect($navbar)->toContain('Profil');
+    expect($navbar)->not->toContain('Nyuci Breadcrumb');
+    expect($navbar)->not->toContain('Subsection aktif');
+    expect($navbar)->not->toContain('Susun akun, toko, pembayaran, dan dashboard dalam satu area kerja yang rapi.');
+});
+
+test('payment edit moves subtitle into page intro and keeps navbar compact', function () {
+    $user = createAppUserWithStore();
+    $payment = createPaymentRecordForStore($user->toko);
+
+    $response = $this
+        ->actingAs($user)
+        ->get(route('pembayaran.edit', $payment));
+
+    $response
+        ->assertOk()
+        ->assertSee('Perbarui metode, tanggal, catatan, atau status pembayaran untuk order yang sama.');
+
+    $content = $response->getContent();
+    $navbar = extractSubpageNavbarMarkup($content);
+
+    expect($navbar)->toContain('Transaksi pembayaran');
+    expect($navbar)->toContain('Edit Pembayaran');
+    expect($navbar)->not->toContain('Perbarui metode, tanggal, catatan, atau status pembayaran untuk order yang sama.');
+    expect($content)->toContain('data-page-intro');
+    expect($content)->toMatch('/data-page-breadcrumbs[\s\S]*data-page-intro[\s\S]*Perbarui metode, tanggal, catatan, atau status pembayaran untuk order yang sama\./');
+});
+
+test('payment detail keeps action buttons in page intro and renders breadcrumb box once', function () {
     $user = createAppUserWithStore();
     $payment = createPaymentRecordForStore($user->toko);
 
@@ -121,6 +175,7 @@ test('payment detail keeps action buttons and renders breadcrumb box once', func
 
     $content = $response->getContent();
     $breadcrumb = extractBreadcrumbMarkup($content);
+    $navbar = extractSubpageNavbarMarkup($content);
 
     expect(substr_count($content, 'data-page-breadcrumbs'))->toBe(1);
     expect($content)->toMatch('/data-flux-main[\s\S]*data-page-breadcrumbs/');
@@ -128,6 +183,13 @@ test('payment detail keeps action buttons and renders breadcrumb box once', func
     expect($breadcrumb)->toContain('Pembayaran');
     expect($breadcrumb)->toContain('Detail Pembayaran');
     expect(substr_count($breadcrumb, 'Detail Pembayaran'))->toBe(1);
+    expect($navbar)->toContain('Payment detail');
+    expect($navbar)->toContain('Detail Pembayaran');
+    expect($navbar)->not->toContain('Cetak');
+    expect($navbar)->not->toContain('Edit Pembayaran');
+    expect($navbar)->not->toContain('Ringkasan transaksi untuk pelanggan dan status pembayaran terakhir.');
+    expect($content)->toContain('data-page-intro');
+    expect($content)->toMatch('/data-page-breadcrumbs[\s\S]*data-page-intro[\s\S]*Cetak[\s\S]*Edit Pembayaran/');
 });
 
 test('dashboard does not render the separated breadcrumb box', function () {
@@ -140,6 +202,7 @@ test('dashboard does not render the separated breadcrumb box', function () {
     $response->assertOk();
 
     expect(substr_count($response->getContent(), 'data-page-breadcrumbs'))->toBe(0);
+    expect($response->getContent())->not->toContain('nyuci-subpage-title');
 });
 
 test('guest login page does not render the separated breadcrumb box', function () {

@@ -164,7 +164,7 @@
                     </ul>
 
                     <div class="d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0">
-                        <a href="{{ route('profile.edit') }}" class="btn btn-soft">Profil</a>
+                        <a href="{{ route('settings.profile') }}" class="btn btn-soft">Pengaturan</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="btn btn-accent">Keluar</button>

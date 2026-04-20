@@ -59,6 +59,364 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    Alpine.data('settingsGuard', (config = {}) => ({
+        saveSucceeded: Boolean(config.saveSucceeded),
+        pendingActionKey: config.pendingActionKey ?? 'nyuci-settings-pending-action',
+        pendingActionTtl: 5 * 60 * 1000,
+        forms: [],
+        dirty: false,
+        pendingAction: null,
+        activeFormId: null,
+        allowImmediateNavigation: false,
+        historyGuardEnabled: false,
+
+        init() {
+            this.forms = Array.from(this.$el.querySelectorAll('[data-settings-form]'));
+            this.forms.forEach((form) => this.registerForm(form));
+            this.updateDirtyState();
+            this.installNavigationGuards();
+            this.resumePendingActionIfNeeded();
+        },
+
+        registerForm(form) {
+            form.dataset.settingsBaseline = this.snapshotForm(form);
+
+            const syncState = () => {
+                this.activeFormId = form.id || null;
+                this.updateDirtyState();
+
+                if (!this.saveSucceeded) {
+                    this.clearPendingAction();
+                }
+            };
+
+            form.addEventListener('focusin', () => {
+                this.activeFormId = form.id || null;
+            });
+
+            form.addEventListener('input', syncState);
+            form.addEventListener('change', syncState);
+            form.addEventListener('submit', () => {
+                this.allowImmediateNavigation = true;
+            });
+        },
+
+        installNavigationGuards() {
+            this.handleDocumentClick = (event) => {
+                if (!this.hasUnsavedChanges() || this.allowImmediateNavigation) {
+                    return;
+                }
+
+                if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+
+                const anchor = event.target.closest('a[href]');
+
+                if (!anchor || anchor.hasAttribute('data-settings-guard-ignore')) {
+                    return;
+                }
+
+                const href = anchor.getAttribute('href');
+
+                if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+                    return;
+                }
+
+                if (anchor.target && anchor.target !== '_self') {
+                    return;
+                }
+
+                const currentUrl = new URL(window.location.href);
+                const targetUrl = new URL(href, currentUrl);
+
+                if (targetUrl.href === currentUrl.href) {
+                    return;
+                }
+
+                event.preventDefault();
+                this.pendingAction = this.buildPendingAction({
+                    type: 'link',
+                    href: targetUrl.href,
+                });
+                this.openGuardModal();
+            };
+
+            this.handleDocumentSubmit = (event) => {
+                if (!this.hasUnsavedChanges() || this.allowImmediateNavigation) {
+                    return;
+                }
+
+                const form = event.target;
+                const actionKey = form.getAttribute('data-settings-guard-action');
+
+                if (!actionKey) {
+                    return;
+                }
+
+                event.preventDefault();
+                this.pendingAction = this.buildPendingAction({
+                    type: 'form',
+                    actionKey,
+                });
+                this.openGuardModal();
+            };
+
+            this.handleBeforeUnload = (event) => {
+                if (!this.hasUnsavedChanges() || this.allowImmediateNavigation) {
+                    return undefined;
+                }
+
+                event.preventDefault();
+                event.returnValue = '';
+
+                return '';
+            };
+
+            this.handlePopState = () => {
+                if (!this.historyGuardEnabled) {
+                    return;
+                }
+
+                if (this.allowImmediateNavigation) {
+                    return;
+                }
+
+                if (this.hasUnsavedChanges()) {
+                    history.pushState({ __settingsGuard: true }, '', window.location.href);
+                    this.pendingAction = this.buildPendingAction({
+                        type: 'history-back',
+                    });
+                    this.openGuardModal();
+
+                    return;
+                }
+
+                this.allowImmediateNavigation = true;
+                history.back();
+            };
+
+            document.addEventListener('click', this.handleDocumentClick, true);
+            document.addEventListener('submit', this.handleDocumentSubmit, true);
+            window.addEventListener('beforeunload', this.handleBeforeUnload);
+            window.addEventListener('popstate', this.handlePopState);
+
+            history.pushState({ __settingsGuard: true }, '', window.location.href);
+            this.historyGuardEnabled = true;
+        },
+
+        snapshotForm(form) {
+            const radioGroups = new Set();
+            const snapshot = [];
+
+            Array.from(form.elements)
+                .filter((element) => (
+                    element.name
+                    && !element.disabled
+                    && !['hidden', 'submit', 'button', 'reset', 'file'].includes(element.type)
+                ))
+                .forEach((element) => {
+                    if (element.type === 'radio') {
+                        if (radioGroups.has(element.name)) {
+                            return;
+                        }
+
+                        radioGroups.add(element.name);
+                        const checkedOption = form.querySelector(`input[type="radio"][name="${CSS.escape(element.name)}"]:checked`);
+                        snapshot.push([element.name, checkedOption ? checkedOption.value : '']);
+
+                        return;
+                    }
+
+                    if (element.type === 'checkbox') {
+                        snapshot.push([element.name, element.checked ? (element.value || '1') : '']);
+
+                        return;
+                    }
+
+                    if (element.tagName === 'SELECT' && element.multiple) {
+                        Array.from(element.selectedOptions)
+                            .map((option) => option.value)
+                            .sort()
+                            .forEach((value) => snapshot.push([element.name, value]));
+
+                        return;
+                    }
+
+                    snapshot.push([element.name, element.value ?? '']);
+                });
+
+            snapshot.sort(([leftName, leftValue], [rightName, rightValue]) => {
+                if (leftName === rightName) {
+                    return String(leftValue).localeCompare(String(rightValue));
+                }
+
+                return leftName.localeCompare(rightName);
+            });
+
+            return JSON.stringify(snapshot);
+        },
+
+        updateDirtyState() {
+            this.dirty = this.forms.some((form) => this.isFormDirty(form));
+
+            if (!this.dirty) {
+                this.pendingAction = null;
+            }
+        },
+
+        isFormDirty(form) {
+            return form.dataset.settingsBaseline !== this.snapshotForm(form);
+        },
+
+        hasUnsavedChanges() {
+            return this.dirty;
+        },
+
+        hasSavableChanges() {
+            return this.getActiveDirtyForm() !== null;
+        },
+
+        getActiveDirtyForm() {
+            if (this.activeFormId) {
+                const activeForm = this.forms.find((form) => form.id === this.activeFormId);
+
+                if (activeForm && this.isFormDirty(activeForm)) {
+                    return activeForm;
+                }
+            }
+
+            return this.forms.find((form) => this.isFormDirty(form)) ?? null;
+        },
+
+        openGuardModal() {
+            this.$dispatch('open-modal', 'settings-unsaved-changes');
+        },
+
+        stayOnPage() {
+            this.pendingAction = null;
+        },
+
+        discardAndLeave() {
+            const action = this.pendingAction;
+            this.pendingAction = null;
+            this.clearPendingAction();
+            this.executePendingAction(action);
+        },
+
+        saveAndLeave() {
+            const action = this.pendingAction;
+            const form = this.getActiveDirtyForm();
+
+            if (!action) {
+                return;
+            }
+
+            if (!form) {
+                this.pendingAction = null;
+                this.executePendingAction(action);
+
+                return;
+            }
+
+            this.persistPendingAction(action);
+            this.allowImmediateNavigation = true;
+            form.requestSubmit();
+        },
+
+        executePendingAction(action) {
+            if (!action) {
+                return;
+            }
+
+            this.allowImmediateNavigation = true;
+
+            if (action.type === 'link' && action.href) {
+                window.location.assign(action.href);
+
+                return;
+            }
+
+            if (action.type === 'form' && action.actionKey) {
+                const form = document.querySelector(`[data-settings-guard-action="${action.actionKey}"]`);
+
+                form?.submit();
+
+                return;
+            }
+
+            if (action.type === 'history-back') {
+                history.go(-2);
+            }
+        },
+
+        buildPendingAction(payload) {
+            return {
+                ...payload,
+                originPath: window.location.pathname,
+                createdAt: Date.now(),
+            };
+        },
+
+        persistPendingAction(action) {
+            sessionStorage.setItem(this.pendingActionKey, JSON.stringify(action));
+        },
+
+        readPendingAction() {
+            const raw = sessionStorage.getItem(this.pendingActionKey);
+
+            if (!raw) {
+                return null;
+            }
+
+            try {
+                const action = JSON.parse(raw);
+
+                if (!action?.originPath || !action?.createdAt) {
+                    this.clearPendingAction();
+
+                    return null;
+                }
+
+                if ((Date.now() - action.createdAt) > this.pendingActionTtl) {
+                    this.clearPendingAction();
+
+                    return null;
+                }
+
+                if (action.originPath !== window.location.pathname) {
+                    this.clearPendingAction();
+
+                    return null;
+                }
+
+                return action;
+            } catch (error) {
+                this.clearPendingAction();
+
+                return null;
+            }
+        },
+
+        clearPendingAction() {
+            sessionStorage.removeItem(this.pendingActionKey);
+        },
+
+        resumePendingActionIfNeeded() {
+            const action = this.readPendingAction();
+
+            if (!action || !this.saveSucceeded) {
+                return;
+            }
+
+            this.clearPendingAction();
+
+            queueMicrotask(() => {
+                this.executePendingAction(action);
+            });
+        },
+    }));
+
     Alpine.data('dashboardChrome', (config = {}) => ({
         isDashboard: Boolean(config.isDashboard),
         searchEnabled: Boolean(config.searchEnabled),

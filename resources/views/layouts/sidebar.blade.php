@@ -7,6 +7,13 @@
         ->take(2)
         ->map(fn ($segment) => str($segment)->substr(0, 1)->upper()->toString())
         ->implode('');
+    $userInitials = str($user->name ?? 'Nyuci')
+        ->explode(' ')
+        ->filter()
+        ->take(2)
+        ->map(fn ($segment) => str($segment)->substr(0, 1)->upper()->toString())
+        ->implode('');
+    $userInitials = $userInitials !== '' ? $userInitials : 'NY';
 
     $laundryIcon = new \Illuminate\Support\HtmlString(<<<'HTML'
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0" aria-hidden="true">
@@ -22,11 +29,6 @@
         ['label' => 'Pembayaran', 'route' => 'pembayaran.index', 'icon' => 'credit-card', 'active' => 'pembayaran.*'],
     ];
 
-    $secondaryItems = [
-        ['label' => 'Pengaturan Dashboard', 'route' => 'pengaturan-dashboard.edit', 'icon' => 'chart-bar', 'active' => 'pengaturan-dashboard.*'],
-        ['label' => 'Pengaturan Toko', 'route' => 'pengaturan-toko.edit', 'icon' => 'cog-6-tooth', 'active' => 'pengaturan-toko.*'],
-        ['label' => 'Profil Saya', 'route' => 'profile.edit', 'icon' => 'user-circle', 'active' => 'profile.*'],
-    ];
 @endphp
 
 <flux:sidebar sticky collapsible="mobile" class="nyuci-sidebar-shell border-r !border-[var(--border-main)] !bg-[var(--bg-card)]">
@@ -73,49 +75,39 @@
                 @endif
             @endforeach
         </flux:sidebar.group>
-
-        <flux:separator class="my-2" />
-
-        <flux:sidebar.group heading="Akun">
-            @foreach ($secondaryItems as $item)
-                <flux:sidebar.item
-                    href="{{ route($item['route']) }}"
-                    wire:navigate
-                    :icon="$item['icon']"
-                    class="{{ 'nyuci-sidebar-link'.(request()->routeIs($item['active']) ? ' is-active' : '') }}"
-                >
-                    {{ $item['label'] }}
-                </flux:sidebar.item>
-            @endforeach
-        </flux:sidebar.group>
     </flux:sidebar.nav>
 
     <flux:sidebar.spacer />
 
-    <div class="px-2 pb-2">
-        <flux:dropdown position="top start" align="start" class="w-full">
-            <flux:sidebar.profile class="nyuci-sidebar-profile" :name="$user->name" :chevron="true" />
+    <div class="space-y-2 px-2 pb-2">
+        <a
+            href="{{ route('settings.profile') }}"
+            wire:navigate
+            class="nyuci-sidebar-footer-link flex items-center gap-3 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-3 transition hover:border-[var(--primary)] hover:bg-[var(--bg-card)]"
+        >
+            <span class="nyuci-sidebar-avatar">{{ $userInitials }}</span>
 
-            <flux:menu>
-                <flux:menu.item href="{{ route('dashboard') }}" wire:navigate icon="home">
-                    Dashboard
-                </flux:menu.item>
-                <flux:menu.item href="{{ route('profile.edit') }}" wire:navigate icon="user-circle">
-                    Profil Saya
-                </flux:menu.item>
-                <flux:menu.item href="{{ route('pengaturan-toko.edit') }}" wire:navigate icon="cog-6-tooth">
-                    Pengaturan Toko
-                </flux:menu.item>
+            <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-semibold text-[var(--text-strong)]">{{ $user->name }}</span>
+                <span class="block truncate text-xs text-[var(--text-muted)]">Pengaturan</span>
+            </span>
 
-                <flux:separator class="my-1" />
+            <flux:icon.chevron-right class="size-4 text-[var(--text-muted)]" />
+        </a>
 
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <flux:menu.item type="submit" variant="danger" icon="arrow-right-start-on-rectangle">
-                        Keluar
-                    </flux:menu.item>
-                </form>
-            </flux:menu>
-        </flux:dropdown>
+        <form method="POST" action="{{ route('logout') }}" data-settings-guard-action="logout">
+            @csrf
+
+            <button type="submit" class="nyuci-sidebar-footer-link flex w-full items-center gap-3 rounded-2xl border border-[var(--border-main)] bg-transparent px-3 py-3 text-left transition hover:border-[var(--danger)] hover:bg-[color-mix(in_srgb,var(--danger)_10%,var(--bg-card))]">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--danger)_14%,var(--bg-card))] text-[var(--danger)]">
+                    <flux:icon.arrow-right-start-on-rectangle class="size-5" />
+                </span>
+
+                <span class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-semibold text-[var(--text-strong)]">Keluar</span>
+                    <span class="block truncate text-xs text-[var(--text-muted)]">Tutup sesi akun ini</span>
+                </span>
+            </button>
+        </form>
     </div>
 </flux:sidebar>
