@@ -79,35 +79,57 @@
 
     <flux:sidebar.spacer />
 
-    <div class="space-y-2 px-2 pb-2">
-        <a
-            href="{{ route('settings.profile') }}"
-            wire:navigate
-            class="nyuci-sidebar-footer-link flex items-center gap-3 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-3 transition hover:border-[var(--primary)] hover:bg-[var(--bg-card)]"
-        >
-            <span class="nyuci-sidebar-avatar">{{ $userInitials }}</span>
-
-            <span class="min-w-0 flex-1">
-                <span class="block truncate text-sm font-semibold text-[var(--text-strong)]">{{ $user->name }}</span>
-                <span class="block truncate text-xs text-[var(--text-muted)]">Pengaturan</span>
-            </span>
-
-            <flux:icon.chevron-right class="size-4 text-[var(--text-muted)]" />
-        </a>
-
-        <form method="POST" action="{{ route('logout') }}" data-settings-guard-action="logout">
+    <div class="px-2 pb-2">
+        <form id="sidebar-logout-form" method="POST" action="{{ route('logout') }}" class="hidden" data-settings-guard-action="logout">
             @csrf
-
-            <button type="submit" class="nyuci-sidebar-footer-link flex w-full items-center gap-3 rounded-2xl border border-[var(--border-main)] bg-transparent px-3 py-3 text-left transition hover:border-[var(--danger)] hover:bg-[color-mix(in_srgb,var(--danger)_10%,var(--bg-card))]">
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--danger)_14%,var(--bg-card))] text-[var(--danger)]">
-                    <flux:icon.arrow-right-start-on-rectangle class="size-5" />
-                </span>
-
-                <span class="min-w-0 flex-1">
-                    <span class="block truncate text-sm font-semibold text-[var(--text-strong)]">Keluar</span>
-                    <span class="block truncate text-xs text-[var(--text-muted)]">Tutup sesi akun ini</span>
-                </span>
-            </button>
         </form>
+
+        <flux:dropdown position="top" align="start" class="block w-full">
+            <flux:profile class="nyuci-sidebar-profile-trigger" :name="$user->name">
+                <x-slot name="avatar">
+                    <span class="nyuci-sidebar-avatar">{{ $userInitials }}</span>
+                </x-slot>
+            </flux:profile>
+
+            <flux:menu class="nyuci-sidebar-footer-menu w-[17rem] max-w-[calc(100vw-1.5rem)]">
+                <div class="px-2 pb-1 pt-2">
+                    <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Akun aktif</p>
+                </div>
+
+                <flux:menu.radio.group keep-open>
+                    <flux:menu.radio checked class="nyuci-sidebar-footer-account">
+                        {{ $user->name }}
+                    </flux:menu.radio>
+                </flux:menu.radio.group>
+
+                <div class="nyuci-sidebar-footer-account-meta px-9 pb-2 pt-0.5">
+                    {{ $user->email }}
+                </div>
+
+                <flux:menu.separator class="my-1" />
+
+                <flux:menu.item
+                    href="{{ route('settings.profile') }}"
+                    wire:navigate
+                    icon="cog-6-tooth"
+                    class="nyuci-sidebar-footer-menu-item"
+                >
+                    Pengaturan
+                </flux:menu.item>
+
+                <flux:menu.item
+                    type="submit"
+                    form="sidebar-logout-form"
+                    variant="danger"
+                    icon="arrow-right-start-on-rectangle"
+                    class="nyuci-sidebar-footer-menu-item"
+                >
+                    <span class="flex min-w-0 flex-col text-left">
+                        <span class="truncate">Keluar</span>
+                        <span class="truncate text-[0.72rem] font-medium text-current/70">Tutup sesi akun ini</span>
+                    </span>
+                </flux:menu.item>
+            </flux:menu>
+        </flux:dropdown>
     </div>
 </flux:sidebar>
