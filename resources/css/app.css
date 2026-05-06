@@ -1893,15 +1893,30 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin: 0.95rem 0;
+    margin: 0;
+    padding: 1rem;
 }
 
 .dt-container .dt-layout-row:first-child {
-    margin-top: 0;
+    border-bottom: 1px solid var(--border-main);
+    background: color-mix(in srgb, var(--bg-card) 94%, var(--bg-surface));
 }
 
 .dt-container .dt-layout-row:last-child {
-    margin-bottom: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    border-top: 1px solid var(--border-main);
+    background: color-mix(in srgb, var(--bg-card) 96%, var(--bg-surface));
+}
+
+.dt-container .dt-layout-row:last-child .dt-layout-cell:first-child {
+    grid-column: 1;
+}
+
+.dt-container .dt-layout-row:last-child .dt-layout-cell:last-child {
+    grid-column: 2;
+    justify-self: center;
 }
 
 .dt-container .dt-layout-cell {
@@ -1912,18 +1927,20 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
 .dt-container .dt-search {
     color: var(--text-main);
     font-size: 0.92rem;
+    font-weight: 600;
 }
 
 .dt-container .dt-length select,
 .dt-container .dt-search input {
-    min-height: 2.5rem;
+    min-height: 2.75rem;
     border: 1px solid var(--border-main);
-    border-radius: 0.75rem;
+    border-radius: 0.85rem;
     background: var(--bg-card);
     color: var(--text-strong);
-    padding: 0.55rem 0.8rem;
+    padding: 0.6rem 0.9rem;
     font-size: 0.92rem;
     outline: none;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -1934,7 +1951,7 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
 }
 
 .dt-container .dt-search input {
-    min-width: min(100%, 15rem);
+    width: min(100vw - 4rem, 18rem);
 }
 
 .dt-container .dt-length select {
@@ -1944,36 +1961,43 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
 .dt-container .dt-info {
     color: var(--text-muted);
     font-size: 0.9rem;
+    font-weight: 600;
 }
 
 .dt-container .dt-paging {
     display: flex;
     align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: 0.4rem;
 }
 
 .dt-container .dt-paging .dt-paging-button {
-    min-width: 2.3rem;
+    min-width: 2.45rem;
     border: 1px solid var(--border-main) !important;
-    border-radius: 0.7rem;
+    border-radius: 999px;
     background: var(--bg-card) !important;
-    padding: 0.45rem 0.75rem !important;
+    padding: 0.52rem 0.85rem !important;
     color: var(--text-main) !important;
     font-size: 0.9rem;
-    box-shadow: none !important;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05) !important;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .dt-container .dt-paging .dt-paging-button:hover:not(.disabled) {
     border-color: color-mix(in srgb, var(--primary) 48%, var(--border-main)) !important;
     background: color-mix(in srgb, var(--primary-soft) 46%, var(--bg-card)) !important;
     color: var(--text-strong) !important;
+    transform: translateY(-1px);
 }
 
 .dt-container .dt-paging .dt-paging-button.current {
     border-color: var(--primary) !important;
     background: var(--primary) !important;
     color: var(--on-primary) !important;
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--primary) 24%, transparent) !important;
 }
 
 .dt-container .dt-paging .dt-paging-button.disabled {
@@ -1997,6 +2021,10 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
     background: var(--bg-card);
 }
 
+.dt-container .dt-scroll-body table.dataTable tbody > tr:last-child > * {
+    border-bottom: 0 !important;
+}
+
 table.dataTable {
     width: 100% !important;
     margin: 0 !important;
@@ -2008,18 +2036,50 @@ table.dataTable thead > tr > th,
 table.dataTable thead > tr > td {
     border-bottom: 1px solid var(--border-main) !important;
     background: color-mix(in srgb, var(--bg-card) 86%, var(--bg-surface));
-    padding: 0.95rem 1rem !important;
+    padding: 1.05rem 1rem !important;
     color: var(--text-strong);
-    font-size: 0.86rem;
-    font-weight: 700;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     white-space: nowrap;
 }
 
 table.dataTable tbody > tr > th,
 table.dataTable tbody > tr > td {
     border-bottom: 1px solid var(--border-main) !important;
-    padding: 0.95rem 1rem !important;
-    vertical-align: top;
+    padding: 1.05rem 1rem !important;
+    color: var(--text-strong);
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+table.dataTable thead > tr > th,
+table.dataTable tbody > tr > td {
+    text-align: center;
+}
+
+table.dataTable thead > tr > th:first-child,
+table.dataTable thead > tr > th:nth-child(2),
+table.dataTable tbody > tr > td:first-child,
+table.dataTable tbody > tr > td:nth-child(2) {
+    text-align: left;
+}
+
+table.dataTable.nyuci-datatable-has-row-number thead > tr > th:first-child,
+table.dataTable.nyuci-datatable-has-row-number tbody > tr > td:first-child {
+    width: 4.5rem;
+    text-align: center;
+}
+
+table.dataTable.nyuci-datatable-has-row-number thead > tr > th:nth-child(2),
+table.dataTable.nyuci-datatable-has-row-number tbody > tr > td:nth-child(2) {
+    text-align: left;
+}
+
+table.dataTable tbody > tr > td:last-child {
+    width: 4.5rem;
+    text-align: center;
 }
 
 table.dataTable.display > tbody > tr:nth-child(odd) > *,
@@ -2799,5 +2859,33 @@ table.dataTable.no-footer {
         background:
             radial-gradient(circle at top, rgb(74 125 240 / 0.18), transparent 24rem),
             linear-gradient(180deg, #030816 0%, #081224 100%);
+    }
+}
+
+@media (max-width: 768px) {
+    .dt-container .dt-layout-row,
+    .dt-container .dt-layout-row:first-child,
+    .dt-container .dt-layout-row:last-child {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+    }
+
+    .dt-container .dt-layout-row:first-child .dt-layout-cell:last-child,
+    .dt-container .dt-layout-row:last-child .dt-layout-cell:first-child,
+    .dt-container .dt-layout-row:last-child .dt-layout-cell:last-child {
+        display: flex;
+        justify-content: center;
+    }
+
+    .dt-container .dt-search,
+    .dt-container .dt-search input,
+    .dt-container .dt-length {
+        width: 100%;
+    }
+
+    .dt-container .dt-info {
+        text-align: center;
     }
 }
