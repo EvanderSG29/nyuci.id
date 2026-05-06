@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RegisterTokoController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardChartSettingsController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\JasaController;
 use App\Http\Controllers\KlienController;
@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/settings/pembayaran/qris', [SettingsController::class, 'updatePaymentQris'])->name('settings.payment.qris.update');
     Route::get('/settings/pembayaran/metode-lainnya', [SettingsController::class, 'paymentMethods'])->name('settings.payment.methods');
     Route::get('/settings/dashboard', [SettingsController::class, 'dashboard'])->name('settings.dashboard');
+    Route::get('/jasa-crud', fn () => view('jasa-crud'))->name('jasa.crud');
 
     Route::get('/pengaturan-dashboard', fn () => redirect()->route('settings.dashboard'))->name('pengaturan-dashboard.edit');
     Route::patch('/pengaturan-dashboard/defaults', [DashboardChartSettingsController::class, 'updateDefaults'])->name('pengaturan-dashboard.defaults.update');

@@ -737,14 +737,28 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
 }
 
 .nyuci-dashboard-icon-button {
-    border: 1px solid color-mix(in srgb, var(--accent-deep) 14%, transparent);
-    background: color-mix(in srgb, var(--bg-card) 72%, transparent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    background: transparent;
     color: var(--text-strong) !important;
-    backdrop-filter: blur(12px);
+    padding: 0.65rem;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.nyuci-dashboard-icon-button:hover {
-    background: color-mix(in srgb, var(--bg-card) 88%, var(--bg-surface));
+.nyuci-dashboard-icon-button:hover,
+.nyuci-dashboard-icon-button:focus-visible {
+    border-color: color-mix(in srgb, var(--accent-deep) 30%, transparent);
+    background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+    outline: none;
+}
+
+.nyuci-dashboard-icon-button:active {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    transform: translateY(1px);
 }
 
 .nyuci-dashboard-nav-kicker,
@@ -759,8 +773,8 @@ input.nyuci-otp-input::-webkit-inner-spin-button {
 }
 
 .nyuci-dashboard-navbar.is-scrolled .nyuci-dashboard-icon-button {
-    border-color: var(--border-main);
-    background: color-mix(in srgb, var(--bg-card) 94%, var(--bg-surface));
+    border-color: transparent;
+    background: transparent;
     color: var(--text-strong) !important;
 }
 

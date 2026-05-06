@@ -429,6 +429,7 @@ test('dashboard dropdown can mark notification as read', function () {
         'tgl_selesai' => '2026-04-08',
     ]);
 
+    // Create notification directly in database
     $user->notifyNow(new LaundryFinishedNotification($laundry));
 
     $notification = $user->unreadNotifications()->firstOrFail();

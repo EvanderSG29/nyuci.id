@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-[var(--border-main)] bg-[var(--bg-card)] backdrop-blur">
+<nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-[var(--border-main)] bg-[var(--bg-card)] backdrop-blur nyuci-app-header nyuci-dashboard-navbar">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-8">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
