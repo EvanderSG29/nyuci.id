@@ -9,6 +9,7 @@ class AppLayout extends Component
 {
     public function __construct(
         public string $title = 'Nyuci.id',
+        public ?string $navbarEyebrow = null,
     ) {
     }
 
@@ -26,6 +27,13 @@ class AppLayout extends Component
         return $title !== '' ? $title : $this->appName();
     }
 
+    protected function pageNavbarEyebrow(): string
+    {
+        $eyebrow = trim((string) ($this->navbarEyebrow ?? ''));
+
+        return $eyebrow;
+    }
+
     /**
      * Get the view / contents that represents the component.
      */
@@ -34,6 +42,7 @@ class AppLayout extends Component
         return view('layouts.app', [
             'appName' => $this->appName(),
             'pageTitle' => $this->pageTitle(),
+            'pageNavbarEyebrow' => $this->pageNavbarEyebrow(),
         ]);
     }
 }

@@ -1,9 +1,13 @@
-<x-app-layout title="Tambah Pembayaran">
-    <x-slot name="header">
-        <div class="flex flex-col gap-2">
-            <p class="text-sm font-medium text-[var(--text-muted)]">Transaksi pembayaran</p>
-            <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Tambah Pembayaran</h2>
-            <p class="text-sm text-[var(--text-muted)]">Pilih order laundry dan simpan pembayaran dengan total biaya yang dihitung otomatis.</p>
+<x-app-layout title="Tambah Pembayaran" navbar-eyebrow="Transaksi pembayaran">
+    <x-slot name="pageIntro">
+        <div class="max-w-3xl">
+            <x-card class="nyuci-page-intro-card p-5 sm:p-6">
+                <div class="nyuci-page-intro-copy">
+                    <p class="text-sm leading-6 text-[var(--text-muted)]">
+                        Pilih order laundry dan simpan pembayaran dengan total biaya yang dihitung otomatis.
+                    </p>
+                </div>
+            </x-card>
         </div>
     </x-slot>
 

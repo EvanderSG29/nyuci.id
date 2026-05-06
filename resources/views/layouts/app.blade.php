@@ -3,16 +3,45 @@
     $appName = $appName ?? config('app.name', 'Nyuci.id');
     $pageTitle = trim($__env->yieldContent('title', $pageTitle ?? $title ?? $appName));
     $pageTitle = $pageTitle !== '' ? $pageTitle : $appName;
-    $storeName = Auth::user()->toko?->nama_toko ?? 'Laundry digital';
+    $pageNavbarEyebrow = trim((string) ($pageNavbarEyebrow ?? ''));
     $isDashboardRoute = request()->routeIs('dashboard');
-    $dashboardSearchEnabled = $isDashboardRoute && Auth::user()?->toko !== null;
-    $userInitials = str(Auth::user()?->name ?? 'Nyuci')
-        ->explode(' ')
-        ->filter()
-        ->take(2)
-        ->map(fn ($segment) => str($segment)->substr(0, 1)->upper()->toString())
-        ->implode('');
-    $userInitials = $userInitials !== '' ? $userInitials : 'NY';
+    $routeName = request()->route()?->getName();
+    $globalSearchEnabled = Auth::user()?->toko !== null;
+    $routeSegmentLabels = [
+        'settings' => 'Pengaturan',
+    ];
+    $normalizeBreadcrumbLabel = static function (?string $label): string {
+        return \Illuminate\Support\Str::of((string) $label)
+            ->replace(['-', '_'], ' ')
+            ->squish()
+            ->lower()
+            ->toString();
+    };
+    $breadcrumbs = collect();
+
+    if (! $isDashboardRoute && $routeName) {
+        $segments = explode('.', $routeName);
+
+        if (count($segments) > 1) {
+            $parentRoute = $segments[0].'.index';
+
+            if (Route::has($parentRoute) && $parentRoute !== 'dashboard.index' && $parentRoute !== $routeName) {
+                $breadcrumbs->push([
+                    'label' => $routeSegmentLabels[$segments[0]] ?? \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $segments[0])),
+                    'url' => route($parentRoute),
+                ]);
+            }
+        }
+
+        if ($normalizeBreadcrumbLabel($pageTitle) !== '' && $normalizeBreadcrumbLabel($pageTitle) !== $normalizeBreadcrumbLabel(data_get($breadcrumbs->last(), 'label'))) {
+            $breadcrumbs->push([
+                'label' => $pageTitle,
+                'url' => null,
+            ]);
+        }
+    }
+
+    $hasPageIntro = isset($pageIntro) && ! $pageIntro->isEmpty();
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -38,6 +67,8 @@
                 'profile-updated' => ['text' => 'Profil akun berhasil diperbarui.', 'variant' => 'success'],
                 'password-updated' => ['text' => 'Kata sandi berhasil diperbarui.', 'variant' => 'success'],
                 'store-settings-updated' => ['text' => 'Pengaturan toko berhasil diperbarui.', 'variant' => 'success'],
+                'store-identity-updated' => ['text' => 'Informasi toko berhasil diperbarui.', 'variant' => 'success'],
+                'payment-qris-updated' => ['text' => 'Pengaturan QRIS berhasil diperbarui.', 'variant' => 'success'],
                 'dashboard-chart-defaults-updated' => ['text' => 'Default chart dashboard berhasil diperbarui.', 'variant' => 'success'],
                 'dashboard-chart-overrides-updated' => ['text' => 'Preferensi chart pribadi berhasil diperbarui.', 'variant' => 'success'],
                 'dashboard-chart-default-reset' => ['text' => 'Slot chart berhasil dikembalikan ke default.', 'variant' => 'success'],
@@ -66,215 +97,73 @@
         <div
             x-data="dashboardChrome({
                 isDashboard: @js($isDashboardRoute),
-                searchEnabled: @js($dashboardSearchEnabled),
-                searchUrl: @js($isDashboardRoute ? route('search.global') : ''),
+                searchEnabled: @js($globalSearchEnabled),
+                searchUrl: @js(route('search.global')),
             })"
             @keydown.escape.window="closeSearch()"
             class="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] {{ $isDashboardRoute ? 'nyuci-dashboard-shell' : '' }}"
         >
             @include('layouts.sidebar')
 
-            @if ($isDashboardRoute)
-                <flux:header
-                    container
-                    x-bind:class="{ 'is-scrolled': scrolled }"
-                    class="nyuci-app-header nyuci-dashboard-navbar !border-b"
-                >
-                    <div class="flex w-full items-center gap-3 lg:gap-4">
-                        <flux:sidebar.toggle class="nyuci-dashboard-icon-button lg:hidden" />
+            <x-dashboard-navbar
+                :page-title="$pageTitle"
+                :page-navbar-eyebrow="$pageNavbarEyebrow"
+                :search-enabled="$globalSearchEnabled"
+                :is-dashboard="$isDashboardRoute"
+            />
 
-                        <div class="hidden min-w-0 shrink-0 lg:block">
-                            <p class="nyuci-dashboard-nav-kicker text-[11px] font-semibold uppercase tracking-[0.24em]">
-                                Dashboard
-                            </p>
-                            <p class="nyuci-dashboard-nav-store mt-1 truncate text-sm font-semibold">
-                                {{ $storeName }}
-                            </p>
-                        </div>
-
-                        <div class="relative w-full max-w-2xl flex-1" @click.outside="closeSearch()">
-                            <label class="nyuci-dashboard-search">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <path d="M21 21l-4.2-4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                                    <circle cx="11" cy="11" r="6.2" stroke="currentColor" stroke-width="1.8" />
-                                </svg>
-                                <input
-                                    type="search"
-                                    x-model.debounce.250ms="query"
-                                    @focus="openSearch()"
-                                    placeholder="{{ $dashboardSearchEnabled ? 'Cari laundry, pelanggan, pembayaran...' : 'Lengkapi toko untuk mengaktifkan pencarian dashboard' }}"
-                                    autocomplete="off"
-                                    @disabled(! $dashboardSearchEnabled)
-                                >
-                                <button
-                                    type="button"
-                                    x-cloak
-                                    x-show="query !== ''"
-                                    @click.prevent="clearSearch()"
-                                    class="nyuci-dashboard-search-clear"
-                                    aria-label="Hapus pencarian"
-                                >
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                                    </svg>
-                                </button>
-                            </label>
-
-                            @unless ($dashboardSearchEnabled)
-                                <p class="nyuci-dashboard-nav-helper mt-2 hidden text-xs sm:block">
-                                    Search aktif setelah profil toko dilengkapi.
-                                </p>
-                            @endunless
-
-                            <div
-                                x-cloak
-                                x-show="shouldShowSearch()"
-                                x-transition.opacity.scale.origin.top
-                                class="nyuci-dashboard-search-panel"
-                            >
-                                <div x-show="loading" class="nyuci-dashboard-search-state">
-                                    Mencari data terbaru...
-                                </div>
-
-                                <div x-show="error" x-text="error" class="nyuci-dashboard-search-state is-error"></div>
-
-                                <div x-show="!loading && !error && !hasSearchResults()" class="nyuci-dashboard-search-state">
-                                    Tidak ada hasil untuk pencarian ini.
-                                </div>
-
-                                <template x-for="group in results.groups" :key="group.key">
-                                    <section class="nyuci-dashboard-search-group">
-                                        <div class="flex items-center justify-between gap-3 px-4 py-3">
-                                            <div>
-                                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]" x-text="group.label"></p>
-                                            </div>
-
-                                            <a
-                                                class="text-xs font-semibold text-[var(--primary)] transition hover:text-[var(--primary-hover)]"
-                                                x-bind:href="group.index_url"
-                                            >
-                                                Lihat semua
+            <flux:main class="p-0">
+                <div class="flex min-w-0 w-full flex-col">
+                    @unless ($isDashboardRoute)
+                        <div class="nyuci-subpage-breadcrumb-shell no-print" data-page-breadcrumbs>
+                            <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                                <div class="nyuci-subpage-breadcrumb-scroll">
+                                    @hasSection('breadcrumbs')
+                                        <nav class="nyuci-breadcrumbs" aria-label="Breadcrumb">
+                                            @yield('breadcrumbs')
+                                        </nav>
+                                    @else
+                                        <nav class="nyuci-breadcrumbs" aria-label="Breadcrumb">
+                                            <a href="{{ route('dashboard') }}" class="nyuci-breadcrumb-item text-[var(--text-muted)] hover:text-[var(--text-strong)]">
+                                                Beranda
                                             </a>
-                                        </div>
 
-                                        <div class="px-2 pb-2">
-                                            <template x-for="item in group.items" :key="item.url">
-                                                <a x-bind:href="item.url" class="nyuci-dashboard-search-item">
-                                                    <div class="min-w-0">
-                                                        <p class="truncate text-sm font-semibold text-[var(--text-strong)]" x-text="item.title"></p>
-                                                        <p class="mt-1 truncate text-xs text-[var(--text-main)]" x-text="item.subtitle"></p>
-                                                    </div>
+                                            @foreach ($breadcrumbs as $item)
+                                                <span class="nyuci-breadcrumb-separator">/</span>
 
-                                                    <p class="shrink-0 text-[0.7rem] font-medium uppercase tracking-[0.14em] text-[var(--text-muted)]" x-text="item.meta"></p>
-                                                </a>
-                                            </template>
-                                        </div>
-                                    </section>
-                                </template>
+                                                @if ($item['url'])
+                                                    <a href="{{ $item['url'] }}" class="nyuci-breadcrumb-item text-[var(--text-muted)] hover:text-[var(--text-strong)]">
+                                                        {{ $item['label'] }}
+                                                    </a>
+                                                @else
+                                                    <span class="nyuci-breadcrumb-item truncate text-[var(--text-strong)]">
+                                                        {{ $item['label'] }}
+                                                    </span>
+                                                @endif
+                                            @endforeach
+                                        </nav>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
-                        <div class="ml-auto flex items-center gap-2">
-                            @include('partials.notification-dropdown')
-
-                            <a
-                                href="{{ route('profile.edit') }}"
-                                wire:navigate
-                                class="nyuci-dashboard-profile"
-                                aria-label="Buka profil"
-                            >
-                                <span class="nyuci-dashboard-profile-avatar">{{ $userInitials }}</span>
-                                <span class="hidden min-w-0 text-left sm:block">
-                                    <span class="nyuci-dashboard-nav-profile-name block truncate text-sm font-semibold">{{ Auth::user()->name }}</span>
-                                    <span class="nyuci-dashboard-nav-profile-meta block truncate text-[0.72rem]">Profil Saya</span>
-                                </span>
-                            </a>
-                        </div>
-                    </div>
-                </flux:header>
-            @else
-                <flux:header container class="nyuci-app-header !border-b !border-[var(--border-main)] !bg-[var(--bg-card)]">
-                    <div class="flex w-full items-center gap-3 sm:gap-4">
-                        <flux:sidebar.toggle class="lg:hidden" />
-
-                        <div class="min-w-0 flex-1 lg:hidden">
-                            <p class="truncate text-sm font-semibold text-[var(--text-strong)]">
-                                {{ $pageTitle }}
-                            </p>
-                        </div>
-
-                        <div class="hidden min-w-0 flex-1 lg:block">
-                            @php
-                                $breadcrumbs = collect();
-                                $routeName = request()->route()?->getName();
-
-                                if ($routeName) {
-                                    $segments = explode('.', $routeName);
-
-                                    if (count($segments) > 1) {
-                                        $parentRoute = $segments[0] . '.index';
-
-                                        if (Route::has($parentRoute) && $parentRoute !== 'dashboard.index') {
-                                            $breadcrumbs->push([
-                                                'label' => \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $segments[0])),
-                                                'url' => route($parentRoute),
-                                            ]);
-                                        }
-                                    }
-                                }
-                            @endphp
-
-                            @isset($header)
-                                {{ $header }}
-                            @else
-                                <div class="min-w-0">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-                                        {{ $storeName }}
-                                    </p>
-                                    <h1 class="mt-2 truncate text-2xl font-semibold tracking-tight text-[var(--text-strong)]">
-                                        {{ $pageTitle }}
-                                    </h1>
+                        @if ($hasPageIntro)
+                            <div class="nyuci-page-intro-shell" data-page-intro>
+                                <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 sm:px-6 lg:px-8">
+                                    {{ $pageIntro }}
                                 </div>
-                            @endisset
+                            </div>
+                        @endif
+                    @endunless
 
-                            @hasSection('breadcrumbs')
-                                <nav class="nyuci-breadcrumbs mt-3">
-                                    @yield('breadcrumbs')
-                                </nav>
-                            @else
-                                <nav class="nyuci-breadcrumbs mt-3">
-                                    <a href="{{ route('dashboard') }}" class="nyuci-breadcrumb-item text-[var(--text-muted)] hover:text-[var(--text-strong)]">
-                                        Beranda
-                                    </a>
-
-                                    @foreach ($breadcrumbs as $item)
-                                        <span class="nyuci-breadcrumb-separator">/</span>
-                                        <a href="{{ $item['url'] }}" class="nyuci-breadcrumb-item text-[var(--text-muted)] hover:text-[var(--text-strong)]">
-                                            {{ $item['label'] }}
-                                        </a>
-                                    @endforeach
-
-                                    <span class="nyuci-breadcrumb-separator">/</span>
-                                    <span class="nyuci-breadcrumb-item truncate text-[var(--text-strong)]">
-                                        {{ $pageTitle }}
-                                    </span>
-                                </nav>
-                            @endif
-                        </div>
-
-                        <div class="ml-auto flex items-center gap-2">
-                            @include('partials.notification-dropdown')
-                        </div>
+                    <div class="min-w-0">
+                        @hasSection('content')
+                            @yield('content')
+                        @else
+                            {{ $slot ?? '' }}
+                        @endif
                     </div>
-                </flux:header>
-            @endif
-
-            <flux:main class="p-0">
-                @hasSection('content')
-                    @yield('content')
-                @else
-                    {{ $slot ?? '' }}
-                @endif
+                </div>
             </flux:main>
         </div>
 

@@ -1,0 +1,1208 @@
+PHP Warning:  PHP Startup: Unable to load dynamic library 'bcmath' (tried: C:\xampp\php\ext\bcmath (The specified module could not be found), C:\xampp\php\ext\php_bcmath.dll (The specified module could not be found)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library 'bcmath' (tried: C:\xampp\php\ext\bcmath (The specified module could not be found), C:\xampp\php\ext\php_bcmath.dll (The specified module could not be found)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library 'bcmath' (tried: C:\xampp\php\ext\bcmath (The specified module could not be found), C:\xampp\php\ext\php_bcmath.dll (The specified module could not be found)) in Unknown on line 0
+PHP Warning:  PHP Startup: Unable to load dynamic library 'bcmath' (tried: C:\xampp\php\ext\bcmath (The specified module could not be found), C:\xampp\php\ext\php_bcmath.dll (The specified module could not be found)) in Unknown on line 0
+
+   FAIL  Tests\Feature\LaundryManagementTest
+  Ô¿» dashboard dropdown can mark notification as read                     1.14s  
+  ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ  
+   FAILED  Tests\Feature\LaundryManagementTest > dashboard dropdown can markÔÇª   
+  Expected: <!DOCTYPE html>\n
+<html lang="en">\n
+    <head>\n
+        <meta charset="utf-8">\n
+        <meta name="viewport" content="width=device-width, initial-scale=1">\n
+        <meta name="csrf-token" content="hqYQC6p6t1o1BjoZdalF3NnyjYv9GoLB4Py6ap2f">\n
+\n
+        <title>Beranda - nyuci.id</title>\n
+        <link rel="icon" type="image/x-icon" href="http://localhost:8000/storage/icon_blue.ico">\n
+        <link rel="shortcut icon" href="http://localhost:8000/storage/icon_blue.ico">\n
+\n
+        <link rel="preconnect" href="https://fonts.bunny.net">\n
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" rel="stylesheet" />\n
+\n
+        <script>\n
+    (() => {\n
+        const html = document.documentElement;\n
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');\n
+        const darkModeKey = 'dark-mode';\n
+        const legacyThemeKey = 'nyuci-theme';\n
+        const selectedRadioKey = 'selected-radio';\n
+\n
+        const readStorage = (key) => {\n
+            const value = localStorage.getItem(key);\n
+\n
+            if (value === null) {\n
+                return null;\n
+            }\n
+\n
+            try {\n
+                return JSON.parse(value);\n
+            } catch {\n
+                return value;\n
+            }\n
+        };\n
+\n
+        const mapLegacyPreference = (value) => {\n
+            if (value === 'light' || value === 'dark') {\n
+                return value;\n
+            }\n
+\n
+            return 'auto';\n
+        };\n
+\n
+        const getStoredMode = () => readStorage(selectedRadioKey)\n
+            || mapLegacyPreference(readStorage(legacyThemeKey))\n
+            || (readStorage(darkModeKey) ? 'dark' : 'auto');\n
+\n
+        const resolveTheme = (mode) => {\n
+            if (mode === 'dark' || mode === 'light') {\n
+                return mode;\n
+            }\n
+\n
+            return mediaQuery.matches ? 'dark' : 'light';\n
+        };\n
+\n
+        const applyThemeClass = (mode) => {\n
+            const resolvedTheme = resolveTheme(mode);\n
+\n
+            html.classList.toggle('dark', resolvedTheme === 'dark');\n
+            html.classList.toggle('theme-dark', resolvedTheme === 'dark');\n
+            html.dataset.theme = resolvedTheme;\n
+            html.style.colorScheme = resolvedTheme;\n
+\n
+            return resolvedTheme;\n
+        };\n
+\n
+        const applyTheme = (mode) => {\n
+            const normalizedMode = mode === 'system' ? 'auto' : mode;\n
+            const resolvedTheme = applyThemeClass(normalizedMode);\n
+\n
+            localStorage.setItem(selectedRadioKey, JSON.stringify(normalizedMode));\n
+            localStorage.setItem(legacyThemeKey, normalizedMode === 'auto' ? 'system' : normalizedMode);\n
+\n
+            if (resolvedTheme === 'dark') {\n
+                localStorage.setItem(darkModeKey, 'true');\n
+            } else {\n
+                localStorage.removeItem(darkModeKey);\n
+            }\n
+\n
+            window.dispatchEvent(new CustomEvent('nyuci-theme-changed', {\n
+                detail: {\n
+                    preference: normalizedMode === 'auto' ? 'system' : normalizedMode,\n
+                    selectedRadio: normalizedMode,\n
+                    resolvedTheme,\n
+                },\n
+            }));\n
+\n
+            return resolvedTheme;\n
+        };\n
+\n
+        const syncSwitches = () => {\n
+            document.querySelectorAll('.switches [type="radio"]').forEach((input) => {\n
+                input.checked = input.id === getStoredMode();\n
+            });\n
+        };\n
+\n
+        const initializeSwitches = () => {\n
+            syncSwitches();\n
+\n
+            document.querySelectorAll('.switches [type="radio"]').forEach((input) => {\n
+                input.addEventListener('change', (event) => {\n
+                    applyTheme(event.target.value);\n
+                    syncSwitches();\n
+                });\n
+            });\n
+        };\n
+\n
+        window.NyuciTheme = {\n
+            getStoredMode,\n
+            getPreference: () => {\n
+                const mode = getStoredMode();\n
+\n
+                return mode === 'auto' ? 'system' : mode;\n
+            },\n
+            getResolvedTheme: () => resolveTheme(getStoredMode()),\n
+            resolveTheme,\n
+            applyTheme,\n
+        };\n
+\n
+        applyThemeClass(getStoredMode());\n
+\n
+        if (document.readyState === 'loading') {\n
+            document.addEventListener('DOMContentLoaded', initializeSwitches, { once: true });\n
+        } else {\n
+            initializeSwitches();\n
+        }\n
+    })();\n
+</script>\n
+        <!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.list-item][wire\:loading\.list-item], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}[wire\:cloak] {display: none !important;}dialog#livewire-error::backdrop {background-color: rgba(0, 0, 0, .6);}</style>\n
+        <style>\n
+    :root.dark {\n
+        color-scheme: dark;\n
+    }\n
+</style>\n
+<script>\n
+    window.Flux = {\n
+        applyAppearance (appearance) {\n
+            let applyDark = () => document.documentElement.classList.add('dark')\n
+            let applyLight = () => document.documentElement.classList.remove('dark')\n
+\n
+            if (appearance === 'system') {\n
+                let media = window.matchMedia('(prefers-color-scheme: dark)')\n
+\n
+                window.localStorage.removeItem('flux.appearance')\n
+\n
+                media.matches ? applyDark() : applyLight()\n
+            } else if (appearance === 'dark') {\n
+                window.localStorage.setItem('flux.appearance', 'dark')\n
+\n
+                applyDark()\n
+            } else if (appearance === 'light') {\n
+                window.localStorage.setItem('flux.appearance', 'light')\n
+\n
+                applyLight()\n
+            }\n
+        }\n
+    }\n
+\n
+    window.Flux.applyAppearance(window.localStorage.getItem('flux.appearance') || 'system')\n
+</script>\n
+        <link rel="preload" as="style" href="http://localhost:8000/build/assets/app-cGOe300D.css" /><link rel="preload" as="style" href="http://localhost:8000/build/assets/app-nh6yBYpf.css" /><link rel="modulepreload" as="script" href="http://localhost:8000/build/assets/app-DW0Z450t.js" /><link rel="stylesheet" href="http://localhost:8000/build/assets/app-cGOe300D.css" data-navigate-track="reload" /><link rel="stylesheet" href="http://localhost:8000/build/assets/app-nh6yBYpf.css" data-navigate-track="reload" /><script type="module" src="http://localhost:8000/build/assets/app-DW0Z450t.js" data-navigate-track="reload"></script>    </head>\n
+    <body x-data="themeManager()" :class="{ 'dark theme-dark': resolvedTheme === 'dark' }" class="font-sans antialiased">\n
+        \n
+        <div\n
+            x-data="dashboardChrome({\n
+                isDashboard: true,\n
+                searchEnabled: true,\n
+                searchUrl: 'http:\/\/localhost:8000\/search\/global',\n
+            })"\n
+            @keydown.escape.window="closeSearch()"\n
+            class="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] nyuci-dashboard-shell"\n
+        >\n
+            <ui-sidebar-toggle class="z-20 fixed inset-0 bg-black/10 hidden data-flux-sidebar-on-mobile:not-data-flux-sidebar-collapsed-mobile:block" data-flux-sidebar-backdrop></ui-sidebar-toggle>\n
+\n
+<ui-sidebar\n
+    class="[grid-area:sidebar] z-1 flex flex-col gap-4 [:where(&amp;)]:w-64 p-4 data-flux-sidebar-collapsed-desktop:w-14 data-flux-sidebar-collapsed-desktop:px-2 data-flux-sidebar-collapsed-desktop:cursor-e-resize rtl:data-flux-sidebar-collapsed-desktop:cursor-w-resize max-lg:data-flux-sidebar-cloak:hidden data-flux-sidebar-on-mobile:data-flux-sidebar-collapsed-mobile:-translate-x-full data-flux-sidebar-on-mobile:data-flux-sidebar-collapsed-mobile:rtl:translate-x-full z-20! data-flux-sidebar-on-mobile:start-0! data-flux-sidebar-on-mobile:fixed! data-flux-sidebar-on-mobile:top-0! data-flux-sidebar-on-mobile:min-h-dvh! data-flux-sidebar-on-mobile:max-h-dvh! max-h-dvh overflow-y-auto overscroll-contain nyuci-sidebar-shell border-r !border-[var(--border-main)] !bg-[var(--bg-card)]" x-init="$el.classList.add(&#039;transition-transform&#039;)"\n
+     collapsible="mobile"          sticky     x-data\n
+    data-flux-sidebar-cloak\n
+    data-flux-sidebar\n
+>\n
+    <div class="flex items-center justify-between gap-2 min-h-10 !border-b !border-[var(--border-main)] !px-3 !py-3" data-flux-sidebar-header>\n
+    <a href="http://localhost:8000/dashboard" class="h-10 flex items-center px-2 in-data-flux-sidebar-collapsed-desktop:w-10 in-data-flux-sidebar-collapsed-desktop:px-0 in-data-flux-sidebar-collapsed-desktop:justify-center in-data-flux-sidebar-collapsed-desktop:in-data-flux-sidebar-active:absolute in-data-flux-sidebar-collapsed-desktop:in-data-flux-sidebar-active:opacity-0 gap-2 nyuci-sidebar-brand !rounded-2xl !px-3 !py-2" data-flux-sidebar-brand>\n
+                    <div class="flex items-center justify-center h-6 min-w-6 rounded-sm overflow-hidden shrink-0">\n
+                                    <img src="http://localhost:8000/storage/icon_black.png" alt="Nyuci.id" class="h-6 min-w-6 dark:hidden" />\n
+                    <img src="http://localhost:8000/storage/icon.white.png" alt="Nyuci.id" class="h-6 min-w-6 hidden dark:block" />\n
+                            </div>\n
+        \n
+        <div class="text-sm font-medium truncate [:where(&amp;)]:text-zinc-800 dark:[:where(&amp;)]:text-zinc-100 in-data-flux-sidebar-collapsed-desktop:hidden">Nyuci.id</div>\n
+    </a>\n
+\n
+        <ui-sidebar-toggle class="w-10 h-8 flex items-center justify-center in-data-flux-sidebar-collapsed-desktop:opacity-0 in-data-flux-sidebar-collapsed-desktop:absolute in-data-flux-sidebar-collapsed-desktop:in-data-flux-sidebar-active:opacity-100  lg:hidden" data-flux-sidebar-collapse>\n
+    <ui-tooltip position="right center"  data-flux-tooltip >\n
+        <button type="button" class="size-10 relative items-center font-medium justify-center gap-2 whitespace-nowrap disabled:opacity-75 dark:disabled:opacity-75 disabled:cursor-default disabled:pointer-events-none text-sm rounded-lg inline-flex  bg-transparent hover:bg-zinc-800/5 dark:hover:bg-white/15 text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white in-data-flux-sidebar-collapsed-desktop:cursor-e-resize rtl:in-data-flux-sidebar-collapsed-desktop:cursor-w-resize [&amp;[collapsible=&quot;mobile&quot;]]:in-data-flux-sidebar-on-desktop:hidden rtl:rotate-180">\n
+            <svg class="text-zinc-500 dark:text-zinc-400" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">\n
+                <path d="M7.5 3.75V16.25M3.4375 16.25H16.5625C17.08 16.25 17.5 15.83 17.5 15.3125V4.6875C17.5 4.17 17.08 3.75 16.5625 3.75H3.4375C2.92 3.75 2.5 4.17 2.5 4.6875V15.3125C2.5 15.83 2.92 16.25 3.4375 16.25Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"></path>\n
+            </svg>\n
+        </button>\n
+\n
+                    <div popover="manual" class="relative py-2 px-2.5 rounded-md text-xs text-white font-medium bg-zinc-800 dark:bg-zinc-700 dark:border dark:border-white/10 p-0 overflow-visible" data-flux-tooltip-content>\n
+    Toggle sidebar\n
+\n
+    </div>\n
+            </ui-tooltip>\n
+</ui-sidebar-toggle>\n
+</div>\n
+    <div class="px-3 pt-3">\n
+        <div class="nyuci-sidebar-store">\n
+            <div class="flex items-center gap-3">\n
+                <div class="nyuci-sidebar-avatar">NT</div>\n
+\n
+                <div class="min-w-0">\n
+                    <p class="truncate text-sm font-semibold text-[var(--text-strong)]">Nyuci Test</p>\n
+                    <p class="truncate text-xs text-[var(--text-muted)]">Kristian Hahn</p>\n
+                </div>\n
+            </div>\n
+\n
+            <p class="mt-3 truncate text-[11px] text-[var(--text-muted)]">adam96@example.com</p>\n
+        </div>\n
+    </div>\n
+\n
+    <nav class="flex flex-col overflow-visible min-h-auto nyuci-sidebar-scroll gap-1 px-2 pt-3" data-flux-sidebar-nav>\n
+    <div class="flex flex-col in-data-flux-sidebar-collapsed-desktop:hidden" data-flux-sidebar-group>\n
+        <div class="px-3 py-2">\n
+            <div class="text-sm text-zinc-400 font-medium leading-none">Menu</div>\n
+        </div>\n
+\n
+        <div class="flex flex-col">\n
+            <ui-tooltip position="right center"  data-flux-tooltip >\n
+        <a href="http://localhost:8000/dashboard" data-current="data-current" class="h-8 in-data-flux-sidebar-on-mobile:h-10 relative flex items-center gap-3 rounded-lg in-data-flux-sidebar-collapsed-desktop:w-10 in-data-flux-sidebar-collapsed-desktop:justify-center py-0 text-start w-full px-3 has-data-flux-navlist-badge:not-in-data-flux-sidebar-collapsed-desktop:pe-1.5 my-px text-zinc-500 dark:text-white/80 data-current:text-(--color-accent-content) hover:data-current:text-(--color-accent-content) data-current:bg-white dark:data-current:bg-white/[7%] data-current:border data-current:border-zinc-200 dark:data-current:border-transparent hover:text-zinc-800 dark:hover:text-white dark:hover:bg-white/[7%] hover:bg-zinc-800/5  border border-transparent in-data-flux-sidebar-group-dropdown:w-auto! in-data-flux-sidebar-group-dropdown:px-2! in-data-flux-sidebar-group-dropdown:text-zinc-800! in-data-flux-sidebar-group-dropdown:bg-white! in-data-flux-sidebar-group-dropdown:hover:bg-zinc-50! dark:in-data-flux-sidebar-group-dropdown:text-white! dark:in-data-flux-sidebar-group-dropdown:bg-transparent! dark:in-data-flux-sidebar-group-dropdown:hover:bg-zinc-600! nyuci-sidebar-link is-active" data-flux-sidebar-item="data-flux-sidebar-item" wire:navigate="">\n
+        <div class="relative">\n
+                                    <svg class="shrink-0 [:where(&amp;)]:size-6 size-4 in-data-flux-sidebar-group-dropdown:text-zinc-400! dark:in-data-flux-sidebar-group-dropdown:text-white/80! [[data-flux-sidebar-item]:hover_&]:text-current!" data-flux-icon xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>\n
+</svg>\n
+\n
+                        \n
+                            </div>\n
+        \n
+                    <div class="\n
+                in-data-flux-sidebar-collapsed-desktop:not-in-data-flux-sidebar-group-dropdown:hidden\n
+                flex-1 text-sm font-medium truncate [[data-nav-footer]_&]:hidden [[data-nav-sidebar]_[data-nav-footer]_&]:block" data-content>Beranda</div>\n
+    </a>\n
+\n
+    <div popover="manual" class="relative py-2 px-2.5 rounded-md text-xs text-white font-medium bg-zinc-800 dark:bg-zinc-700 dark:border dark:border-white/10 p-0 overflow-visible not-in-data-flux-sidebar-collapsed-desktop:hidden in-data-flux-sidebar-group-dropdown:hidden cursor-default" data-flux-tooltip-content>\n
+    Beranda\n
+\n
+    </div>\n
+\n
+            </ui-tooltip>\n
+                                                                                <ui-tooltip position="right center"  data-flux-tooltip >\n
+        <a href="http://localhost:8000/biaya-jasa" class="h-8 in-data-flux-sidebar-on-mobile:h-10 relative flex items-center gap-3 rounded-lg in-data-flux-sidebar-collapsed-desktop:w-10 in-data-flux-sidebar-collapsed-desktop:justify-center py-0 text-start w-full px-3 has-data-flux-navlist-badge:not-in-data-flux-sidebar-collapsed-desktop:pe-1.5 my-px text-zinc-500 dark:text-white/80 data-current:text-(--color-accent-content) hover:data-current:text-(--color-accent-content) data-current:bg-white dark:data-current:bg-white/[7%] data-current:border data-current:border-zinc-200 dark:data-current:border-transparent hover:text-zinc-800 dark:hover:text-white dark:hover:bg-white/[7%] hover:bg-zinc-800/5  border border-transparent in-data-flux-sidebar-group-dropdown:w-auto! in-data-flux-sidebar-group-dropdown:px-2! in-data-flux-sidebar-group-dropdown:text-zinc-800! in-data-flux-sidebar-group-dropdown:bg-white! in-data-flux-sidebar-group-dropdown:hover:bg-zinc-50! dark:in-data-flux-sidebar-group-dropdown:text-white! dark:in-data-flux-sidebar-group-dropdown:bg-transparent! dark:in-data-flux-sidebar-group-dropdown:hover:bg-zinc-600! nyuci-sidebar-link" data-flux-sidebar-item="data-flux-sidebar-item" wire:navigate="">\n
+        <div class="relative">\n
+                                    <svg class="shrink-0 [:where(&amp;)]:size-6 size-4 in-data-flux-sidebar-group-dropdown:text-zinc-400! dark:in-data-flux-sidebar-group-dropdown:text-white/80! [[data-flux-sidebar-item]:hover_&]:text-current!" data-flux-icon xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"/>\n
+</svg>\n
+\n
+                        \n
+                            </div>\n
+        \n
+                    <div class="\n
+                in-data-flux-sidebar-collapsed-desktop:not-in-data-flux-sidebar-group-dropdown:hidden\n
+                flex-1 text-sm font-medium truncate [[data-nav-footer]_&]:hidden [[data-nav-sidebar]_[data-nav-footer]_&]:block" data-content>Biaya Jasa</div>\n
+    </a>\n
+\n
+    <div popover="manual" class="relative py-2 px-2.5 rounded-md text-xs text-white font-medium bg-zinc-800 dark:bg-zinc-700 dark:border dark:border-white/10 p-0 overflow-visible not-in-data-flux-sidebar-collapsed-desktop:hidden in-data-flux-sidebar-group-dropdown:hidden cursor-default" data-flux-tooltip-content>\n
+    Biaya Jasa\n
+\n
+    </div>\n
+\n
+            </ui-tooltip>\n
+                                                                                <ui-tooltip position="right center"  data-flux-tooltip >\n
+        <a href="http://localhost:8000/pelanggan" class="h-8 in-data-flux-sidebar-on-mobile:h-10 relative flex items-center gap-3 rounded-lg in-data-flux-sidebar-collapsed-desktop:w-10 in-data-flux-sidebar-collapsed-desktop:justify-center py-0 text-start w-full px-3 has-data-flux-navlist-badge:not-in-data-flux-sidebar-collapsed-desktop:pe-1.5 my-px text-zinc-500 dark:text-white/80 data-current:text-(--color-accent-content) hover:data-current:text-(--color-accent-content) data-current:bg-white dark:data-current:bg-white/[7%] data-current:border data-current:border-zinc-200 dark:data-current:border-transparent hover:text-zinc-800 dark:hover:text-white dark:hover:bg-white/[7%] hover:bg-zinc-800/5  border border-transparent in-data-flux-sidebar-group-dropdown:w-auto! in-data-flux-sidebar-group-dropdown:px-2! in-data-flux-sidebar-group-dropdown:text-zinc-800! in-data-flux-sidebar-group-dropdown:bg-white! in-data-flux-sidebar-group-dropdown:hover:bg-zinc-50! dark:in-data-flux-sidebar-group-dropdown:text-white! dark:in-data-flux-sidebar-group-dropdown:bg-transparent! dark:in-data-flux-sidebar-group-dropdown:hover:bg-zinc-600! nyuci-sidebar-link" data-flux-sidebar-item="data-flux-sidebar-item" wire:navigate="">\n
+        <div class="relative">\n
+                                    <svg class="shrink-0 [:where(&amp;)]:size-6 size-4 in-data-flux-sidebar-group-dropdown:text-zinc-400! dark:in-data-flux-sidebar-group-dropdown:text-white/80! [[data-flux-sidebar-item]:hover_&]:text-current!" data-flux-icon xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>\n
+</svg>\n
+\n
+                        \n
+                            </div>\n
+        \n
+                    <div class="\n
+                in-data-flux-sidebar-collapsed-desktop:not-in-data-flux-sidebar-group-dropdown:hidden\n
+                flex-1 text-sm font-medium truncate [[data-nav-footer]_&]:hidden [[data-nav-sidebar]_[data-nav-footer]_&]:block" data-content>Pelanggan</div>\n
+    </a>\n
+\n
+    <div popover="manual" class="relative py-2 px-2.5 rounded-md text-xs text-white font-medium bg-zinc-800 dark:bg-zinc-700 dark:border dark:border-white/10 p-0 overflow-visible not-in-data-flux-sidebar-collapsed-desktop:hidden in-data-flux-sidebar-group-dropdown:hidden cursor-default" data-flux-tooltip-content>\n
+    Pelanggan\n
+\n
+    </div>\n
+\n
+            </ui-tooltip>\n
+                                                                                <ui-tooltip position="right center"  data-flux-tooltip >\n
+        <a href="http://localhost:8000/laundry" class="h-8 in-data-flux-sidebar-on-mobile:h-10 relative flex items-center gap-3 rounded-lg in-data-flux-sidebar-collapsed-desktop:w-10 in-data-flux-sidebar-collapsed-desktop:justify-center py-0 text-start w-full px-3 has-data-flux-navlist-badge:not-in-data-flux-sidebar-collapsed-desktop:pe-1.5 my-px text-zinc-500 dark:text-white/80 data-current:text-(--color-accent-content) hover:data-current:text-(--color-accent-content) data-current:bg-white dark:data-current:bg-white/[7%] data-current:border data-current:border-zinc-200 dark:data-current:border-transparent hover:text-zinc-800 dark:hover:text-white dark:hover:bg-white/[7%] hover:bg-zinc-800/5  border border-transparent in-data-flux-sidebar-group-dropdown:w-auto! in-data-flux-sidebar-group-dropdown:px-2! in-data-flux-sidebar-group-dropdown:text-zinc-800! in-data-flux-sidebar-group-dropdown:bg-white! in-data-flux-sidebar-group-dropdown:hover:bg-zinc-50! dark:in-data-flux-sidebar-group-dropdown:text-white! dark:in-data-flux-sidebar-group-dropdown:bg-transparent! dark:in-data-flux-sidebar-group-dropdown:hover:bg-zinc-600! nyuci-sidebar-link" data-flux-sidebar-item="data-flux-sidebar-item">\n
+        <div class="relative">\n
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0" aria-hidden="true">\n
+        <path d="M5.757 1.071a.5.5 0 0 1 .172.686L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1v4.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 13.5V9a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h1.217L5.07 1.243a.5.5 0 0 1 .686-.172zM2 9v4.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V9zM1 7v1h14V7zm3 3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 4 10m2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 6 10m2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 8 10m2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5m2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5"/>\n
+    </svg>\n
+                \n
+                            </div>\n
+        \n
+                    <div class="\n
+                in-data-flux-sidebar-collapsed-desktop:not-in-data-flux-sidebar-group-dropdown:hidden\n
+                flex-1 text-sm font-medium truncate [[data-nav-footer]_&]:hidden [[data-nav-sidebar]_[data-nav-footer]_&]:block" data-content>Laundry</div>\n
+    </a>\n
+\n
+    <div popover="manual" class="relative py-2 px-2.5 rounded-md text-xs text-white font-medium bg-zinc-800 dark:bg-zinc-700 dark:border dark:border-white/10 p-0 overflow-visible not-in-data-flux-sidebar-collapsed-desktop:hidden in-data-flux-sidebar-group-dropdown:hidden cursor-default" data-flux-tooltip-content>\n
+    Laundry\n
+\n
+    </div>\n
+\n
+            </ui-tooltip>\n
+                                                                                <ui-tooltip position="right center"  data-flux-tooltip >\n
+        <a href="http://localhost:8000/pembayaran" class="h-8 in-data-flux-sidebar-on-mobile:h-10 relative flex items-center gap-3 rounded-lg in-data-flux-sidebar-collapsed-desktop:w-10 in-data-flux-sidebar-collapsed-desktop:justify-center py-0 text-start w-full px-3 has-data-flux-navlist-badge:not-in-data-flux-sidebar-collapsed-desktop:pe-1.5 my-px text-zinc-500 dark:text-white/80 data-current:text-(--color-accent-content) hover:data-current:text-(--color-accent-content) data-current:bg-white dark:data-current:bg-white/[7%] data-current:border data-current:border-zinc-200 dark:data-current:border-transparent hover:text-zinc-800 dark:hover:text-white dark:hover:bg-white/[7%] hover:bg-zinc-800/5  border border-transparent in-data-flux-sidebar-group-dropdown:w-auto! in-data-flux-sidebar-group-dropdown:px-2! in-data-flux-sidebar-group-dropdown:text-zinc-800! in-data-flux-sidebar-group-dropdown:bg-white! in-data-flux-sidebar-group-dropdown:hover:bg-zinc-50! dark:in-data-flux-sidebar-group-dropdown:text-white! dark:in-data-flux-sidebar-group-dropdown:bg-transparent! dark:in-data-flux-sidebar-group-dropdown:hover:bg-zinc-600! nyuci-sidebar-link" data-flux-sidebar-item="data-flux-sidebar-item" wire:navigate="">\n
+        <div class="relative">\n
+                                    <svg class="shrink-0 [:where(&amp;)]:size-6 size-4 in-data-flux-sidebar-group-dropdown:text-zinc-400! dark:in-data-flux-sidebar-group-dropdown:text-white/80! [[data-flux-sidebar-item]:hover_&]:text-current!" data-flux-icon xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>\n
+</svg>\n
+\n
+                        \n
+                            </div>\n
+        \n
+                    <div class="\n
+                in-data-flux-sidebar-collapsed-desktop:not-in-data-flux-sidebar-group-dropdown:hidden\n
+                flex-1 text-sm font-medium truncate [[data-nav-footer]_&]:hidden [[data-nav-sidebar]_[data-nav-footer]_&]:block" data-content>Pembayaran</div>\n
+    </a>\n
+\n
+    <div popover="manual" class="relative py-2 px-2.5 rounded-md text-xs text-white font-medium bg-zinc-800 dark:bg-zinc-700 dark:border dark:border-white/10 p-0 overflow-visible not-in-data-flux-sidebar-collapsed-desktop:hidden in-data-flux-sidebar-group-dropdown:hidden cursor-default" data-flux-tooltip-content>\n
+    Pembayaran\n
+\n
+    </div>\n
+\n
+            </ui-tooltip>\n
+        </div>\n
+    </div>\n
+</nav>\n
+\n
+    <div class="flex-1 pointer-events-none" data-flux-sidebar-spacer></div>\n
+    <div class="px-2 pb-2">\n
+        <form id="sidebar-logout-form" method="POST" action="http://localhost:8000/logout" class="hidden" data-settings-guard-action="logout">\n
+            <input type="hidden" name="_token" value="hqYQC6p6t1o1BjoZdalF3NnyjYv9GoLB4Py6ap2f" autocomplete="off">        </form>\n
+\n
+        <ui-dropdown position="top start" class="block w-full" data-flux-dropdown>\n
+    <button type="button" class="group flex items-center rounded-lg has-data-[circle=true]:rounded-full [ui-dropdown&gt;&amp;]:w-full p-1 hover:bg-zinc-800/5 dark:hover:bg-white/15 nyuci-sidebar-profile-trigger" data-flux-profile>\n
+    <div class="shrink-0">\n
+                    <span class="nyuci-sidebar-avatar">KH</span>\n
+            </div>\n
+\n
+            <span class="mx-2 text-sm text-zinc-500 dark:text-white/80 group-hover:text-zinc-800 dark:group-hover:text-white font-medium truncate">\n
+            Kristian Hahn\n
+        </span>\n
+    \n
+            <div class="shrink-0 ms-auto size-8 flex justify-center items-center">\n
+            <svg class="shrink-0 [:where(&amp;)]:size-4 text-zinc-400 dark:text-white/80 group-hover:text-zinc-800 dark:group-hover:text-white" data-flux-icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/>\n
+</svg>\n
+\n
+                </div>\n
+    </button>\n
+\n
+            <ui-menu\n
+    class="[:where(&amp;)]:min-w-48 p-[.3125rem] rounded-lg shadow-xs border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 focus:outline-hidden nyuci-sidebar-footer-menu w-[17rem] max-w-[calc(100vw-1.5rem)]"\n
+    popover="manual"\n
+    data-flux-menu\n
+>\n
+    <div class="px-2 pb-1 pt-2">\n
+                    <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Akun aktif</p>\n
+                </div>\n
+\n
+                <ui-menu-radio-group keep-open="keep-open" data-flux-menu-radio-group>\n
+    <ui-menu-radio class="group/menu-radio flex items-center px-2 py-1.5 w-full focus:outline-hidden rounded-md text-start text-sm font-medium [[disabled]_&amp;]:opacity-50 [&amp;[disabled]]:opacity-50 text-zinc-800 data-active:bg-zinc-50 dark:text-white dark:data-active:bg-zinc-600 **:data-flux-menu-item-icon:text-zinc-400 dark:**:data-flux-menu-item-icon:text-white/60 [&amp;[data-active]_[data-flux-menu-item-icon]]:text-current nyuci-sidebar-footer-account" checked="checked" data-flux-menu-item-has-icon data-flux-menu-radio>\n
+    <div class="w-7">\n
+        <div class="hidden group-data-checked/menu-radio:block">\n
+            <svg class="shrink-0 [:where(&amp;)]:size-5" data-flux-menu-item-icon="data-flux-menu-item-icon" data-flux-icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/>\n
+</svg>\n
+\n
+                </div>\n
+    </div>\n
+\n
+    Kristian Hahn\n
+\n
+    \n
+    </ui-menu-radio>\n
+</ui-menu-radio-group>\n
+\n
+                <div class="nyuci-sidebar-footer-account-meta px-9 pb-2 pt-0.5">\n
+                    adam96@example.com\n
+                </div>\n
+\n
+                <div class="-mx-[.3125rem] my-[.3125rem] h-px" class="my-1" data-flux-menu-separator>\n
+    <div data-orientation="horizontal" role="none" class="border-0 [print-color-adjust:exact] bg-zinc-800/15 dark:bg-white/20 h-px w-full dark:bg-zinc-600!" data-flux-separator></div>\n
+</div>\n
+\n
+                <a href="http://localhost:8000/settings/profile" data-flux-menu-item="data-flux-menu-item" data-flux-menu-item-has-icon="data-flux-menu-item-has-icon" class="flex items-center px-2 py-1.5 w-full focus:outline-hidden rounded-md text-start text-sm font-medium [&amp;[disabled]]:opacity-50 text-zinc-800 data-active:bg-zinc-50 dark:text-white dark:data-active:bg-zinc-600 **:data-flux-menu-item-icon:text-zinc-400 dark:**:data-flux-menu-item-icon:text-white/60 [&amp;[data-active]_[data-flux-menu-item-icon]]:text-current nyuci-sidebar-footer-menu-item" wire:navigate="">\n
+        <svg class="shrink-0 [:where(&amp;)]:size-5 me-2" data-flux-menu-item-icon="data-flux-menu-item-icon" data-flux-icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path fill-rule="evenodd" d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd"/>\n
+</svg>\n
+\n
+            \n
+    Pengaturan\n
+    </a>\n
+\n
+                <button type="submit" class="flex items-center px-2 py-1.5 w-full focus:outline-hidden rounded-md text-start text-sm font-medium [&amp;[disabled]]:opacity-50 text-zinc-800 data-active:text-red-600 data-active:bg-red-50 dark:text-white dark:data-active:bg-red-400/20 dark:data-active:text-red-400 **:data-flux-menu-item-icon:text-zinc-400 dark:**:data-flux-menu-item-icon:text-white/60 [&amp;[data-active]_[data-flux-menu-item-icon]]:text-current nyuci-sidebar-footer-menu-item" data-flux-menu-item="data-flux-menu-item" data-flux-menu-item-has-icon="data-flux-menu-item-has-icon" form="sidebar-logout-form">\n
+        <svg class="shrink-0 [:where(&amp;)]:size-5 me-2" data-flux-menu-item-icon="data-flux-menu-item-icon" data-flux-icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 0 1 5.25 2h5.5A2.25 2.25 0 0 1 13 4.25v2a.75.75 0 0 1-1.5 0v-2a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 0 0 .75-.75v-2a.75.75 0 0 1 1.5 0v2A2.25 2.25 0 0 1 10.75 18h-5.5A2.25 2.25 0 0 1 3 15.75V4.25Z" clip-rule="evenodd"/>\n
+  <path fill-rule="evenodd" d="M6 10a.75.75 0 0 1 .75-.75h9.546l-1.048-.943a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 1 1-1.004-1.114l1.048-.943H6.75A.75.75 0 0 1 6 10Z" clip-rule="evenodd"/>\n
+</svg>\n
+\n
+            \n
+    <span class="flex min-w-0 flex-col text-left">\n
+                        <span class="truncate">Keluar</span>\n
+                        <span class="truncate text-[0.72rem] font-medium text-current/70">Tutup sesi akun ini</span>\n
+                    </span>\n
+    </button>\n
+</ui-menu>\n
+</ui-dropdown>\n
+    </div>\n
+</ui-sidebar>\n
+\n
+            <header class="[grid-area:header] z-10 min-h-14  nyuci-app-header nyuci-dashboard-navbar !border-b" x-bind:class="{ 'is-scrolled': scrolled }" data-flux-header>\n
+            <div class="mx-auto w-full h-full [:where(&)]:max-w-7xl px-6 lg:px-8 flex items-center">\n
+            <div class="flex w-full items-center gap-3 lg:gap-4 ">\r\n
+                    <div class="hidden min-w-0 shrink-0 lg:block">\r\n
+                <p class="nyuci-dashboard-nav-kicker text-[11px] font-semibold uppercase tracking-[0.24em]">\r\n
+                    Dashboard\r\n
+                </p>\r\n
+                <p class="nyuci-dashboard-nav-store mt-1 truncate text-sm font-semibold">\r\n
+                    Nyuci Test\r\n
+                </p>\r\n
+            </div>\r\n
+        \r\n
+        <div class="relative w-full max-w-2xl flex-1" @click.outside="closeSearch()">\r\n
+            <div class="">\r\n
+                <label class="nyuci-dashboard-search">\n
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">\n
+        <path d="M21 21l-4.2-4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />\n
+        <circle cx="11" cy="11" r="6.2" stroke="currentColor" stroke-width="1.8" />\n
+    </svg>\n
+    <input\n
+        type="search"\n
+        x-model.debounce.250ms="query"\n
+        @focus="openSearch()"\n
+        placeholder="Cari laundry, pelanggan, pembayaran..."\n
+        autocomplete="off"\n
+            >\n
+    <button\n
+        type="button"\n
+        x-cloak\n
+        x-show="query !== ''"\n
+        @click.prevent="clearSearch()"\n
+        class="nyuci-dashboard-search-clear"\n
+        aria-label="Hapus pencarian"\n
+    >\n
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">\n
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />\n
+        </svg>\n
+    </button>\n
+</label>\n
+\n
+\n
+<div\n
+    x-cloak\n
+    x-show="shouldShowSearch()"\n
+    x-transition.opacity.scale.origin.top\n
+    class="nyuci-dashboard-search-panel"\n
+>\n
+    <div x-show="loading" class="nyuci-dashboard-search-state">\n
+        Mencari data terbaru...\n
+    </div>\n
+\n
+    <div x-show="error" x-text="error" class="nyuci-dashboard-search-state is-error"></div>\n
+\n
+    <div x-show="!loading && !error && !hasSearchResults()" class="nyuci-dashboard-search-state">\n
+        Tidak ada hasil untuk pencarian ini.\n
+    </div>\n
+\n
+    <template x-for="group in results.groups" :key="group.key">\n
+        <section class="nyuci-dashboard-search-group">\n
+            <div class="flex items-center justify-between gap-3 px-4 py-3">\n
+                <div>\n
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]" x-text="group.label"></p>\n
+                </div>\n
+\n
+                <a\n
+                    class="text-xs font-semibold text-[var(--primary)] transition hover:text-[var(--primary-hover)]"\n
+                    x-bind:href="group.index_url"\n
+                >\n
+                    Lihat semua\n
+                </a>\n
+            </div>\n
+\n
+            <div class="px-2 pb-2">\n
+                <template x-for="item in group.items" :key="item.url">\n
+                    <a x-bind:href="item.url" class="nyuci-dashboard-search-item">\n
+                        <div class="min-w-0">\n
+                            <p class="truncate text-sm font-semibold text-[var(--text-strong)]" x-text="item.title"></p>\n
+                            <p class="mt-1 truncate text-xs text-[var(--text-main)]" x-text="item.subtitle"></p>\n
+                        </div>\n
+\n
+                        <p class="shrink-0 text-[0.7rem] font-medium uppercase tracking-[0.14em] text-[var(--text-muted)]" x-text="item.meta"></p>\n
+                    </a>\n
+                </template>\n
+            </div>\n
+        </section>\n
+    </template>\n
+</div>\n
+            </div>\r\n
+        </div>\r\n
+\r\n
+        <div class="ml-auto flex items-center gap-2">\r\n
+            <ui-dropdown position="bottom end"  data-flux-dropdown>\n
+    <button type="button" class="relative items-center font-medium justify-center gap-2 whitespace-nowrap disabled:opacity-75 dark:disabled:opacity-75 disabled:cursor-default disabled:pointer-events-none justify-center h-10 text-sm rounded-lg w-10 inline-flex  bg-transparent hover:bg-zinc-800/5 dark:hover:bg-white/15 text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white      relative" data-flux-button="data-flux-button" aria-label="Notifikasi">\n
+        <svg class="shrink-0 [:where(&amp;)]:size-6 size-5" data-flux-icon xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>\n
+</svg>\n
+    </button>\n
+\n
+    <ui-menu\n
+    class="[:where(&amp;)]:min-w-48 p-[.3125rem] rounded-lg shadow-xs border border-zinc-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 focus:outline-hidden w-[24rem] max-w-[calc(100vw-2rem)] !border-[var(--border-main)] !bg-[var(--bg-card)]"\n
+    popover="manual"\n
+    data-flux-menu\n
+>\n
+    <div class="px-2 py-1">\n
+            <div class="flex items-start justify-between gap-3">\n
+                <div>\n
+                    <p class="text-sm font-semibold text-[var(--text-strong)]">Notifikasi</p>\n
+                    <p class="mt-1 text-xs text-[var(--text-muted)]">Update order terbaru yang belum Anda baca.</p>\n
+                </div>\n
+\n
+                            </div>\n
+        </div>\n
+\n
+        <div data-orientation="horizontal" role="none" class="border-0 [print-color-adjust:exact] bg-zinc-800/15 dark:bg-white/20 h-px w-full my-1" data-flux-separator></div>\n
+\n
+                    <div class="px-4 py-6 text-center">\n
+                <p class="text-sm font-semibold text-[var(--text-strong)]">Belum ada notifikasi baru.</p>\n
+                <p class="mt-1 text-xs text-[var(--text-muted)]">Notifikasi database akan muncul di sini setelah queue worker memproses job.</p>\n
+            </div>\n
+</ui-menu>\n
+</ui-dropdown>\n\r
+\n
+            <a\r\n
+                href="http://localhost:8000/settings/profile"\r\n
+                wire:navigate\r\n
+                class="nyuci-dashboard-icon-button inline-flex size-11 items-center justify-center rounded-2xl"\r\n
+                aria-label="Buka pengaturan"\r\n
+            >\r\n
+                <svg class="shrink-0 [:where(&amp;)]:size-6 size-5" data-flux-icon xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">\n
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/>\n
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>\n
+</svg>\n
+\n
+                    </a>\r\n
+\r\n
+            <a\r\n
+                href="http://localhost:8000/settings/profile"\r\n
+                wire:navigate\r\n
+                class="nyuci-dashboard-profile"\r\n
+                aria-label="Buka profil"\r\n
+            >\r\n
+                <span class="nyuci-dashboard-profile-avatar">KH</span>\r\n
+                <span class="hidden min-w-0 text-left sm:block">\r\n
+                    <span class="nyuci-dashboard-nav-profile-name block truncate text-sm font-semibold">Kristian Hahn</span>\r\n
+                    <span class="nyuci-dashboard-nav-profile-meta block truncate text-[0.72rem]">Profil Saya</span>\r\n
+                </span>\r\n
+            </a>\r\n
+        </div>\r\n
+    </div>\n
+        </div>\n
+    </header>\n
+\n
+            <div class="[grid-area:main] p-6 lg:p-8 [[data-flux-container]_&amp;]:px-0  p-0" data-flux-main>\n
+    <div class="flex min-w-0 w-full flex-col">\n
+                    \n
+                    <div class="min-w-0">\n
+                                                    <div class="pb-8 pt-0 sm:pb-10">\n
+            <div class="w-full px-4 sm:px-6 lg:px-8">\n
+            <section class="nyuci-dashboard-hero rounded-[2rem] px-6 py-6 sm:px-8 sm:py-8">\n
+    <div class="flex flex-col gap-6">\n
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">\n
+            <div class="max-w-2xl">\n
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">Dashboard</p>\n
+                <h1 class="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">\n
+                    Nyuci Test\n
+                </h1>\n
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-white/78 sm:text-base">\n
+                    0 order masih aktif dan 1 tagihan butuh tindakan hari ini.\n
+                </p>\n
+                <p class="mt-3 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.95rem]">\n
+                    1 transaksi belum beres dengan potensi nilai Rp 24.000.\n
+                </p>\n
+                <p class="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-white/55">\n
+                    Jun 2025 - May 2026\n
+                </p>\n
+\n
+                <div class="mt-6 flex flex-wrap gap-3">\n
+                    <a href="http://localhost:8000/laundry/create" wire:navigate class="nyuci-dashboard-cta">\n
+                        Tambah Laundry\n
+                    </a>\n
+                    <a href="http://localhost:8000/pembayaran" wire:navigate class="nyuci-dashboard-cta-secondary">\n
+                        Kelola Pembayaran\n
+                    </a>\n
+                </div>\n
+            </div>\n
+\n
+            <div class="flex flex-wrap gap-3 xl:max-w-2xl xl:justify-end">\n
+                                    <div class="nyuci-dashboard-chart-pill">\n
+                        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/60">\n
+                            Order Masuk\n
+                        </p>\n
+                        <p class="mt-2 text-base font-semibold text-white">\n
+                            1\n
+                        </p>\n
+                                                    <p class="mt-1 text-[0.72rem] font-medium text-white/72">\n
+                                -1 (-100%) vs sebelumnya\n
+                            </p>\n
+                                            </div>\n
+                                    <div class="nyuci-dashboard-chart-pill">\n
+                        <p class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/60">\n
+                            Revenue\n
+                        </p>\n
+                        <p class="mt-2 text-base font-semibold text-white">\n
+                            Rp 0\n
+                        </p>\n
+                                                    <p class="mt-1 text-[0.72rem] font-medium text-white/72">\n
+                                +Rp 0 vs sebelumnya\n
+                            </p>\n
+                                            </div>\n
+                            </div>\n
+        </div>\n
+\n
+        <div class="nyuci-dashboard-chart-shell rounded-[1.8rem] p-4 sm:p-5">\n
+            <div class="h-[22rem] sm:h-[24rem]">\n
+                <div data-dashboard-chart='{"slot_key":"hero","title":"Dashboard","subtitle":"Ringkasan 12 bulan terakhir","accent_color":"#ffffff","chart_variant":"line_area","chart_type":"line","surface":"hero","show_points":true,"show_previous_comparison":true,"period_label":"Jun 2025 - May 2026","summary_items":[{"label":"Order Masuk","value":"1","caption":"Total periode","trend":"-1 (-100%) vs sebelumnya"},{"label":"Revenue","value":"Rp 0","caption":"Total periode","trend":"+Rp 0 vs sebelumnya"}],"has_data":true,"axes":{"y":"number","y1":"currency"},"chart":{"type":"line","showLegend":false,"data":{"labels":["Jun 2025","Jul 2025","Aug 2025","Sep 2025","Oct 2025","Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026"],"datasets":[{"label":"Order Masuk","metric_key":"orders_created","metric_format":"number","axis_id":"y","data":[0,0,0,0,0,0,0,0,0,0,1,0],"meta":[{"label":"Jun 2025","formattedValue":"0","rawValue":0,"deltaAbs":null,"deltaPercent":null,"deltaText":null},{"label":"Jul 2025","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Aug 2025","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Sep 2025","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Oct 2025","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Nov 2025","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Dec 2025","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Jan 2026","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Feb 2026","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Mar 2026","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"Apr 2026","formattedValue":"1","rawValue":1,"deltaAbs":1,"deltaPercent":null,"deltaText":"+1 (+0%) vs sebelumnya"},{"label":"May 2026","formattedValue":"0","rawValue":0,"deltaAbs":-1,"deltaPercent":-100,"deltaText":"-1 (-100%) vs sebelumnya"}],"borderColor":"#ffffff","backgroundColor":"rgba(255, 255, 255, 0.22)","pointBackgroundColor":"#ffffff","pointBorderColor":"#ffffff","fill":true,"tension":0.38,"borderWidth":3,"pointRadius":3,"pointHoverRadius":5,"pointHitRadius":12,"borderDash":[]},{"label":"Revenue","metric_key":"revenue_paid","metric_format":"currency","axis_id":"y1","data":[0,0,0,0,0,0,0,0,0,0,0,0],"meta":[{"label":"Jun 2025","formattedValue":"Rp 0","rawValue":0,"deltaAbs":null,"deltaPercent":null,"deltaText":null},{"label":"Jul 2025","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Aug 2025","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Sep 2025","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Oct 2025","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Nov 2025","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Dec 2025","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Jan 2026","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Feb 2026","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Mar 2026","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"Apr 2026","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"May 2026","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"}],"borderColor":"rgba(219, 234, 254, 0.86)","backgroundColor":"rgba(255, 255, 255, 0.16)","pointBackgroundColor":"rgba(219, 234, 254, 0.86)","pointBorderColor":"rgba(219, 234, 254, 0.86)","fill":false,"tension":0.38,"borderWidth":2,"pointRadius":3,"pointHoverRadius":5,"pointHitRadius":12,"borderDash":[]}]}}}' class="h-full w-full">\n
+                    <canvas class="h-full w-full"></canvas>\n
+                </div>\n
+            </div>\n
+        </div>\n
+    </div>\n
+</section>\n
+            <section class="-mt-16 grid gap-4 lg:grid-cols-3">\n
+            <div class="nyuci-card nyuci-dashboard-panel relative z-20 overflow-hidden rounded-[1.85rem] p-5 sm:p-6">\n
+    <div class="flex items-start justify-between gap-4">\n
+                <div class="min-w-0">\n
+                    <p class="text-sm font-semibold text-[var(--text-muted)]">\n
+                        Order Masuk\n
+                    </p>\n
+                    <h3 class="mt-1 text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                        1\n
+                    </h3>\n
+                    <p class="mt-2 text-sm leading-6 text-[var(--text-main)]">\n
+                        Order baru per hari\n
+                    </p>\n
+                </div>\n
+\n
+                <span class="nyuci-dashboard-badge shrink-0">\n
+                    Total periode\n
+                </span>\n
+            </div>\n
+\n
+            <div class="mt-4 flex flex-wrap gap-2">\n
+                                    <span class="inline-flex items-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">\n
+                        Order Masuk: 1\n
+                    </span>\n
+                            </div>\n
+\n
+            <div class="mt-5 h-[16rem]">\n
+                <div data-dashboard-chart='{"slot_key":"card_1","title":"Order Masuk","subtitle":"Order baru per hari","accent_color":"#ff6d3a","chart_variant":"line","chart_type":"line","surface":"surface","show_points":true,"show_previous_comparison":true,"period_label":"07 Apr - 06 May","summary_items":[{"label":"Order Masuk","value":"1","caption":"Total periode","trend":"+0 vs sebelumnya"}],"has_data":true,"axes":{"y":"number"},"chart":{"type":"line","showLegend":false,"data":{"labels":["07 Apr","08 Apr","09 Apr","10 Apr","11 Apr","12 Apr","13 Apr","14 Apr","15 Apr","16 Apr","17 Apr","18 Apr","19 Apr","20 Apr","21 Apr","22 Apr","23 Apr","24 Apr","25 Apr","26 Apr","27 Apr","28 Apr","29 Apr","30 Apr","01 May","02 May","03 May","04 May","05 May","06 May"],"datasets":[{"label":"Order Masuk","metric_key":"orders_created","metric_format":"number","axis_id":"y","data":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"meta":[{"label":"07 Apr","formattedValue":"1","rawValue":1,"deltaAbs":null,"deltaPercent":null,"deltaText":null},{"label":"08 Apr","formattedValue":"0","rawValue":0,"deltaAbs":-1,"deltaPercent":-100,"deltaText":"-1 (-100%) vs sebelumnya"},{"label":"09 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"10 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"11 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"12 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"13 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"14 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"15 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"16 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"17 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"18 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"19 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"20 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"21 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"22 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"23 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"24 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"25 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"26 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"27 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"28 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"29 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"30 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"01 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"02 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"03 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"04 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"05 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"06 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"}],"borderColor":"#ff6d3a","backgroundColor":"rgba(255, 109, 58, 0.22)","pointBackgroundColor":"#ff6d3a","pointBorderColor":"#ff6d3a","fill":true,"tension":0.38,"borderWidth":3,"pointRadius":3,"pointHoverRadius":5,"pointHitRadius":12,"borderDash":[]}]}}}' class="h-full w-full">\n
+                    <canvas class="h-full w-full"></canvas>\n
+                </div>\n
+            </div>\n
+</div>\n
+            <div class="nyuci-card nyuci-dashboard-panel relative z-20 overflow-hidden rounded-[1.85rem] p-5 sm:p-6">\n
+    <div class="flex items-start justify-between gap-4">\n
+                <div class="min-w-0">\n
+                    <p class="text-sm font-semibold text-[var(--text-muted)]">\n
+                        Order Selesai\n
+                    </p>\n
+                    <h3 class="mt-1 text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                        1\n
+                    </h3>\n
+                    <p class="mt-2 text-sm leading-6 text-[var(--text-main)]">\n
+                        Order selesai per hari\n
+                    </p>\n
+                </div>\n
+\n
+                <span class="nyuci-dashboard-badge shrink-0">\n
+                    Total periode\n
+                </span>\n
+            </div>\n
+\n
+            <div class="mt-4 flex flex-wrap gap-2">\n
+                                    <span class="inline-flex items-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">\n
+                        Order Selesai: 1\n
+                    </span>\n
+                            </div>\n
+\n
+            <div class="mt-5 h-[16rem]">\n
+                <div data-dashboard-chart='{"slot_key":"card_2","title":"Order Selesai","subtitle":"Order selesai per hari","accent_color":"#10b981","chart_variant":"line","chart_type":"line","surface":"surface","show_points":true,"show_previous_comparison":true,"period_label":"07 Apr - 06 May","summary_items":[{"label":"Order Selesai","value":"1","caption":"Total periode","trend":"+0 vs sebelumnya"}],"has_data":true,"axes":{"y":"number"},"chart":{"type":"line","showLegend":false,"data":{"labels":["07 Apr","08 Apr","09 Apr","10 Apr","11 Apr","12 Apr","13 Apr","14 Apr","15 Apr","16 Apr","17 Apr","18 Apr","19 Apr","20 Apr","21 Apr","22 Apr","23 Apr","24 Apr","25 Apr","26 Apr","27 Apr","28 Apr","29 Apr","30 Apr","01 May","02 May","03 May","04 May","05 May","06 May"],"datasets":[{"label":"Order Selesai","metric_key":"orders_completed","metric_format":"number","axis_id":"y","data":[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"meta":[{"label":"07 Apr","formattedValue":"0","rawValue":0,"deltaAbs":null,"deltaPercent":null,"deltaText":null},{"label":"08 Apr","formattedValue":"1","rawValue":1,"deltaAbs":1,"deltaPercent":null,"deltaText":"+1 (+0%) vs sebelumnya"},{"label":"09 Apr","formattedValue":"0","rawValue":0,"deltaAbs":-1,"deltaPercent":-100,"deltaText":"-1 (-100%) vs sebelumnya"},{"label":"10 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"11 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"12 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"13 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"14 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"15 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"16 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"17 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"18 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"19 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"20 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"21 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"22 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"23 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"24 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"25 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"26 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"27 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"28 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"29 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"30 Apr","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"01 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"02 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"03 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"04 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"05 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"},{"label":"06 May","formattedValue":"0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+0 (+0%) vs sebelumnya"}],"borderColor":"#10b981","backgroundColor":"rgba(16, 185, 129, 0.22)","pointBackgroundColor":"#10b981","pointBorderColor":"#10b981","fill":true,"tension":0.38,"borderWidth":3,"pointRadius":3,"pointHoverRadius":5,"pointHitRadius":12,"borderDash":[]}]}}}' class="h-full w-full">\n
+                    <canvas class="h-full w-full"></canvas>\n
+                </div>\n
+            </div>\n
+</div>\n
+            <div class="nyuci-card nyuci-dashboard-panel relative z-20 overflow-hidden rounded-[1.85rem] p-5 sm:p-6">\n
+    <div class="flex items-start justify-between gap-4">\n
+                <div class="min-w-0">\n
+                    <p class="text-sm font-semibold text-[var(--text-muted)]">\n
+                        Revenue\n
+                    </p>\n
+                    <h3 class="mt-1 text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                        Rp 0\n
+                    </h3>\n
+                    <p class="mt-2 text-sm leading-6 text-[var(--text-main)]">\n
+                        Pemasukan lunas per hari\n
+                    </p>\n
+                </div>\n
+\n
+                <span class="nyuci-dashboard-badge shrink-0">\n
+                    Total periode\n
+                </span>\n
+            </div>\n
+\n
+            <div class="mt-4 flex flex-wrap gap-2">\n
+                                    <span class="inline-flex items-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">\n
+                        Revenue: Rp 0\n
+                    </span>\n
+                            </div>\n
+\n
+            <div class="mt-5 h-[16rem]">\n
+                <div data-dashboard-chart='{"slot_key":"card_3","title":"Revenue","subtitle":"Pemasukan lunas per hari","accent_color":"#4a7df0","chart_variant":"bar","chart_type":"bar","surface":"surface","show_points":false,"show_previous_comparison":true,"period_label":"07 Apr - 06 May","summary_items":[{"label":"Revenue","value":"Rp 0","caption":"Total periode","trend":"+Rp 0 vs sebelumnya"}],"has_data":false,"axes":{"y":"number"},"chart":{"type":"bar","showLegend":false,"data":{"labels":["07 Apr","08 Apr","09 Apr","10 Apr","11 Apr","12 Apr","13 Apr","14 Apr","15 Apr","16 Apr","17 Apr","18 Apr","19 Apr","20 Apr","21 Apr","22 Apr","23 Apr","24 Apr","25 Apr","26 Apr","27 Apr","28 Apr","29 Apr","30 Apr","01 May","02 May","03 May","04 May","05 May","06 May"],"datasets":[{"label":"Revenue","metric_key":"revenue_paid","metric_format":"currency","axis_id":"y","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"meta":[{"label":"07 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":null,"deltaPercent":null,"deltaText":null},{"label":"08 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"09 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"10 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"11 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"12 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"13 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"14 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"15 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"16 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"17 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"18 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"19 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"20 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"21 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"22 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"23 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"24 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"25 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"26 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"27 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"28 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"29 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"30 Apr","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"01 May","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"02 May","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"03 May","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"04 May","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"05 May","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"},{"label":"06 May","formattedValue":"Rp 0","rawValue":0,"deltaAbs":0,"deltaPercent":null,"deltaText":"+Rp 0 (+0%) vs sebelumnya"}],"borderColor":"#4a7df0","backgroundColor":"rgba(74, 125, 240, 0.22)","pointBackgroundColor":"#4a7df0","pointBorderColor":"#4a7df0","fill":false,"tension":0.38,"borderWidth":3,"pointRadius":3,"pointHoverRadius":5,"pointHitRadius":12,"borderDash":[],"borderRadius":10,"barPercentage":0.78,"categoryPercentage":0.8}]}}}' class="h-full w-full">\n
+                    <canvas class="h-full w-full"></canvas>\n
+                </div>\n
+            </div>\n
+</div>\n
+    </section>\n
+        </div>\n
+\n
+        <div class="mx-auto mt-8 max-w-6xl px-4 sm:px-6 lg:px-8">\n
+            <div class="space-y-6">\n
+            <div class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-5 sm:p-6">\n
+    <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr] xl:items-center">\n
+                <div>\n
+                    <p class="text-sm font-semibold text-[var(--text-muted)]">Ringkasan bisnis</p>\n
+                    <h3 class="mt-1 text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                        0 order masih aktif dan 1 tagihan butuh tindakan hari ini.\n
+                    </h3>\n
+                    <p class="mt-3 max-w-3xl text-sm leading-7 text-[var(--text-main)]">\n
+                        1 transaksi belum beres dengan potensi nilai Rp 24.000.\n
+                    </p>\n
+                </div>\n
+\n
+                <div class="grid gap-3 sm:grid-cols-2">\n
+                                            <div class="rounded-[1.2rem] border border-[var(--border-main)] bg-[var(--bg-surface)] p-4">\n
+                            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                                Masuk hari ini\n
+                            </p>\n
+                            <p class="mt-3 text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                0\n
+                            </p>\n
+                        </div>\n
+                                            <div class="rounded-[1.2rem] border border-[var(--border-main)] bg-[var(--bg-surface)] p-4">\n
+                            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                                Jatuh tempo\n
+                            </p>\n
+                            <p class="mt-3 text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                0\n
+                            </p>\n
+                        </div>\n
+                                            <div class="rounded-[1.2rem] border border-[var(--border-main)] bg-[var(--bg-surface)] p-4">\n
+                            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                                Siap diambil\n
+                            </p>\n
+                            <p class="mt-3 text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                0\n
+                            </p>\n
+                        </div>\n
+                                            <div class="rounded-[1.2rem] border border-[var(--border-main)] bg-[var(--bg-surface)] p-4">\n
+                            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                                Selesai\n
+                            </p>\n
+                            <p class="mt-3 text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                100%\n
+                            </p>\n
+                        </div>\n
+                                    </div>\n
+            </div>\n
+</div>\n
+\n
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">\n
+                            <div class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-5">\n
+    <p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                        Total order\n
+                    </p>\n
+                    <p class="mt-4 text-3xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                        1\n
+                    </p>\n
+                    <p class="mt-3 text-sm leading-6 text-[var(--text-main)]">\n
+                        Semua laundry yang pernah masuk ke toko ini.\n
+                    </p>\n
+</div>\n
+                            <div class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-5">\n
+    <p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                        Pendapatan bulan ini\n
+                    </p>\n
+                    <p class="mt-4 text-3xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                        Rp 0\n
+                    </p>\n
+                    <p class="mt-3 text-sm leading-6 text-[var(--text-main)]">\n
+                        Akumulasi pembayaran lunas pada bulan berjalan.\n
+                    </p>\n
+</div>\n
+                            <div class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-5">\n
+    <p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                        Order aktif\n
+                    </p>\n
+                    <p class="mt-4 text-3xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                        0\n
+                    </p>\n
+                    <p class="mt-3 text-sm leading-6 text-[var(--text-main)]">\n
+                        Masih perlu proses, pengecekan, atau penyerahan.\n
+                    </p>\n
+</div>\n
+                            <div class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-5">\n
+    <p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                        Pelanggan aktif\n
+                    </p>\n
+                    <p class="mt-4 text-3xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                        1\n
+                    </p>\n
+                    <p class="mt-3 text-sm leading-6 text-[var(--text-main)]">\n
+                        Pelanggan yang bertransaksi dalam 30 hari terakhir.\n
+                    </p>\n
+</div>\n
+                    </div>\n
+    \n
+            <div class="grid gap-6 xl:grid-cols-2">\n
+                            <div class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-6">\n
+    <div class="flex items-start justify-between gap-4">\n
+                        <div>\n
+                            <p class="text-sm font-semibold text-[var(--text-muted)]">Status order</p>\n
+                            <h3 class="mt-1 text-xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                Ringkasan progres kerja\n
+                            </h3>\n
+                            <p class="mt-2 text-sm leading-6 text-[var(--text-main)]">\n
+                                Distribusi seluruh laundry berdasarkan progres kerja terbaru.\n
+                            </p>\n
+                        </div>\n
+\n
+                        <div class="nyuci-donut-chart" style="background: conic-gradient(#10b981 0deg 360deg);">\n
+                            <div class="nyuci-donut-content">\n
+                                <span class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                    1\n
+                                </span>\n
+                                <span class="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                                    total\n
+                                </span>\n
+                            </div>\n
+                        </div>\n
+                    </div>\n
+\n
+                    <div class="mt-6 space-y-3">\n
+                                                    <div class="nyuci-dashboard-breakdown rounded-[1.25rem] p-4">\n
+                                <div class="flex items-center gap-3">\n
+                                    <span class="nyuci-dashboard-breakdown-dot" style="background: #f59e0b;"></span>\n
+                                    <span class="text-sm font-medium text-[var(--text-strong)]">Belum selesai</span>\n
+                                </div>\n
+\n
+                                <div class="nyuci-meter">\n
+                                    <span style="--meter-width: 0%; --meter-color: #f59e0b;"></span>\n
+                                </div>\n
+\n
+                                <div class="text-right">\n
+                                    <p class="text-sm font-semibold text-[var(--text-strong)]">0</p>\n
+                                    <p class="text-xs text-[var(--text-muted)]">0%</p>\n
+                                </div>\n
+                            </div>\n
+                                                    <div class="nyuci-dashboard-breakdown rounded-[1.25rem] p-4">\n
+                                <div class="flex items-center gap-3">\n
+                                    <span class="nyuci-dashboard-breakdown-dot" style="background: #4a7df0;"></span>\n
+                                    <span class="text-sm font-medium text-[var(--text-strong)]">Proses</span>\n
+                                </div>\n
+\n
+                                <div class="nyuci-meter">\n
+                                    <span style="--meter-width: 0%; --meter-color: #4a7df0;"></span>\n
+                                </div>\n
+\n
+                                <div class="text-right">\n
+                                    <p class="text-sm font-semibold text-[var(--text-strong)]">0</p>\n
+                                    <p class="text-xs text-[var(--text-muted)]">0%</p>\n
+                                </div>\n
+                            </div>\n
+                                                    <div class="nyuci-dashboard-breakdown rounded-[1.25rem] p-4">\n
+                                <div class="flex items-center gap-3">\n
+                                    <span class="nyuci-dashboard-breakdown-dot" style="background: #10b981;"></span>\n
+                                    <span class="text-sm font-medium text-[var(--text-strong)]">Selesai</span>\n
+                                </div>\n
+\n
+                                <div class="nyuci-meter">\n
+                                    <span style="--meter-width: 100%; --meter-color: #10b981;"></span>\n
+                                </div>\n
+\n
+                                <div class="text-right">\n
+                                    <p class="text-sm font-semibold text-[var(--text-strong)]">1</p>\n
+                                    <p class="text-xs text-[var(--text-muted)]">100%</p>\n
+                                </div>\n
+                            </div>\n
+                                            </div>\n
+</div>\n
+            \n
+                            <div class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-6">\n
+    <div class="flex items-start justify-between gap-4">\n
+                        <div>\n
+                            <p class="text-sm font-semibold text-[var(--text-muted)]">Metode pembayaran</p>\n
+                            <h3 class="mt-1 text-xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                Komposisi kanal pembayaran\n
+                            </h3>\n
+                            <p class="mt-2 text-sm leading-6 text-[var(--text-main)]">\n
+                                Komposisi metode pada data pembayaran yang sudah tercatat.\n
+                            </p>\n
+                        </div>\n
+\n
+                        <div class="nyuci-donut-chart" style="background: conic-gradient(var(--bg-elevated) 0deg 360deg);">\n
+                            <div class="nyuci-donut-content">\n
+                                <span class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                    0\n
+                                </span>\n
+                                <span class="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                                    transaksi\n
+                                </span>\n
+                            </div>\n
+                        </div>\n
+                    </div>\n
+\n
+                    <div class="mt-6 space-y-3">\n
+                                                    <div class="nyuci-dashboard-breakdown rounded-[1.25rem] p-4">\n
+                                <div class="flex items-center gap-3">\n
+                                    <span class="nyuci-dashboard-breakdown-dot" style="background: #4a7df0;"></span>\n
+                                    <span class="text-sm font-medium text-[var(--text-strong)]">Cash</span>\n
+                                </div>\n
+\n
+                                <div class="nyuci-meter">\n
+                                    <span style="--meter-width: 0%; --meter-color: #4a7df0;"></span>\n
+                                </div>\n
+\n
+                                <div class="text-right">\n
+                                    <p class="text-sm font-semibold text-[var(--text-strong)]">0</p>\n
+                                    <p class="text-xs text-[var(--text-muted)]">0%</p>\n
+                                </div>\n
+                            </div>\n
+                                                    <div class="nyuci-dashboard-breakdown rounded-[1.25rem] p-4">\n
+                                <div class="flex items-center gap-3">\n
+                                    <span class="nyuci-dashboard-breakdown-dot" style="background: #10b981;"></span>\n
+                                    <span class="text-sm font-medium text-[var(--text-strong)]">QRIS</span>\n
+                                </div>\n
+\n
+                                <div class="nyuci-meter">\n
+                                    <span style="--meter-width: 0%; --meter-color: #10b981;"></span>\n
+                                </div>\n
+\n
+                                <div class="text-right">\n
+                                    <p class="text-sm font-semibold text-[var(--text-strong)]">0</p>\n
+                                    <p class="text-xs text-[var(--text-muted)]">0%</p>\n
+                                </div>\n
+                            </div>\n
+                                                    <div class="nyuci-dashboard-breakdown rounded-[1.25rem] p-4">\n
+                                <div class="flex items-center gap-3">\n
+                                    <span class="nyuci-dashboard-breakdown-dot" style="background: #7c3aed;"></span>\n
+                                    <span class="text-sm font-medium text-[var(--text-strong)]">Transfer</span>\n
+                                </div>\n
+\n
+                                <div class="nyuci-meter">\n
+                                    <span style="--meter-width: 0%; --meter-color: #7c3aed;"></span>\n
+                                </div>\n
+\n
+                                <div class="text-right">\n
+                                    <p class="text-sm font-semibold text-[var(--text-strong)]">0</p>\n
+                                    <p class="text-xs text-[var(--text-muted)]">0%</p>\n
+                                </div>\n
+                            </div>\n
+                                                    <div class="nyuci-dashboard-breakdown rounded-[1.25rem] p-4">\n
+                                <div class="flex items-center gap-3">\n
+                                    <span class="nyuci-dashboard-breakdown-dot" style="background: #06b6d4;"></span>\n
+                                    <span class="text-sm font-medium text-[var(--text-strong)]">E-Wallet</span>\n
+                                </div>\n
+\n
+                                <div class="nyuci-meter">\n
+                                    <span style="--meter-width: 0%; --meter-color: #06b6d4;"></span>\n
+                                </div>\n
+\n
+                                <div class="text-right">\n
+                                    <p class="text-sm font-semibold text-[var(--text-strong)]">0</p>\n
+                                    <p class="text-xs text-[var(--text-muted)]">0%</p>\n
+                                </div>\n
+                            </div>\n
+                                                    <div class="nyuci-dashboard-breakdown rounded-[1.25rem] p-4">\n
+                                <div class="flex items-center gap-3">\n
+                                    <span class="nyuci-dashboard-breakdown-dot" style="background: #94a3b8;"></span>\n
+                                    <span class="text-sm font-medium text-[var(--text-strong)]">Belum diatur</span>\n
+                                </div>\n
+\n
+                                <div class="nyuci-meter">\n
+                                    <span style="--meter-width: 0%; --meter-color: #94a3b8;"></span>\n
+                                </div>\n
+\n
+                                <div class="text-right">\n
+                                    <p class="text-sm font-semibold text-[var(--text-strong)]">0</p>\n
+                                    <p class="text-xs text-[var(--text-muted)]">0%</p>\n
+                                </div>\n
+                            </div>\n
+                                            </div>\n
+</div>\n
+                    </div>\n
+    \n
+            <div class="grid gap-6 xl:grid-cols-2">\n
+                            <div class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-6">\n
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">\n
+                        <div>\n
+                            <p class="text-sm font-semibold text-[var(--text-muted)]">Layanan terlaris</p>\n
+                            <h3 class="text-xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                Kontributor order paling aktif\n
+                            </h3>\n
+                        </div>\n
+                        <a href="http://localhost:8000/biaya-jasa" wire:navigate class="text-sm font-medium text-[var(--primary-ink)] transition hover:text-[var(--text-strong)]">\n
+                            Kelola jasa\n
+                        </a>\n
+                    </div>\n
+\n
+                                            <div class="nyuci-dashboard-service mt-4 rounded-[1.35rem] p-4">\n
+                            <div class="flex items-start justify-between gap-4">\n
+                                <div>\n
+                                    <p class="text-base font-semibold text-[var(--text-strong)]">Cuci</p>\n
+                                    <p class="mt-1 text-sm text-[var(--text-muted)]">\n
+                                        1 order ÔÇó 3 kg\n
+                                    </p>\n
+                                </div>\n
+\n
+                                <p class="text-sm font-semibold text-[var(--text-strong)]">Rp 24.000</p>\n
+                            </div>\n
+\n
+                            <div class="nyuci-service-bar mt-4">\n
+                                <span style="width: 100%;"></span>\n
+                            </div>\n
+                        </div>\n
+</div>\n
+            \n
+                            <section class="nyuci-card nyuci-dashboard-panel rounded-[1.85rem] p-6">\n
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">\n
+                        <div>\n
+                            <p class="text-sm font-semibold text-[var(--text-muted)]">Laundry terbaru</p>\n
+                            <h3 class="text-xl font-semibold tracking-tight text-[var(--text-strong)]">\n
+                                Aktivitas terakhir toko Anda\n
+                            </h3>\n
+                        </div>\n
+                        <a href="http://localhost:8000/laundry" wire:navigate class="text-sm font-medium text-[var(--primary-ink)] transition hover:text-[var(--text-strong)]">\n
+                            Lihat semua data\n
+                        </a>\n
+                    </div>\n
+\n
+                                            <div class="mt-6 space-y-3 lg:hidden">\n
+                                                            <div class="nyuci-dashboard-activity rounded-[1.35rem] p-4">\n
+                                    <div class="flex items-start justify-between gap-4">\n
+                                        <div>\n
+                                            <p class="font-semibold text-[var(--text-strong)]">Salsa</p>\n
+                                            <p class="mt-1 text-sm text-[var(--text-muted)]">\n
+                                                Cuci ÔÇó 3 kg\n
+                                            </p>\n
+                                        </div>\n
+                                        <span class="nyuci-badge nyuci-badge-success">\n
+    Selesai\n
+</span>\n
+                                    </div>\n
+\n
+                                    <div class="mt-4 flex items-center justify-between text-sm text-[var(--text-muted)]">\n
+                                        <span>06 May 2026</span>\n
+                                        <span>Belum bayar</span>\n
+                                    </div>\n
+                                </div>\n
+                                                    </div>\n
+\n
+                        <div class="mt-6 hidden overflow-x-auto lg:block">\n
+                            <table class="min-w-full divide-y divide-[var(--border-main)] text-left text-sm text-[var(--text-main)]">\n
+                                <thead>\n
+                                    <tr class="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">\n
+                                        <th class="px-4 py-3 font-semibold">Customer</th>\n
+                                        <th class="px-4 py-3 font-semibold">Layanan</th>\n
+                                        <th class="px-4 py-3 font-semibold">Qty</th>\n
+                                        <th class="px-4 py-3 font-semibold">Status</th>\n
+                                        <th class="px-4 py-3 font-semibold">Bayar</th>\n
+                                        <th class="px-4 py-3 font-semibold">Tanggal</th>\n
+                                    </tr>\n
+                                </thead>\n
+                                <tbody class="divide-y divide-[var(--border-main)]">\n
+                                                                            <tr class="transition hover:bg-[var(--bg-surface)]">\n
+                                            <td class="px-4 py-4 font-medium text-[var(--text-strong)]">Salsa</td>\n
+                                            <td class="px-4 py-4">Cuci</td>\n
+                                            <td class="px-4 py-4">3 kg</td>\n
+                                            <td class="px-4 py-4">\n
+                                                <span class="nyuci-badge nyuci-badge-success">\n
+    Selesai\n
+</span>\n
+                                            </td>\n
+                                            <td class="px-4 py-4">\n
+                                                <span class="nyuci-badge nyuci-badge-pending">\n
+    Belum bayar\n
+</span>\n
+                                            </td>\n
+                                            <td class="px-4 py-4">06 May 2026</td>\n
+                                        </tr>\n
+                                                                    </tbody>\n
+                            </table>\n
+                        </div>\n
+</section>\n
+                    </div>\n
+    </div>\n
+        </div>\n
+    </div>\n
+                                            </div>\n
+                </div>\n
+</div>\n
+        </div>\n
+\n
+        <div x-persist="app-toast">\n
+            <div class="fixed right-4 top-4 z-[90] sm:right-6 sm:top-6">\n
+                <ui-toast x-data x-on:toast-show.document="! $el.closest('ui-toast-group') && $el.showToast($event.detail)" popover="manual" position="top end" wire:ignore>\n
+    <template>\n
+        <div class="max-w-sm in-[ui-toast-group]:max-w-auto in-[ui-toast-group]:w-xs sm:in-[ui-toast-group]:w-sm" data-variant="" data-flux-toast-dialog>\n
+            <div class="p-2 flex rounded-xl shadow-lg bg-white border border-zinc-200 border-b-zinc-300/80 dark:bg-zinc-700 dark:border-zinc-600">\n
+                <div class="flex-1 flex items-start gap-4 overflow-hidden">\n
+                    <div class="flex-1 py-1.5 ps-2.5 flex gap-2">\n
+                        \n
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="hidden [[data-flux-toast-dialog][data-variant=success]_&]:block shrink-0 mt-0.5 size-4 text-lime-600 dark:text-lime-400">\n
+                            <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z" clip-rule="evenodd" />\n
+                        </svg>\n
+\n
+                        \n
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="hidden [[data-flux-toast-dialog][data-variant=warning]_&]:block shrink-0 mt-0.5 size-4 text-amber-500 dark:text-amber-400">\n
+                            <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 1 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />\n
+                        </svg>\n
+\n
+                        \n
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="hidden [[data-flux-toast-dialog][data-variant=danger]_&]:block shrink-0 mt-0.5 size-4 text-rose-500 dark:text-rose-400">\n
+                            <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />\n
+                        </svg>\n
+\n
+                        <div>\n
+                            \n
+                            <div class="font-medium text-sm text-zinc-800 dark:text-white [&:not(:empty)+div]:font-normal [&:not(:empty)+div]:text-zinc-500 [&:not(:empty)+div]:dark:text-zinc-300 [&:not(:empty)]:pb-2"><slot name="heading"></slot></div>\n
+\n
+                            \n
+                            <div class="font-medium text-sm text-zinc-800 dark:text-white"><slot name="text"></slot></div>\n
+                        </div>\n
+                    </div>\n
+\n
+                    \n
+                    <ui-close class="flex items-center">\n
+                        <button type="button" class="inline-flex items-center font-medium justify-center gap-2 truncate disabled:opacity-50 dark:disabled:opacity-75 disabled:cursor-default h-8 text-sm rounded-md w-8 bg-transparent hover:bg-zinc-800/5 dark:hover:bg-white/15 text-zinc-400 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white" as="button">\n
+                            <div>\n
+                                <svg class="[:where(&)]:size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">\n
+                                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"></path>\n
+                                </svg>\n
+                            </div>\n
+                        </button>\n
+                    </ui-close>\n
+                </div>\n
+            </div>\n
+        </div>\n
+    </template>\n
+</ui-toast>\n
+            </div>\n
+        </div>\n
+\n
+        <!-- Livewire Scripts -->\n
+<script src="http://localhost:8000/livewire-5a87910b/livewire.js?id=6b3709b1"   data-csrf="hqYQC6p6t1o1BjoZdalF3NnyjYv9GoLB4Py6ap2f" data-module-url="http://localhost:8000/livewire-5a87910b" data-update-uri="http://localhost:8000/livewire-5a87910b/update" data-navigate-once="true"></script>\n
+        <script src="http://localhost:8000/flux/flux.js?id=27098d51" data-navigate-once></script>\n
+\n
+        \n
+            </body>\n
+</html>\n
+
+
+  To contain: Laundry selesai diproses
+
+  at tests\Feature\LaundryManagementTest.php:440
+    436Ôûò     $this
+    437Ôûò         ->actingAs($user)
+    438Ôûò         ->get(route('dashboard'))
+    439Ôûò         ->assertOk()
+  Ô×£ 440Ôûò         ->assertSee('Laundry selesai diproses')
+    441Ôûò         ->assertSee('Tandai dibaca');
+    442Ôûò 
+    443Ôûò     $this
+    444Ôûò         ->actingAs($user)
+
+
+  Tests:    1 failed (2 assertions)
+  Duration: 1.50s
+

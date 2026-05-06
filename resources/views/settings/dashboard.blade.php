@@ -1,11 +1,4 @@
-<x-app-layout title="Pengaturan Dashboard">
-    <x-slot name="header">
-        <div class="flex flex-col gap-1">
-            <p class="text-sm font-medium text-[var(--text-muted)]">Pengaturan chart dashboard</p>
-            <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Pengaturan Dashboard</h2>
-        </div>
-    </x-slot>
-
+<x-app-layout title="Pengaturan Dashboard" navbar-eyebrow="Pengaturan chart dashboard">
     <div class="py-8 sm:py-10">
         <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
             @if (! $hasStore)

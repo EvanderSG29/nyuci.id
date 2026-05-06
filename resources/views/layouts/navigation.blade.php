@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-[var(--border-main)] bg-[var(--bg-card)] backdrop-blur">
+<nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-[var(--border-main)] bg-[var(--bg-card)] backdrop-blur nyuci-app-header nyuci-dashboard-navbar">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-8">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
@@ -28,8 +28,8 @@
                 <p class="text-xs text-[var(--text-muted)]">{{ Auth::user()->email }}</p>
             </div>
 
-            <a href="{{ route('profile.edit') }}" class="inline-flex items-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-medium text-[var(--text-main)] shadow-sm transition hover:border-[var(--primary)] hover:text-[var(--text-strong)]">
-                Profil
+            <a href="{{ route('settings.profile') }}" class="inline-flex items-center rounded-full border border-[var(--border-soft)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-medium text-[var(--text-main)] shadow-sm transition hover:border-[var(--primary)] hover:text-[var(--text-strong)]">
+                Pengaturan
             </a>
 
             <form method="POST" action="{{ route('logout') }}">

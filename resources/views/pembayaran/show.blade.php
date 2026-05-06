@@ -1,20 +1,24 @@
-<x-app-layout title="Detail Pembayaran">
-    <x-slot name="header">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-                <p class="text-sm font-medium text-[var(--text-muted)]">Payment detail</p>
-                <h2 class="text-2xl font-semibold tracking-tight text-[var(--text-strong)]">Detail Pembayaran</h2>
-                <p class="mt-2 max-w-2xl text-sm text-[var(--text-muted)]">Ringkasan transaksi untuk pelanggan dan status pembayaran terakhir.</p>
-            </div>
+<x-app-layout title="Detail Pembayaran" navbar-eyebrow="Payment detail">
+    <x-slot name="pageIntro">
+        <div class="max-w-4xl">
+            <x-card class="nyuci-page-intro-card no-print p-5 sm:p-6">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="nyuci-page-intro-copy max-w-2xl">
+                        <p class="text-sm leading-6 text-[var(--text-muted)]">
+                            Ringkasan transaksi untuk pelanggan dan status pembayaran terakhir.
+                        </p>
+                    </div>
 
-            <div class="flex flex-col gap-3 sm:flex-row">
-                <button type="button" onclick="window.print()" class="nyuci-btn-secondary no-print">
-                    Cetak
-                </button>
-                <a href="{{ route('pembayaran.edit', $pembayaran) }}" class="nyuci-btn-primary no-print">
-                    Edit Pembayaran
-                </a>
-            </div>
+                    <div class="flex flex-col gap-3 sm:flex-row">
+                        <button type="button" onclick="window.print()" class="nyuci-btn-secondary no-print">
+                            Cetak
+                        </button>
+                        <a href="{{ route('pembayaran.edit', $pembayaran) }}" class="nyuci-btn-primary no-print">
+                            Edit Pembayaran
+                        </a>
+                    </div>
+                </div>
+            </x-card>
         </div>
     </x-slot>
 

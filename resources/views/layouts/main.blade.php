@@ -62,6 +62,42 @@
             text-overflow: ellipsis;
         }
 
+        .navbar .btn-soft {
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--nyuci-text);
+            transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .navbar .btn-soft:hover,
+        .navbar .btn-soft:focus {
+            border-color: rgba(147, 197, 253, 0.45);
+            background: rgba(255, 255, 255, 0.09);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .navbar .btn-accent {
+            border-radius: 999px;
+            border-color: transparent;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .navbar .btn-accent:hover,
+        .navbar .btn-accent:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.18);
+        }
+
+        .navbar .nav-link {
+            color: var(--nyuci-muted);
+        }
+
+        .navbar .nav-link.active,
+        .navbar .nav-link:hover {
+            color: #93c5fd;
+        }
+
         .card,
         .surface-card {
             border: 1px solid var(--nyuci-border);
@@ -164,7 +200,7 @@
                     </ul>
 
                     <div class="d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0">
-                        <a href="{{ route('profile.edit') }}" class="btn btn-soft">Profil</a>
+                        <a href="{{ route('settings.profile') }}" class="btn btn-soft">Pengaturan</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="btn btn-accent">Keluar</button>

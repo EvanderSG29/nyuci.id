@@ -1,8 +1,6 @@
-# 🧺 NYUCI.ID - Laundry Management System
+# NYUCI.ID - Laundry Management System
 
 Aplikasi manajemen toko laundry untuk operasional harian toko laundry Indonesia. Dokumentasi ini mencerminkan rilis **v1.2.0** dengan fokus pada analytics, workflow operasional, dan checkout QRIS publik.
-
-<!-- **Live Demo:** [nyuci.id](https://nyuci.id) -->
 
 ---
 

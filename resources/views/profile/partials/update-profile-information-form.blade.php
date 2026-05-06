@@ -15,7 +15,7 @@
         </form>
     @endif
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form id="settings-profile-form" method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" data-settings-form>
         @csrf
         @method('patch')
 

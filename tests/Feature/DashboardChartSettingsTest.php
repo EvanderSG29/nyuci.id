@@ -179,7 +179,7 @@ test('dashboard chart settings page seeds defaults and chart payloads remain str
 
     $this
         ->actingAs($user)
-        ->get(route('pengaturan-dashboard.edit'))
+        ->get(route('settings.dashboard'))
         ->assertOk()
         ->assertSee('Default Toko')
         ->assertSee('Preferensi Saya')
@@ -223,7 +223,7 @@ test('dashboard chart comparison visibility is validated as boolean', function (
 
     $this
         ->actingAs($user)
-        ->get(route('pengaturan-dashboard.edit'))
+        ->get(route('settings.dashboard'))
         ->assertOk();
 
     $this
@@ -244,7 +244,7 @@ test('dashboard chart defaults can be updated and reset back to seeded values', 
 
     $this
         ->actingAs($user)
-        ->get(route('pengaturan-dashboard.edit'))
+        ->get(route('settings.dashboard'))
         ->assertOk();
 
     $this
@@ -259,7 +259,7 @@ test('dashboard chart defaults can be updated and reset back to seeded values', 
                 'title' => 'Kas Masuk',
             ],
         ]))
-        ->assertRedirect(route('pengaturan-dashboard.edit'))
+        ->assertRedirect(route('settings.dashboard'))
         ->assertSessionHas('status', 'dashboard-chart-defaults-updated');
 
     expect(DashboardChartPreset::query()->where('toko_id', $toko->id)->where('slot_key', 'hero')->value('title'))->toBe('Ringkasan Utama');
@@ -269,7 +269,7 @@ test('dashboard chart defaults can be updated and reset back to seeded values', 
     $this
         ->actingAs($user)
         ->post(route('pengaturan-dashboard.defaults.reset', 'hero'))
-        ->assertRedirect(route('pengaturan-dashboard.edit'))
+        ->assertRedirect(route('settings.dashboard'))
         ->assertSessionHas('status', 'dashboard-chart-default-reset');
 
     $resolver = app(DashboardChartConfigResolver::class);
@@ -286,7 +286,7 @@ test('dashboard chart overrides can be enabled and removed', function () {
 
     $this
         ->actingAs($user)
-        ->get(route('pengaturan-dashboard.edit'))
+        ->get(route('settings.dashboard'))
         ->assertOk();
 
     $this
@@ -306,7 +306,7 @@ test('dashboard chart overrides can be enabled and removed', function () {
                 'show_previous_comparison' => false,
             ],
         ]))
-        ->assertRedirect(route('pengaturan-dashboard.edit'))
+        ->assertRedirect(route('settings.dashboard'))
         ->assertSessionHas('status', 'dashboard-chart-overrides-updated');
 
     expect(DashboardChartUserOverride::query()->count())->toBe(1);
@@ -320,7 +320,7 @@ test('dashboard chart overrides can be enabled and removed', function () {
     $this
         ->actingAs($user)
         ->delete(route('pengaturan-dashboard.overrides.destroy', 'hero'))
-        ->assertRedirect(route('pengaturan-dashboard.edit'))
+        ->assertRedirect(route('settings.dashboard'))
         ->assertSessionHas('status', 'dashboard-chart-override-deleted');
 
     expect(DashboardChartUserOverride::query()->count())->toBe(0);
