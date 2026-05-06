@@ -99,7 +99,13 @@
         @endisset
 
         <div class="nyuci-datatable-host">
-            <table id="{{ $tableId }}" class="display stripe hover dataTable w-full">
+            <table
+                id="{{ $tableId }}"
+                @class([
+                    'display stripe hover dataTable w-full',
+                    'nyuci-datatable-has-row-number' => ($columns[0] ?? null) === 'No',
+                ])
+            >
                 <thead>
                     <tr>
                         @foreach ($columns as $column)
